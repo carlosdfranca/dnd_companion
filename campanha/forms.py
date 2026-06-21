@@ -4,6 +4,7 @@ from django.forms import inlineformset_factory
 from .models import (
     Personagem, Pericia, Salvaguarda, RecursoDeCombate,
     ItemInventario, Local, NPC, Missao, ResumoSessao, InformacaoImportante,
+    NotaCombate,
 )
 
 
@@ -132,3 +133,16 @@ class InformacaoImportanteForm(BootstrapFormMixin, forms.ModelForm):
     class Meta:
         model = InformacaoImportante
         fields = "__all__"
+
+
+class NotaCombateForm(BootstrapFormMixin, forms.ModelForm):
+    class Meta:
+        model = NotaCombate
+        fields = ["titulo", "conteudo", "ordem"]
+        widgets = {
+            "conteudo": forms.Textarea(attrs={
+                "rows": 8,
+                "placeholder": "Descreva a mecânica, dano, condições...\nFormatação livre — quebras de linha são preservadas.",
+                "style": "font-family: monospace; font-size: .88rem;",
+            }),
+        }

@@ -4,170 +4,204 @@
 {% block content %}
 <div class="row g-3">
 
-  {# ── Coluna 1: Personagem ── #}
+  {# ── Coluna 1: Personagem (4/12) ── #}
   <div class="col-12 col-lg-4">
-    <div class="bel-card h-100">
+    <div class="bel-card h-100 d-flex flex-column">
       <div class="bel-card-header">
         <i class="bi bi-person-fill me-2"></i>Personagem
       </div>
+
       {% if personagem %}
-        <div class="text-center py-2">
-          <h4 class="mb-0 bel-char-name">{{ personagem.nome }}</h4>
-          <p class="text-muted small mb-2">{{ personagem.raca }} · {{ personagem.classe }} · Nível {{ personagem.nivel }}</p>
+        <div class="px-3 pt-3 pb-2">
+          <div class="bel-dash-char-name">{{ personagem.nome }}</div>
+          <div class="text-muted small mt-1">{{ personagem.raca }} · {{ personagem.classe }} · Nível {{ personagem.nivel }}</div>
+        </div>
 
-          {# HP #}
-          <div class="bel-hp-block mb-3">
-            <span class="bel-hp-value {% if personagem.pv_atual <= 0 %}text-danger{% elif pv_pct < 40 %}text-warning{% endif %}">
+        <div class="bel-hp-strip">
+          <div class="d-flex align-items-baseline justify-content-between px-3 mb-2">
+            <span class="bel-hp-main {% if personagem.pv_atual <= 0 %}text-danger{% elif pv_pct < 40 %}text-warning{% endif %}">
               {{ personagem.pv_atual }}
+              <span class="bel-hp-sep">/</span>
+              <span class="bel-hp-max-inline">{{ personagem.pv_maximo }}</span>
             </span>
-            <span class="text-muted"> / {{ personagem.pv_maximo }}</span>
-            {% if personagem.pv_temporario %}
-              <span class="badge bg-info ms-1">+{{ personagem.pv_temporario }} temp</span>
-            {% endif %}
-            <div class="progress mt-1" style="height:8px">
-              <div class="progress-bar {% if pv_pct > 60 %}bg-success{% elif pv_pct > 30 %}bg-warning{% else %}bg-danger{% endif %}"
-                   style="width:{{ pv_pct }}%"></div>
-            </div>
+            <span class="d-flex align-items-center gap-1">
+              <span class="small text-muted fw-semibold">PV</span>
+              {% if personagem.pv_temporario %}
+                <span class="badge bg-info ms-1">+{{ personagem.pv_temporario }} temp</span>
+              {% endif %}
+            </span>
           </div>
-
-          {# Stats rápidos #}
-          <div class="d-flex justify-content-center gap-3 mb-3">
-            <div class="bel-stat-pill">
-              <span class="bel-stat-val">{{ personagem.ca }}</span>
-              <span class="bel-stat-lbl">CA</span>
-            </div>
-            <div class="bel-stat-pill">
-              <span class="bel-stat-val">{% if personagem.iniciativa >= 0 %}+{% endif %}{{ personagem.iniciativa }}</span>
-              <span class="bel-stat-lbl">Init</span>
-            </div>
-            <div class="bel-stat-pill">
-              <span class="bel-stat-val">+{{ personagem.bonus_proficiencia }}</span>
-              <span class="bel-stat-lbl">Prof</span>
-            </div>
-            <div class="bel-stat-pill">
-              <span class="bel-stat-val">{{ personagem.deslocamento }}m</span>
-              <span class="bel-stat-lbl">Mov</span>
-            </div>
+          <div class="progress bel-pv-bar">
+            <div class="progress-bar {% if pv_pct > 60 %}bg-success{% elif pv_pct > 30 %}bg-warning{% else %}bg-danger{% endif %}"
+                 style="width:{{ pv_pct }}%"></div>
           </div>
         </div>
 
-        <div class="d-flex flex-column gap-2 px-2 pb-2">
-          <a href="{% url 'ficha' %}" class="btn btn-outline-primary btn-sm"><i class="bi bi-person-lines-fill me-1"></i>Ficha Completa</a>
-          <a href="{% url 'combate' %}" class="btn btn-outline-danger btn-sm"><i class="bi bi-shield-shaded me-1"></i>Central de Combate</a>
-          <a href="{% url 'item_list' %}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-bag-fill me-1"></i>Inventário</a>
+        {# Stat pills com ícones #}
+        <div class="d-flex gap-2 px-3 py-2">
+          <div class="bel-stat-pill flex-fill">
+            <i class="bi bi-shield-fill" style="font-size:.62rem;color:var(--bel-text-muted)"></i>
+            <span class="bel-stat-val">{{ personagem.ca }}</span>
+            <span class="bel-stat-lbl">CA</span>
+          </div>
+          <div class="bel-stat-pill flex-fill">
+            <i class="bi bi-lightning-fill" style="font-size:.62rem;color:var(--bel-text-muted)"></i>
+            <span class="bel-stat-val">{% if personagem.iniciativa >= 0 %}+{% endif %}{{ personagem.iniciativa }}</span>
+            <span class="bel-stat-lbl">Init</span>
+          </div>
+          <div class="bel-stat-pill flex-fill">
+            <i class="bi bi-patch-check-fill" style="font-size:.62rem;color:var(--bel-text-muted)"></i>
+            <span class="bel-stat-val">+{{ personagem.bonus_proficiencia }}</span>
+            <span class="bel-stat-lbl">Prof</span>
+          </div>
+          <div class="bel-stat-pill flex-fill">
+            <i class="bi bi-person-walking" style="font-size:.62rem;color:var(--bel-text-muted)"></i>
+            <span class="bel-stat-val">{{ personagem.deslocamento }}m</span>
+            <span class="bel-stat-lbl">Mov</span>
+          </div>
         </div>
+
+        <div class="d-flex gap-2 px-3 pb-3 mt-auto pt-1">
+          <a href="{% url 'ficha' %}" class="btn btn-outline-secondary btn-sm flex-fill">
+            <i class="bi bi-person-lines-fill me-1"></i>Ficha
+          </a>
+          <a href="{% url 'combate' %}" class="btn btn-outline-danger btn-sm flex-fill">
+            <i class="bi bi-shield-shaded me-1"></i>Combate
+          </a>
+          <a href="{% url 'item_list' %}" class="btn btn-outline-secondary btn-sm flex-fill">
+            <i class="bi bi-bag-fill me-1"></i>Itens
+          </a>
+        </div>
+
       {% else %}
-        <div class="p-3 text-center text-muted">
-          <i class="bi bi-person-x fs-3"></i>
-          <p class="mt-2">Nenhum personagem cadastrado.<br>
-          <a href="/admin/campanha/personagem/add/" class="btn btn-sm btn-primary mt-2">Criar via Admin</a></p>
+        <div class="flex-fill d-flex flex-column align-items-center justify-content-center p-4 text-center text-muted">
+          <i class="bi bi-person-x fs-2 mb-2"></i>
+          <p class="small mb-3">Nenhum personagem cadastrado.</p>
+          <a href="/admin/campanha/personagem/add/" class="btn btn-sm btn-primary">Criar via Admin</a>
         </div>
       {% endif %}
     </div>
   </div>
 
-  {# ── Coluna 2: Lore e Mundo ── #}
-  <div class="col-12 col-lg-4">
-    <div class="bel-card h-100">
-      <div class="bel-card-header">
-        <i class="bi bi-globe2 me-2"></i>Lore e Mundo
+  {# ── Coluna 2: Stats da Ficha (5/12) ── #}
+  <div class="col-12 col-lg-5">
+    <div class="bel-card h-100 d-flex flex-column">
+      <div class="bel-card-header d-flex align-items-center justify-content-between">
+        <span><i class="bi bi-person-lines-fill me-2"></i>Atributos &amp; Perícias</span>
+        <a href="{% url 'ficha' %}" class="btn btn-outline-secondary btn-sm py-0">Ver ficha</a>
       </div>
 
-      <div class="px-2 pb-2">
-        <div class="bel-section-label">NPCs Recentes</div>
-        {% if npcs_recentes %}
-          <ul class="list-unstyled mb-3">
-            {% for npc in npcs_recentes %}
-              <li class="d-flex align-items-center justify-content-between py-1 bel-list-row">
-                <a href="{% url 'npc_detail' npc.pk %}" class="bel-link">{{ npc.nome }}</a>
-                <span class="badge bel-relacao-{{ npc.relacao_grupo }}">{{ npc.get_relacao_grupo_display }}</span>
-              </li>
-            {% endfor %}
-          </ul>
-        {% else %}
-          <p class="text-muted small mb-3">Nenhum NPC cadastrado.</p>
-        {% endif %}
-        <div class="d-flex gap-2 mb-3">
-          <a href="{% url 'npc_list' %}" class="btn btn-outline-secondary btn-sm flex-fill">Todos NPCs</a>
-          <a href="{% url 'npc_create' %}" class="btn btn-outline-success btn-sm"><i class="bi bi-plus-lg"></i></a>
+      {% if personagem %}
+
+        {# Faixa de atributos #}
+        <div class="bel-attr-strip" style="border-radius:0;border-left:none;border-right:none;border-top:none">
+          {% for a in atributos_data %}
+          <div class="bel-attr-col {% if a.mod >= 3 %}bel-attr-col-strong{% endif %}"
+               style="padding:.6rem .3rem .5rem">
+            <div class="bel-attr-col-abrev">{{ a.abrev }}</div>
+            <div class="bel-attr-col-mod" style="font-size:1.55rem">{% if a.mod >= 0 %}+{% endif %}{{ a.mod }}</div>
+            <div class="bel-attr-col-score" style="width:24px;height:24px;font-size:.72rem">{{ a.score }}</div>
+          </div>
+          {% endfor %}
         </div>
 
-        <div class="bel-section-label">Locais</div>
-        {% if sessoes_recentes %}
-          <ul class="list-unstyled mb-2">
-            {% for s in sessoes_recentes %}
-              <li class="py-1 bel-list-row">
-                <a href="{% url 'sessao_detail' s.pk %}" class="bel-link">
-                  <i class="bi bi-clock-history me-1 text-muted"></i>Sessão {{ s.numero }}{% if s.titulo %} — {{ s.titulo }}{% endif %}
-                </a>
-              </li>
+        {# Salvaguardas + Perícias #}
+        <div class="row g-0 flex-fill" style="min-height:0;overflow:hidden">
+
+          {# Salvaguardas #}
+          <div class="col-5 border-end" style="border-color:var(--bel-border) !important;overflow-y:auto">
+            <div class="bel-section-label px-2 pt-2">Salvaguardas</div>
+            {% for sv in salvaguardas %}
+              <div class="bel-skill-row {% if sv.proficiente %}bel-skill-row-prof{% endif %}" style="padding-left:.5rem;padding-right:.5rem">
+                <span class="bel-prof-dot {% if sv.proficiente %}proficiente{% endif %}">{% if sv.proficiente %}●{% else %}○{% endif %}</span>
+                <span class="bel-skill-mod {% if sv.proficiente %}bel-skill-mod-prof{% endif %}">{% if sv.modificador_total >= 0 %}+{% endif %}{{ sv.modificador_total }}</span>
+                <span class="bel-skill-nome" style="font-size:.82rem">{{ sv.rotulo }}</span>
+              </div>
             {% endfor %}
-          </ul>
-        {% endif %}
-        <div class="d-flex gap-2">
-          <a href="{% url 'local_list' %}" class="btn btn-outline-secondary btn-sm flex-fill">Todos Locais</a>
-          <a href="{% url 'local_create' %}" class="btn btn-outline-success btn-sm"><i class="bi bi-plus-lg"></i></a>
+          </div>
+
+          {# Perícias #}
+          <div class="col-7" style="overflow-y:auto">
+            <div class="bel-section-label px-2 pt-2">Perícias</div>
+            {% for pc in pericias %}
+              <div class="bel-skill-row {% if pc.proficiente %}bel-skill-row-prof{% endif %}" style="padding-left:.5rem;padding-right:.5rem">
+                <span class="bel-prof-dot {% if pc.proficiente %}proficiente{% endif %}">{% if pc.proficiente %}●{% else %}○{% endif %}</span>
+                <span class="bel-skill-mod {% if pc.proficiente %}bel-skill-mod-prof{% endif %}">{% if pc.modificador_total >= 0 %}+{% endif %}{{ pc.modificador_total }}</span>
+                <span class="bel-skill-nome" style="font-size:.82rem">{{ pc.rotulo }}</span>
+              </div>
+            {% endfor %}
+          </div>
+
         </div>
-      </div>
+
+      {% else %}
+        <div class="flex-fill d-flex align-items-center justify-content-center text-muted p-3">
+          <span class="small">Nenhum personagem cadastrado.</span>
+        </div>
+      {% endif %}
+
     </div>
   </div>
 
-  {# ── Coluna 3: Missões e Anotações ── #}
-  <div class="col-12 col-lg-4">
-    <div class="bel-card h-100">
-      <div class="bel-card-header">
-        <i class="bi bi-flag-fill me-2"></i>Missões &amp; Anotações
+  {# ── Coluna 3: Missões e Anotações (3/12) ── #}
+  <div class="col-12 col-lg-3">
+    <div class="bel-card h-100 d-flex flex-column">
+      <div class="bel-card-header d-flex align-items-center justify-content-between">
+        <span><i class="bi bi-flag-fill me-2"></i>Missões &amp; Anotações</span>
+        <a href="{% url 'missao_create' %}" class="btn btn-outline-success btn-sm py-0 px-2"><i class="bi bi-plus-lg"></i></a>
       </div>
 
-      <div class="px-2 pb-2">
-        <div class="bel-section-label d-flex align-items-center justify-content-between">
-          Missões Ativas
-          <a href="{% url 'missao_create' %}" class="btn btn-outline-success btn-sm py-0"><i class="bi bi-plus-lg"></i></a>
-        </div>
+      <div class="bel-section-label px-3 mt-2">
+        Ativas
         {% if missoes_ativas %}
-          <ul class="list-unstyled mb-3">
-            {% for m in missoes_ativas %}
-              <li class="py-1 bel-list-row d-flex align-items-center justify-content-between">
-                <a href="{% url 'missao_detail' m.pk %}" class="bel-link">{{ m.titulo }}</a>
-                <form method="post" action="{% url 'missao_concluir' m.pk %}" class="d-inline">
-                  {% csrf_token %}
-                  <button class="btn btn-outline-success btn-sm py-0 px-1" title="Concluir">
-                    <i class="bi bi-check2"></i>
-                  </button>
-                </form>
-              </li>
-            {% endfor %}
-          </ul>
-        {% else %}
-          <p class="text-muted small mb-3">Nenhuma missão ativa.</p>
+          <span class="badge bg-secondary ms-1" style="font-size:.65rem">{{ missoes_ativas|length }}</span>
         {% endif %}
+      </div>
+      {% if missoes_ativas %}
+        <ul class="list-unstyled mb-0">
+          {% for m in missoes_ativas %}
+            <li class="bel-mission-row">
+              <i class="bi bi-circle-fill bel-mission-dot bel-mission-dot-{{ m.tipo }} flex-shrink-0"></i>
+              <a href="{% url 'missao_detail' m.pk %}" class="bel-link flex-fill text-truncate small">{{ m.titulo }}</a>
+              <form method="post" action="{% url 'missao_concluir' m.pk %}" class="d-inline flex-shrink-0">
+                {% csrf_token %}
+                <button class="btn btn-link btn-sm p-0 bel-check-btn text-muted" title="Concluir missão">
+                  <i class="bi bi-check2-circle"></i>
+                </button>
+              </form>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="text-muted small px-3 mb-0">Nenhuma missão ativa.</p>
+      {% endif %}
 
-        <div class="bel-section-label d-flex align-items-center justify-content-between">
-          Informações Importantes
-          <a href="{% url 'info_create' %}" class="btn btn-outline-success btn-sm py-0"><i class="bi bi-plus-lg"></i></a>
-        </div>
-        {% if infos %}
-          <ul class="list-unstyled mb-2">
-            {% for info in infos %}
-              <li class="py-1 bel-list-row d-flex align-items-start justify-content-between gap-2">
-                <span class="small">
-                  <i class="bi bi-lightbulb-fill text-warning me-1"></i>{{ info.texto }}
-                </span>
-                <form method="post" action="{% url 'info_delete' info.pk %}">
-                  {% csrf_token %}
-                  <button class="btn btn-link btn-sm text-danger p-0" title="Apagar"><i class="bi bi-x"></i></button>
-                </form>
-              </li>
-            {% endfor %}
-          </ul>
-        {% else %}
-          <p class="text-muted small">Nenhuma anotação.</p>
-        {% endif %}
+      <div class="bel-section-label px-3 mt-2 d-flex align-items-center justify-content-between">
+        <span>Informações</span>
+        <a href="{% url 'info_create' %}" class="btn btn-outline-success btn-sm py-0 px-1"><i class="bi bi-plus-lg"></i></a>
+      </div>
+      {% if infos %}
+        <ul class="list-unstyled mb-0">
+          {% for info in infos %}
+            <li class="bel-info-row">
+              <i class="bi bi-lightbulb-fill text-warning flex-shrink-0" style="font-size:.72rem;margin-top:.2rem"></i>
+              <span class="flex-fill small">{{ info.texto }}</span>
+              <form method="post" action="{% url 'info_delete' info.pk %}" class="flex-shrink-0">
+                {% csrf_token %}
+                <button class="btn btn-link btn-sm p-0 bel-del-btn text-muted" title="Apagar">
+                  <i class="bi bi-x"></i>
+                </button>
+              </form>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="text-muted small px-3">Nenhuma anotação.</p>
+      {% endif %}
 
-        <div class="mt-3">
-          <a href="{% url 'missao_list' %}" class="btn btn-outline-secondary btn-sm me-2">Todas Missões</a>
-          <a href="{% url 'sessao_list' %}" class="btn btn-outline-secondary btn-sm">Sessões</a>
-        </div>
+      <div class="px-3 pb-3 mt-auto pt-2">
+        <a href="{% url 'missao_list' %}" class="btn btn-outline-secondary btn-sm me-1">Todas Missões</a>
+        <a href="{% url 'sessao_list' %}" class="btn btn-outline-secondary btn-sm">Sessões</a>
       </div>
     </div>
   </div>

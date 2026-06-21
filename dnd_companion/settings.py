@@ -117,6 +117,9 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+MEDIA_URL  = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
 # Redireciona login/logout (uso futuro)
 LOGIN_REDIRECT_URL = '/'
 

@@ -335,3 +335,680 @@ html[data-theme="light"] .form-select {
   border-color: rgba(0,0,0,0.18) !important;
   color: #1a1d15 !important;
 }
+
+/* ── Dashboard ───────────────────────────────────────────────────────── */
+.bel-dash-char-name {
+  font-size: 1.55rem;
+  font-weight: 800;
+  color: var(--bel-accent);
+  line-height: 1.15;
+  letter-spacing: -.02em;
+}
+
+/* HP strip — sem padding lateral para barra full-bleed */
+.bel-hp-strip {
+  border-top: 1px solid var(--bel-border);
+  border-bottom: 1px solid var(--bel-border);
+  padding-top: .65rem;
+}
+
+.bel-hp-main {
+  font-size: 2.8rem;
+  font-weight: 900;
+  line-height: 1;
+  color: var(--bel-accent);
+}
+
+.bel-hp-sep {
+  font-size: 1.3rem;
+  font-weight: 400;
+  color: var(--bel-text-muted);
+  margin: 0 .2rem;
+}
+
+.bel-hp-max-inline {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--bel-text-secondary);
+}
+
+/* Barra de HP full-bleed (sem border-radius, cola nas bordas do card) */
+.bel-pv-bar {
+  height: 7px;
+  border-radius: 0;
+  background-color: var(--bel-surface-raised);
+  margin-top: .5rem;
+}
+
+/* Linhas de NPC no dashboard */
+.bel-dash-npc-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .5rem;
+  padding: .35rem .4rem;
+  border-bottom: 1px solid var(--bel-border);
+  min-width: 0;
+}
+.bel-dash-npc-row:last-child { border-bottom: none; }
+
+/* Linhas de missão — borda esquerda accent no hover */
+.bel-mission-row {
+  display: flex;
+  align-items: center;
+  gap: .45rem;
+  padding: .4rem .75rem;
+  border-bottom: 1px solid var(--bel-border);
+  border-left: 2px solid transparent;
+  transition: border-left-color .15s, background .15s;
+  min-width: 0;
+}
+.bel-mission-row:last-child { border-bottom: none; }
+.bel-mission-row:hover {
+  border-left-color: var(--bel-accent);
+  background: var(--bel-surface-3);
+}
+
+.bel-mission-dot {
+  font-size: .42rem;
+  color: var(--bel-accent);
+  opacity: .75;
+}
+.bel-mission-dot-principal  { color: #d4a93a !important; opacity: 1; }
+.bel-mission-dot-contrato   { color: var(--bel-accent) !important; opacity: 1; }
+.bel-mission-dot-secundaria { color: var(--bel-text-muted) !important; opacity: .9; }
+
+.bel-check-btn:hover { color: var(--bs-success) !important; opacity: 1 !important; }
+.bel-del-btn:hover   { color: var(--bs-danger)  !important; opacity: 1 !important; }
+
+/* Linhas de informação importante */
+.bel-info-row {
+  display: flex;
+  align-items: flex-start;
+  gap: .4rem;
+  padding: .35rem .75rem;
+  border-bottom: 1px solid var(--bel-border);
+  min-width: 0;
+}
+.bel-info-row:last-child { border-bottom: none; }
+
+/* ── Notas de combate (accordion) ───────────────────────────────────── */
+.bel-nota-item {
+  background: transparent !important;
+  border-bottom: 1px solid var(--bel-border) !important;
+}
+.bel-nota-item:last-child { border-bottom: none !important; }
+
+.bel-nota-btn {
+  background: var(--bel-surface-2) !important;
+  color: var(--bel-text-primary) !important;
+  box-shadow: none !important;
+  padding: .55rem .85rem;
+  gap: .5rem;
+}
+.bel-nota-btn:not(.collapsed) {
+  background: var(--bel-surface-3) !important;
+  color: var(--bel-accent) !important;
+}
+.bel-nota-btn::after {
+  filter: invert(70%) sepia(10%) saturate(400%) hue-rotate(200deg);
+}
+
+.bel-nota-titulo {
+  font-size: .9rem;
+  font-weight: 600;
+}
+
+.bel-nota-action {
+  font-size: .75rem;
+  line-height: 1.4;
+  opacity: .5;
+  transition: opacity .15s;
+}
+.bel-nota-btn:hover .bel-nota-action { opacity: 1; }
+
+.bel-nota-body {
+  background: var(--bel-surface-3) !important;
+  padding: .85rem 1rem;
+}
+
+.bel-nota-pre {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  font-size: .85rem;
+  line-height: 1.6;
+  color: var(--bel-text-secondary);
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin: 0;
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+
+/* ── Markdown rendered in combat notes ─── */
+.bel-nota-md {
+  font-size: .875rem;
+  line-height: 1.65;
+  color: var(--bel-text-secondary);
+}
+.bel-nota-md > *:first-child { margin-top: 0; }
+.bel-nota-md > *:last-child  { margin-bottom: 0; }
+
+.bel-nota-md h1,
+.bel-nota-md h2,
+.bel-nota-md h3,
+.bel-nota-md h4 {
+  font-family: Georgia, 'Times New Roman', serif;
+  color: var(--bel-accent);
+  margin: 1rem 0 .35rem;
+  line-height: 1.25;
+  font-weight: 600;
+}
+.bel-nota-md h1 { font-size: 1.15rem; }
+.bel-nota-md h2 { font-size: 1.05rem; }
+.bel-nota-md h3 { font-size: .95rem;  }
+.bel-nota-md h4 { font-size: .875rem; }
+
+.bel-nota-md p  { margin: 0 0 .6rem; }
+
+.bel-nota-md strong { color: var(--bel-text-primary); font-weight: 600; }
+.bel-nota-md em     { color: var(--bel-text-primary); font-style: italic; }
+
+.bel-nota-md ul,
+.bel-nota-md ol {
+  padding-left: 1.4rem;
+  margin: 0 0 .6rem;
+}
+.bel-nota-md li { margin-bottom: .15rem; }
+
+.bel-nota-md hr {
+  border: none;
+  border-top: 1px solid var(--bel-border);
+  margin: .75rem 0;
+}
+
+.bel-nota-md blockquote {
+  border-left: 3px solid var(--bel-accent);
+  padding: .2rem .75rem;
+  margin: .5rem 0;
+  color: var(--bel-text-muted);
+  font-style: italic;
+}
+
+.bel-nota-md code {
+  font-family: 'Cascadia Code', 'Consolas', monospace;
+  font-size: .82rem;
+  background: var(--bel-surface-raised);
+  border: 1px solid var(--bel-border);
+  border-radius: 3px;
+  padding: .1em .35em;
+  color: var(--bel-accent);
+}
+
+.bel-nota-md pre {
+  background: var(--bel-surface-raised);
+  border: 1px solid var(--bel-border);
+  border-radius: 6px;
+  padding: .75rem 1rem;
+  overflow-x: auto;
+  margin: .5rem 0 .75rem;
+}
+.bel-nota-md pre code {
+  background: transparent;
+  border: none;
+  padding: 0;
+  font-size: .82rem;
+  color: var(--bel-text-secondary);
+}
+
+.bel-nota-md table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: .82rem;
+  margin: .5rem 0 .75rem;
+}
+.bel-nota-md table th,
+.bel-nota-md table td {
+  border: 1px solid var(--bel-border);
+  padding: .3rem .6rem;
+  text-align: left;
+}
+.bel-nota-md table th {
+  background: var(--bel-surface-raised);
+  color: var(--bel-text-primary);
+  font-weight: 600;
+}
+.bel-nota-md table tr:nth-child(even) td {
+  background: var(--bel-surface-3);
+}
+
+/* ── Kanban de missões ───────────────────────────────────────────────── */
+.bel-kanban-board {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  align-items: start;
+}
+@media (max-width: 767px) {
+  .bel-kanban-board { grid-template-columns: 1fr; }
+}
+
+.bel-kanban-col {
+  background: var(--bel-surface-2);
+  border: 1px solid var(--bel-border);
+  border-radius: 10px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.bel-kanban-col-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: .6rem .85rem;
+  border-bottom: 1px solid var(--bel-border);
+  font-size: .82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
+
+/* Cor da borda superior por tipo */
+.bel-kanban-principal { border-top: 3px solid #d4a93a; }
+.bel-kanban-contrato  { border-top: 3px solid var(--bel-accent); }
+.bel-kanban-secundaria{ border-top: 3px solid var(--bel-text-muted); }
+
+/* Cor do título por tipo */
+.bel-kanban-principal .bel-kanban-col-title { color: #d4a93a; }
+.bel-kanban-contrato  .bel-kanban-col-title { color: var(--bel-accent); }
+.bel-kanban-secundaria .bel-kanban-col-title{ color: var(--bel-text-muted); }
+
+.bel-kanban-col-count {
+  background: var(--bel-surface-3);
+  border: 1px solid var(--bel-border);
+  border-radius: 20px;
+  font-size: .72rem;
+  font-weight: 700;
+  padding: .05rem .5rem;
+  color: var(--bel-text-secondary);
+}
+
+.bel-kanban-col-body {
+  padding: .5rem;
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+  min-height: 80px;
+}
+
+.bel-kanban-card {
+  background: var(--bel-surface-3);
+  border: 1px solid var(--bel-border);
+  border-radius: 8px;
+  padding: .65rem .75rem;
+  display: flex;
+  flex-direction: column;
+  transition: box-shadow .15s, border-color .15s;
+}
+.bel-kanban-card:hover {
+  border-color: var(--bel-border-hover);
+  box-shadow: 0 3px 12px rgba(0,0,0,.25);
+}
+
+/* Dot colorido no canto do card */
+.bel-kanban-tipo-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: .3rem;
+}
+.bel-kanban-dot-principal  { background: #d4a93a; }
+.bel-kanban-dot-contrato   { background: var(--bel-accent); }
+.bel-kanban-dot-secundaria { background: var(--bel-text-muted); }
+
+.bel-kanban-empty {
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+  color: var(--bel-text-muted);
+  font-size: .82rem;
+  padding: .5rem .25rem;
+  opacity: .7;
+}
+
+/* Cards da seção Concluídas */
+.bel-kanban-concluida { opacity: .75; }
+.bel-kanban-concluida:hover { opacity: 1; }
+
+/* Badges de tipo nas concluídas */
+.bel-badge-tipo-principal  { background: rgba(212,169,58,.18)  !important; color: #d4a93a !important; }
+.bel-badge-tipo-contrato   { background: var(--bel-accent-dim) !important; color: var(--bel-accent) !important; }
+.bel-badge-tipo-secundaria { background: rgba(121,128,113,.18) !important; color: var(--bel-text-muted) !important; }
+
+/* Chevron animado */
+.bel-chevron-toggle { transition: transform .2s; font-size: .75rem; }
+
+/* ── NPC chips (usados em local_list) ───────────────────────────────── */
+.bel-npc-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  padding: .18rem .5rem;
+  border-radius: 20px;
+  font-size: .75rem;
+  font-weight: 500;
+  text-decoration: none;
+  border: 1px solid rgba(255,255,255,.08);
+  transition: opacity .15s, transform .1s;
+  line-height: 1.4;
+}
+.bel-npc-chip:hover { opacity: .85; transform: translateY(-1px); text-decoration: none; }
+
+.bel-npc-chip-img {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: top;
+  flex-shrink: 0;
+}
+
+/* ── NPC cards com portrait ──────────────────────────────────────────── */
+.bel-npc-card { transition: box-shadow .15s; }
+.bel-npc-card:hover { box-shadow: 0 4px 18px rgba(0,0,0,.35); }
+
+.bel-npc-portrait-wrap {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  aspect-ratio: 3/4;
+  background: var(--bel-surface-3);
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.bel-npc-portrait {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+  display: block;
+  transition: transform .25s;
+}
+.bel-npc-card:hover .bel-npc-portrait { transform: scale(1.04); }
+
+.bel-npc-portrait-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 4rem;
+  color: var(--bel-border-hover);
+}
+
+.bel-npc-relacao-overlay {
+  position: absolute;
+  bottom: .4rem;
+  right: .4rem;
+  font-size: .7rem;
+  opacity: .92;
+}
+
+/* ── PV Action panels (Dano / Cura) ─────────────────────────────────── */
+.bel-pv-actions {
+  border-top: 1px solid var(--bel-border);
+  border-bottom: 1px solid var(--bel-border);
+}
+
+.bel-pv-action-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .4rem;
+  padding: .75rem .5rem;
+}
+
+.bel-pv-dano { background: rgba(220,53,69,.06); border-right: 1px solid var(--bel-border); }
+.bel-pv-cura { background: rgba(25,135,84,.06); }
+
+.bel-pv-action-label {
+  font-size: .75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--bel-text-muted);
+}
+.bel-pv-dano .bel-pv-action-label { color: #e57373; }
+.bel-pv-cura .bel-pv-action-label { color: #66bb6a; }
+
+.bel-pv-input {
+  width: 100%;
+  background: transparent !important;
+  border: none !important;
+  border-bottom: 2px solid var(--bel-border) !important;
+  border-radius: 0 !important;
+  color: var(--bel-text-primary) !important;
+  font-size: 1.8rem;
+  font-weight: 800;
+  text-align: center;
+  padding: .1rem .3rem;
+  box-shadow: none !important;
+}
+.bel-pv-dano .bel-pv-input:focus { border-bottom-color: #e57373 !important; }
+.bel-pv-cura .bel-pv-input:focus { border-bottom-color: #66bb6a !important; }
+.bel-pv-input::-webkit-inner-spin-button,
+.bel-pv-input::-webkit-outer-spin-button { opacity: 0; }
+
+.bel-pv-btn {
+  width: 100%;
+  border: none;
+  border-radius: 6px;
+  padding: .3rem .5rem;
+  font-size: .8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .15s;
+}
+.bel-pv-btn-dano { background: rgba(220,53,69,.18); color: #e57373; }
+.bel-pv-btn-dano:hover { background: rgba(220,53,69,.32); }
+.bel-pv-btn-cura { background: rgba(25,135,84,.18); color: #66bb6a; }
+.bel-pv-btn-cura:hover { background: rgba(25,135,84,.32); }
+
+/* ── Ficha de personagem ─────────────────────────────────────────────── */
+
+.bel-ficha-header {
+  padding-bottom: .85rem;
+  border-bottom: 1px solid var(--bel-border);
+}
+
+.bel-ficha-nome {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: -.015em;
+  color: var(--bel-text-primary);
+  line-height: 1.15;
+}
+
+.bel-ficha-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: .2rem .65rem;
+  border-radius: 20px;
+  font-size: .78rem;
+  font-weight: 500;
+  background: var(--bel-surface-3);
+  border: 1px solid var(--bel-border);
+  color: var(--bel-text-secondary);
+}
+.bel-ficha-tag-class {
+  background: var(--bel-accent-dim);
+  border-color: rgba(153,154,198,.4);
+  color: var(--bel-accent);
+}
+
+/* Combat stats bar */
+.bel-ficha-combat-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .5rem 1rem;
+  background: var(--bel-surface-2);
+  border: 1px solid var(--bel-border);
+  border-radius: 10px;
+  padding: .85rem 1.1rem;
+}
+
+.bel-ficha-stat-hp {
+  display: flex;
+  flex-direction: column;
+}
+
+.bel-ficha-hp-val {
+  font-size: 2.1rem;
+  font-weight: 900;
+  color: var(--bel-accent);
+  line-height: 1;
+}
+
+.bel-ficha-hp-sep {
+  font-size: .9rem;
+  color: var(--bel-text-muted);
+}
+
+.bel-ficha-hp-bar {
+  height: 4px;
+  width: 100px;
+  border-radius: 2px;
+  background: var(--bel-surface-raised);
+  margin: .3rem 0 .2rem;
+}
+
+.bel-ficha-stat-lbl {
+  font-size: .65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--bel-text-muted);
+}
+
+.bel-ficha-stat-divider {
+  width: 1px;
+  height: 44px;
+  background: var(--bel-border);
+  flex-shrink: 0;
+  align-self: center;
+}
+
+.bel-ficha-stat-pill {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: .2rem .6rem;
+}
+
+.bel-ficha-stat-val {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--bel-text-primary);
+  line-height: 1.1;
+}
+
+/* Attribute strip */
+.bel-attr-strip {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  border: 1px solid var(--bel-border);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--bel-surface-2);
+}
+@media (max-width: 479px) {
+  .bel-attr-strip {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.bel-attr-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: .9rem .4rem .75rem;
+  border-right: 1px solid var(--bel-border);
+  position: relative;
+}
+.bel-attr-col:last-child { border-right: none; }
+
+/* Top accent line — default muted, accent when strong */
+.bel-attr-col::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--bel-border);
+  transition: background .2s;
+}
+.bel-attr-col-strong::before { background: var(--bel-accent); }
+
+.bel-attr-col-abrev {
+  font-size: .65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--bel-text-muted);
+  margin-bottom: .55rem;
+}
+
+/* Georgia serif for the modifier — the only serif element in the UI */
+.bel-attr-col-mod {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 2.1rem;
+  font-weight: 700;
+  color: var(--bel-accent);
+  line-height: 1;
+  margin-bottom: .5rem;
+}
+
+.bel-attr-col-score {
+  font-size: .78rem;
+  font-weight: 600;
+  color: var(--bel-text-secondary);
+  background: var(--bel-surface-3);
+  border: 1px solid var(--bel-border);
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* Skill + save rows: proficient highlight */
+.bel-skill-row-prof {
+  background: var(--bel-accent-dim);
+}
+
+.bel-skill-mod-prof {
+  color: var(--bel-accent) !important;
+  font-weight: 800;
+}
+
+/* ── Short rest dice inputs ──────────────────────────────────────────── */
+.bel-dado-prefix {
+  background: var(--bel-surface-3) !important;
+  border-color: var(--bel-border) !important;
+  color: var(--bel-text-muted) !important;
+  font-size: .78rem;
+}
+.bel-dado-result {
+  background: var(--bel-surface-3) !important;
+  border-color: var(--bel-border) !important;
+  color: var(--bel-accent) !important;
+  font-size: .78rem;
+  min-width: 4rem;
+  justify-content: center;
+  font-weight: 600;
+}

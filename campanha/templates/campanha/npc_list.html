@@ -2,36 +2,147 @@
 {% block title %}NPCs{% endblock %}
 
 {% block content %}
-<div class="d-flex align-items-center justify-content-between mb-3">
+<div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
   <h3 class="mb-0"><i class="bi bi-people-fill me-2"></i>NPCs</h3>
   <a href="{% url 'npc_create' %}" class="btn btn-outline-success btn-sm"><i class="bi bi-plus-lg me-1"></i>Novo NPC</a>
 </div>
 
 {% if object_list %}
-  <div class="row g-3">
-    {% for npc in object_list %}
-      <div class="col-12 col-md-6 col-lg-4">
-        <div class="bel-card h-100">
-          <div class="bel-card-header d-flex justify-content-between align-items-center">
-            <a href="{% url 'npc_detail' npc.pk %}" class="bel-link fw-semibold">{{ npc.nome }}</a>
-            <span class="badge bel-relacao-{{ npc.relacao_grupo }}">{{ npc.get_relacao_grupo_display }}</span>
-          </div>
-          <div class="p-2">
-            {% if npc.local %}<p class="small text-muted mb-1"><i class="bi bi-geo-alt me-1"></i>{{ npc.local }}</p>{% endif %}
-            <p class="small text-muted mb-2">{{ npc.descricao|truncatechars:100 }}</p>
-            <div class="d-flex gap-1">
-              <a href="{% url 'npc_update' npc.pk %}" class="btn btn-outline-secondary btn-sm py-0"><i class="bi bi-pencil"></i></a>
-              <a href="{% url 'npc_delete' npc.pk %}" class="btn btn-outline-danger btn-sm py-0"><i class="bi bi-trash3"></i></a>
+{# ── Filtros live ── #}
+<div class="bel-card mb-3 p-2">
+  <div class="row g-2 align-items-end">
+    <div class="col-12 col-sm-6">
+      <label class="form-label mb-1 small">Buscar por nome</label>
+      <div class="input-group input-group-sm">
+        <span class="input-group-text" style="background:var(--bel-surface-3);border-color:var(--bel-border)">
+          <i class="bi bi-search" style="color:var(--bel-text-muted)"></i>
+        </span>
+        <input type="text" id="npc-search" class="form-control"
+               placeholder="Comece a digitar…" autocomplete="off">
+      </div>
+    </div>
+    <div class="col-12 col-sm-4">
+      <label class="form-label mb-1 small">Local</label>
+      <select id="npc-local" class="form-select form-select-sm">
+        <option value="">Todos os locais</option>
+        {% for local in locais %}
+          <option value="{{ local.pk }}">{{ local.nome }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-12 col-sm-2 d-flex align-items-end">
+      <button id="npc-clear" type="button"
+              class="btn btn-outline-danger btn-sm w-100"
+              style="display:none !important">
+        <i class="bi bi-x-lg me-1"></i>Limpar
+      </button>
+    </div>
+  </div>
+</div>
+
+<p id="npc-count" class="text-muted small mb-2" style="display:none"></p>
+
+{# ── Grid de cards ── #}
+<div class="row g-3" id="npc-grid">
+  {% for npc in object_list %}
+    <div class="col-12 col-sm-6 col-lg-4 col-xl-3 bel-npc-col"
+         data-nome="{{ npc.nome|lower }}"
+         data-local="{{ npc.local.pk|default:'' }}">
+      <div class="bel-card h-100 d-flex flex-column bel-npc-card">
+
+        <a href="{% url 'npc_detail' npc.pk %}" class="bel-npc-portrait-wrap">
+          {% if npc.imagem %}
+            <img src="{{ npc.imagem.url }}" alt="{{ npc.nome }}" class="bel-npc-portrait">
+          {% else %}
+            <div class="bel-npc-portrait-placeholder">
+              <i class="bi bi-person-fill"></i>
             </div>
+          {% endif %}
+          <span class="bel-npc-relacao-overlay badge bel-relacao-{{ npc.relacao_grupo }}">
+            {{ npc.get_relacao_grupo_display }}
+          </span>
+        </a>
+
+        <div class="p-2 flex-fill d-flex flex-column">
+          <a href="{% url 'npc_detail' npc.pk %}" class="bel-link fw-semibold d-block mb-1">{{ npc.nome }}</a>
+          {% if npc.local %}
+            <p class="small text-muted mb-1"><i class="bi bi-geo-alt me-1"></i>{{ npc.local }}</p>
+          {% endif %}
+          {% if npc.descricao %}
+            <p class="small text-muted mb-2" style="line-height:1.35">{{ npc.descricao|truncatechars:80 }}</p>
+          {% endif %}
+          <div class="d-flex gap-1 mt-auto">
+            <a href="{% url 'npc_update' npc.pk %}" class="btn btn-outline-secondary btn-sm py-0"><i class="bi bi-pencil"></i></a>
+            <a href="{% url 'npc_delete' npc.pk %}" class="btn btn-outline-danger btn-sm py-0"><i class="bi bi-trash3"></i></a>
           </div>
         </div>
+
       </div>
-    {% endfor %}
-  </div>
+    </div>
+  {% endfor %}
+</div>
+
+<div id="npc-empty" class="text-center text-muted py-5" style="display:none">
+  <i class="bi bi-person-x fs-1"></i>
+  <p class="mt-2">Nenhum NPC encontrado com esses filtros.</p>
+</div>
+
 {% else %}
   <div class="text-center text-muted py-5">
     <i class="bi bi-person-x fs-1"></i>
-    <p class="mt-2">Nenhum NPC. <a href="{% url 'npc_create' %}">Adicionar</a></p>
+    <p class="mt-2">Nenhum NPC cadastrado. <a href="{% url 'npc_create' %}">Adicionar</a></p>
   </div>
 {% endif %}
+
+<script>
+(function () {
+  var searchEl  = document.getElementById('npc-search');
+  var localEl   = document.getElementById('npc-local');
+  var clearBtn  = document.getElementById('npc-clear');
+  var countEl   = document.getElementById('npc-count');
+  var emptyEl   = document.getElementById('npc-empty');
+  var cols      = document.querySelectorAll('.bel-npc-col');
+  var total     = cols.length;
+
+  if (!searchEl) return;
+
+  function filter() {
+    var q     = searchEl.value.toLowerCase().trim();
+    var local = localEl.value;
+    var shown = 0;
+
+    cols.forEach(function (col) {
+      var nome      = col.dataset.nome  || '';
+      var colLocal  = col.dataset.local || '';
+      var matchNome  = !q     || nome.includes(q);
+      var matchLocal = !local || colLocal === local;
+      var visible    = matchNome && matchLocal;
+      col.style.display = visible ? '' : 'none';
+      if (visible) shown++;
+    });
+
+    var hasFilter = q || local;
+    clearBtn.style.setProperty('display', hasFilter ? '' : 'none', 'important');
+
+    if (hasFilter) {
+      countEl.style.display = '';
+      countEl.innerHTML = '<strong>' + shown + '</strong> de ' + total + ' NPC' + (total !== 1 ? 's' : '');
+    } else {
+      countEl.style.display = 'none';
+    }
+
+    emptyEl.style.display = shown === 0 ? '' : 'none';
+  }
+
+  searchEl.addEventListener('input', filter);
+  localEl.addEventListener('change', filter);
+
+  clearBtn.addEventListener('click', function () {
+    searchEl.value = '';
+    localEl.value  = '';
+    filter();
+    searchEl.focus();
+  });
+})();
+</script>
 {% endblock %}

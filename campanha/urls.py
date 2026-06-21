@@ -12,9 +12,15 @@ urlpatterns = [
     # Central de Combate
     path("combate/", views.central_combate, name="combate"),
     path("combate/pv/", views.atualizar_pv, name="pv_atualizar"),
+    path("combate/descanso/curto/dados/", views.descanso_curto_dados, name="descanso_curto_dados"),
     path("combate/descanso/<str:tipo>/", views.aplicar_descanso, name="descanso"),
     path("combate/recurso/<int:pk>/usar/", views.usar_recurso, name="recurso_usar"),
     path("combate/recurso/<int:pk>/restaurar/", views.restaurar_recurso, name="recurso_restaurar"),
+
+    # Notas de Combate
+    path("combate/notas/nova/", views.NotaCombateCreateView.as_view(), name="nota_create"),
+    path("combate/notas/<int:pk>/editar/", views.NotaCombateUpdateView.as_view(), name="nota_update"),
+    path("combate/notas/<int:pk>/excluir/", views.NotaCombateDeleteView.as_view(), name="nota_delete"),
 
     # Itens
     path("itens/", views.ItemListView.as_view(), name="item_list"),

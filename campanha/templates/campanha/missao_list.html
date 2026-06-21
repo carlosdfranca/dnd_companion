@@ -2,43 +2,121 @@
 {% block title %}Missões{% endblock %}
 
 {% block content %}
-<div class="d-flex align-items-center justify-content-between mb-3">
-  <h3 class="mb-0"><i class="bi bi-flag-fill me-2"></i>Missões</h3>
-  <a href="{% url 'missao_create' %}" class="btn btn-outline-success btn-sm"><i class="bi bi-plus-lg me-1"></i>Nova Missão</a>
+<div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+  <h3 class="mb-0"><i class="bi bi-kanban-fill me-2"></i>Missões</h3>
+  <a href="{% url 'missao_create' %}" class="btn btn-outline-success btn-sm">
+    <i class="bi bi-plus-lg me-1"></i>Nova Missão
+  </a>
 </div>
 
-{% regroup object_list by get_status_display as grupos %}
-{% for grupo in grupos %}
-  <h5 class="mt-3 mb-2 {% if grupo.grouper == 'Ativa' %}text-success{% else %}text-muted{% endif %}">
-    {{ grupo.grouper }}
-    <span class="badge bg-secondary">{{ grupo.list|length }}</span>
-  </h5>
-  {% for m in grupo.list %}
-    <div class="bel-card mb-2">
-      <div class="bel-card-header d-flex align-items-center justify-content-between">
-        <a href="{% url 'missao_detail' m.pk %}" class="bel-link fw-semibold">{{ m.titulo }}</a>
-        <div class="d-flex gap-1 align-items-center">
-          {% if m.status == 'ativa' %}
-            <form method="post" action="{% url 'missao_concluir' m.pk %}" class="d-inline">
+{# ── Kanban board ── #}
+<div class="bel-kanban-board">
+  {% for col in colunas %}
+  <div class="bel-kanban-col bel-kanban-{{ col.tipo }}">
+
+    {# Cabeçalho da coluna #}
+    <div class="bel-kanban-col-header">
+      <span class="bel-kanban-col-title">
+        <i class="bi {{ col.icon }} me-2"></i>{{ col.label }}
+      </span>
+      <span class="bel-kanban-col-count">{{ col.missoes|length }}</span>
+    </div>
+
+    {# Cards da coluna #}
+    <div class="bel-kanban-col-body">
+      {% for m in col.missoes %}
+        <div class="bel-kanban-card">
+          <div class="d-flex align-items-start justify-content-between gap-2 mb-1">
+            <a href="{% url 'missao_detail' m.pk %}" class="bel-link fw-semibold" style="line-height:1.3">
+              {{ m.titulo }}
+            </a>
+            <span class="bel-kanban-tipo-dot bel-kanban-dot-{{ col.tipo }}" title="{{ col.label }}"></span>
+          </div>
+
+          {% if m.descricao %}
+            <p class="small text-muted mb-2" style="line-height:1.35">{{ m.descricao|truncatechars:110 }}</p>
+          {% endif %}
+
+          <div class="d-flex gap-1 mt-auto pt-1 flex-wrap">
+            <form method="post" action="{% url 'missao_concluir' m.pk %}">
               {% csrf_token %}
-              <button class="btn btn-outline-success btn-sm py-0" title="Marcar como concluída">
+              <button class="btn btn-outline-success btn-sm py-0 px-2" title="Concluir">
                 <i class="bi bi-check2-circle me-1"></i>Concluir
               </button>
             </form>
-          {% endif %}
-          <a href="{% url 'missao_update' m.pk %}" class="btn btn-outline-secondary btn-sm py-0"><i class="bi bi-pencil"></i></a>
-          <a href="{% url 'missao_delete' m.pk %}" class="btn btn-outline-danger btn-sm py-0"><i class="bi bi-trash3"></i></a>
+            <a href="{% url 'missao_update' m.pk %}" class="btn btn-outline-secondary btn-sm py-0 px-2">
+              <i class="bi bi-pencil"></i>
+            </a>
+            <a href="{% url 'missao_delete' m.pk %}" class="btn btn-outline-danger btn-sm py-0 px-2">
+              <i class="bi bi-trash3"></i>
+            </a>
+          </div>
         </div>
-      </div>
-      {% if m.descricao %}
-        <div class="p-2 small text-muted">{{ m.descricao|truncatechars:180 }}</div>
-      {% endif %}
+      {% empty %}
+        <div class="bel-kanban-empty">
+          <i class="bi bi-inbox"></i>
+          <span>Nenhuma missão</span>
+        </div>
+      {% endfor %}
     </div>
+
+  </div>
   {% endfor %}
-{% empty %}
+</div>
+
+{# ── Concluídas ── #}
+{% if concluidas %}
+<div class="mt-4">
+  <button class="btn btn-link text-muted p-0 mb-2 d-flex align-items-center gap-2"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#concluidas-panel"
+          aria-expanded="false">
+    <i class="bi bi-chevron-right bel-chevron-toggle"></i>
+    <span class="small fw-semibold text-uppercase" style="letter-spacing:.05em">
+      Concluídas
+    </span>
+    <span class="badge bg-secondary">{{ concluidas|length }}</span>
+  </button>
+
+  <div class="collapse" id="concluidas-panel">
+    <div class="row g-2">
+      {% for m in concluidas %}
+        <div class="col-12 col-md-6 col-lg-4">
+          <div class="bel-card bel-kanban-concluida">
+            <div class="bel-card-header d-flex align-items-center justify-content-between">
+              <a href="{% url 'missao_detail' m.pk %}" class="bel-link small fw-semibold">{{ m.titulo }}</a>
+              <span class="badge bel-badge-tipo-{{ m.tipo }} small">{{ m.get_tipo_display }}</span>
+            </div>
+            {% if m.resultado %}
+              <div class="p-2 small text-muted">{{ m.resultado|truncatechars:100 }}</div>
+            {% endif %}
+            <div class="px-2 pb-2 d-flex gap-1">
+              <a href="{% url 'missao_update' m.pk %}" class="btn btn-outline-secondary btn-sm py-0"><i class="bi bi-pencil"></i></a>
+              <a href="{% url 'missao_delete' m.pk %}" class="btn btn-outline-danger btn-sm py-0"><i class="bi bi-trash3"></i></a>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endif %}
+
+{% if not colunas.0.missoes and not colunas.1.missoes and not colunas.2.missoes and not concluidas %}
   <div class="text-center text-muted py-5">
     <i class="bi bi-flag fs-1"></i>
     <p class="mt-2">Nenhuma missão. <a href="{% url 'missao_create' %}">Adicionar</a></p>
   </div>
-{% endfor %}
+{% endif %}
+
+<script>
+// Rotaciona o chevron ao expandir/colapsar
+document.querySelectorAll('[data-bs-toggle="collapse"]').forEach(function (btn) {
+  var target = document.querySelector(btn.dataset.bsTarget);
+  if (!target) return;
+  target.addEventListener('show.bs.collapse',  function () { btn.querySelector('.bel-chevron-toggle').style.transform = 'rotate(90deg)'; });
+  target.addEventListener('hide.bs.collapse',  function () { btn.querySelector('.bel-chevron-toggle').style.transform = ''; });
+});
+</script>
 {% endblock %}

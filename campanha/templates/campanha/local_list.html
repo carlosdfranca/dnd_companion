@@ -2,36 +2,156 @@
 {% block title %}Locais{% endblock %}
 
 {% block content %}
-<div class="d-flex align-items-center justify-content-between mb-3">
+<div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
   <h3 class="mb-0"><i class="bi bi-geo-alt-fill me-2"></i>Locais</h3>
   <a href="{% url 'local_create' %}" class="btn btn-outline-success btn-sm"><i class="bi bi-plus-lg me-1"></i>Novo Local</a>
 </div>
 
 {% if object_list %}
-  <div class="row g-3">
-    {% for local in object_list %}
-      <div class="col-12 col-md-6 col-lg-4">
-        <div class="bel-card h-100">
-          <div class="bel-card-header d-flex justify-content-between">
-            <a href="{% url 'local_detail' local.pk %}" class="bel-link fw-semibold">{{ local.nome }}</a>
-            <span class="badge bg-secondary">{{ local.get_tipo_display }}</span>
-          </div>
-          <div class="p-2">
-            {% if local.status %}<p class="small mb-1"><i class="bi bi-circle-fill text-warning me-1" style="font-size:.5em"></i>{{ local.status }}</p>{% endif %}
-            <p class="small text-muted mb-2">{{ local.descricao|truncatechars:100 }}</p>
-            <div class="d-flex gap-1">
-              <a href="{% url 'local_update' local.pk %}" class="btn btn-outline-secondary btn-sm py-0"><i class="bi bi-pencil"></i></a>
-              <a href="{% url 'local_delete' local.pk %}" class="btn btn-outline-danger btn-sm py-0"><i class="bi bi-trash3"></i></a>
-            </div>
+{# ── Busca live ── #}
+<div class="bel-card mb-3 p-2">
+  <div class="row g-2 align-items-end">
+    <div class="col-12 col-sm-8">
+      <div class="input-group input-group-sm">
+        <span class="input-group-text" style="background:var(--bel-surface-3);border-color:var(--bel-border)">
+          <i class="bi bi-search" style="color:var(--bel-text-muted)"></i>
+        </span>
+        <input type="text" id="local-search" class="form-control"
+               placeholder="Buscar local por nome…" autocomplete="off">
+      </div>
+    </div>
+    <div class="col-12 col-sm-4 d-flex align-items-end">
+      <button id="local-clear" type="button"
+              class="btn btn-outline-danger btn-sm w-100"
+              style="display:none !important">
+        <i class="bi bi-x-lg me-1"></i>Limpar
+      </button>
+    </div>
+  </div>
+</div>
+
+<p id="local-count" class="text-muted small mb-2" style="display:none"></p>
+
+{# ── Grid de locais ── #}
+<div class="row g-3" id="local-grid">
+  {% for local in object_list %}
+    <div class="col-12 col-md-6 col-lg-4 bel-local-col"
+         data-nome="{{ local.nome|lower }}">
+      <div class="bel-card h-100 d-flex flex-column">
+
+        <div class="bel-card-header d-flex justify-content-between align-items-center">
+          <a href="{% url 'local_detail' local.pk %}" class="bel-link fw-semibold">{{ local.nome }}</a>
+          <span class="badge bg-secondary">{{ local.get_tipo_display }}</span>
+        </div>
+
+        <div class="p-2 flex-fill d-flex flex-column">
+          {% if local.status %}
+            <p class="small mb-1">
+              <i class="bi bi-circle-fill text-warning me-1" style="font-size:.5em"></i>{{ local.status }}
+            </p>
+          {% endif %}
+
+          {% if local.descricao %}
+            <p class="small text-muted mb-2">{{ local.descricao|truncatechars:90 }}</p>
+          {% endif %}
+
+          {# NPCs do local #}
+          {% with npcs=local.npcs.all %}
+            {% if npcs %}
+              <div class="mt-1 mb-2">
+                <div class="bel-section-label mb-1">
+                  <i class="bi bi-people me-1"></i>NPCs
+                  <span class="badge bg-secondary ms-1" style="font-size:.6rem">{{ npcs|length }}</span>
+                </div>
+                <div class="d-flex flex-wrap gap-1">
+                  {% for npc in npcs %}
+                    <a href="{% url 'npc_detail' npc.pk %}"
+                       class="bel-npc-chip bel-relacao-{{ npc.relacao_grupo }}"
+                       title="{{ npc.get_relacao_grupo_display }}">
+                      {% if npc.imagem %}
+                        <img src="{{ npc.imagem.url }}" alt="{{ npc.nome }}" class="bel-npc-chip-img">
+                      {% else %}
+                        <i class="bi bi-person-fill"></i>
+                      {% endif %}
+                      {{ npc.nome }}
+                    </a>
+                  {% endfor %}
+                </div>
+              </div>
+            {% else %}
+              <p class="small text-muted mb-2"><i class="bi bi-person-x me-1"></i>Nenhum NPC associado.</p>
+            {% endif %}
+          {% endwith %}
+
+          <div class="d-flex gap-1 mt-auto pt-1">
+            <a href="{% url 'local_detail' local.pk %}" class="btn btn-outline-secondary btn-sm py-0">
+              <i class="bi bi-eye me-1"></i>Ver
+            </a>
+            <a href="{% url 'local_update' local.pk %}" class="btn btn-outline-secondary btn-sm py-0">
+              <i class="bi bi-pencil"></i>
+            </a>
+            <a href="{% url 'local_delete' local.pk %}" class="btn btn-outline-danger btn-sm py-0">
+              <i class="bi bi-trash3"></i>
+            </a>
           </div>
         </div>
+
       </div>
-    {% endfor %}
-  </div>
+    </div>
+  {% endfor %}
+</div>
+
+<div id="local-empty" class="text-center text-muted py-5" style="display:none">
+  <i class="bi bi-map fs-1"></i>
+  <p class="mt-2">Nenhum local encontrado.</p>
+</div>
+
 {% else %}
   <div class="text-center text-muted py-5">
     <i class="bi bi-map fs-1"></i>
     <p class="mt-2">Nenhum local. <a href="{% url 'local_create' %}">Adicionar</a></p>
   </div>
 {% endif %}
+
+<script>
+(function () {
+  var searchEl = document.getElementById('local-search');
+  var clearBtn = document.getElementById('local-clear');
+  var countEl  = document.getElementById('local-count');
+  var emptyEl  = document.getElementById('local-empty');
+  var cols     = document.querySelectorAll('.bel-local-col');
+  var total    = cols.length;
+
+  if (!searchEl) return;
+
+  function filter() {
+    var q     = searchEl.value.toLowerCase().trim();
+    var shown = 0;
+
+    cols.forEach(function (col) {
+      var visible = !q || col.dataset.nome.includes(q);
+      col.style.display = visible ? '' : 'none';
+      if (visible) shown++;
+    });
+
+    clearBtn.style.setProperty('display', q ? '' : 'none', 'important');
+
+    if (q) {
+      countEl.style.display = '';
+      countEl.innerHTML = '<strong>' + shown + '</strong> de ' + total + ' local' + (total !== 1 ? 'is' : '');
+    } else {
+      countEl.style.display = 'none';
+    }
+
+    emptyEl.style.display = shown === 0 ? '' : 'none';
+  }
+
+  searchEl.addEventListener('input', filter);
+  clearBtn.addEventListener('click', function () {
+    searchEl.value = '';
+    filter();
+    searchEl.focus();
+  });
+})();
+</script>
 {% endblock %}

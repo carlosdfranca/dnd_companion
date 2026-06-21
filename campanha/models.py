@@ -1,6 +1,7 @@
 import math
 
 from django.db import models
+from django.utils.safestring import mark_safe
 
 from . import constants
 
@@ -27,6 +28,8 @@ class Personagem(models.Model):
     carisma = models.PositiveSmallIntegerField("Carisma", default=10)
 
     bonus_proficiencia = models.PositiveSmallIntegerField("Bônus de Proficiência", default=2)
+    iniciativa_bonus   = models.SmallIntegerField("Bônus extra de Iniciativa", default=0,
+                             help_text="Adicione aqui qualquer bônus extra (ex.: Bônus de Proficiência se tiver o feat/recurso correspondente).")
 
     # Combate / corpo
     ca = models.PositiveSmallIntegerField("Classe de Armadura", default=10)
@@ -86,7 +89,7 @@ class Personagem(models.Model):
 
     @property
     def iniciativa(self):
-        return self.mod_destreza
+        return self.mod_destreza + self.iniciativa_bonus
 
 
 class Pericia(models.Model):
@@ -273,6 +276,7 @@ class NPC(models.Model):
     relacao_grupo = models.CharField(
         "Relação com o Grupo", max_length=15, choices=RELACOES, default="neutro"
     )
+    imagem = models.ImageField("Imagem", upload_to="npcs/", blank=True, null=True)
 
     class Meta:
         verbose_name = "NPC"
@@ -291,15 +295,22 @@ class Missao(models.Model):
         ("concluida", "Concluída"),
     ]
 
-    titulo = models.CharField("Título", max_length=200)
+    TIPOS = [
+        ("principal", "Missão Principal"),
+        ("contrato", "Contrato"),
+        ("secundaria", "Missão Secundária"),
+    ]
+
+    titulo    = models.CharField("Título", max_length=200)
     descricao = models.TextField("Descrição / Objetivos", blank=True)
-    status = models.CharField("Status", max_length=10, choices=STATUS, default="ativa")
+    tipo      = models.CharField("Tipo", max_length=12, choices=TIPOS, default="secundaria")
+    status    = models.CharField("Status", max_length=10, choices=STATUS, default="ativa")
     resultado = models.TextField("Resultado", blank=True)
 
     class Meta:
         verbose_name = "Missão"
         verbose_name_plural = "Missões"
-        ordering = ["status", "titulo"]
+        ordering = ["tipo", "titulo"]
 
     def __str__(self):
         return self.titulo
@@ -320,6 +331,32 @@ class ResumoSessao(models.Model):
 
     def __str__(self):
         return f"Sessão {self.numero}" + (f" — {self.titulo}" if self.titulo else "")
+
+
+class NotaCombate(models.Model):
+    """Referência de habilidade/mecânica consultada durante o combate."""
+
+    personagem = models.ForeignKey(
+        Personagem, on_delete=models.CASCADE, related_name="notas_combate"
+    )
+    titulo   = models.CharField("Título", max_length=200)
+    conteudo = models.TextField("Conteúdo", blank=True,
+                   help_text="Descreva a mecânica, dano, condições, etc. Formatação livre.")
+    ordem    = models.PositiveSmallIntegerField("Ordem", default=0,
+                   help_text="Número menor aparece primeiro.")
+
+    class Meta:
+        verbose_name = "Nota de Combate"
+        verbose_name_plural = "Notas de Combate"
+        ordering = ["ordem", "titulo"]
+
+    def __str__(self):
+        return self.titulo
+
+    @property
+    def conteudo_html(self):
+        from .markup import render_md
+        return mark_safe(render_md(self.conteudo))
 
 
 class InformacaoImportante(models.Model):
