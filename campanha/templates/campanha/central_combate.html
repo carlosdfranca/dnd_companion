@@ -1,0 +1,196 @@
+{% extends "campanha/base.html" %}
+{% block title %}Combate{% endblock %}
+
+{% block content %}
+{% if not personagem %}
+  <div class="alert alert-warning">Nenhum personagem encontrado. <a href="/admin/campanha/personagem/add/">Criar via admin</a>.</div>
+{% else %}
+
+{# ── Header ── #}
+<div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+  <h3 class="mb-0"><i class="bi bi-shield-shaded me-2"></i>Central de Combate — {{ personagem.nome }}</h3>
+  <div class="d-flex gap-2">
+    <a href="{% url 'recurso_create' %}" class="btn btn-outline-success btn-sm"><i class="bi bi-plus-lg me-1"></i>Recurso</a>
+    <a href="{% url 'ficha' %}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-person-fill me-1"></i>Ficha</a>
+  </div>
+</div>
+
+<div class="row g-3">
+
+  {# ── PV e stats ── #}
+  <div class="col-12 col-lg-4">
+    <div class="bel-card">
+      <div class="bel-card-header"><i class="bi bi-heart-fill me-2 text-danger"></i>Pontos de Vida</div>
+      <div class="p-3">
+        {# Big HP display #}
+        <div class="text-center mb-2">
+          <span class="bel-hp-big {% if personagem.pv_atual <= 0 %}text-danger{% elif pv_pct < 40 %}text-warning{% endif %}">
+            {{ personagem.pv_atual }}
+          </span>
+          <span class="bel-hp-max"> / {{ personagem.pv_maximo }}</span>
+          {% if personagem.pv_temporario %}
+            <div class="badge bg-info mt-1">+{{ personagem.pv_temporario }} PV temp</div>
+          {% endif %}
+        </div>
+        <div class="progress mb-3" style="height:12px">
+          <div class="progress-bar {% if pv_pct > 60 %}bg-success{% elif pv_pct > 30 %}bg-warning{% else %}bg-danger{% endif %}"
+               style="width:{{ pv_pct }}%"></div>
+        </div>
+
+        {# Dano / Cura ── delta #}
+        <div class="row g-2 mb-2">
+          <div class="col-6">
+            <form method="post" action="{% url 'pv_atualizar' %}">
+              {% csrf_token %}
+              <input type="hidden" name="acao" value="delta">
+              <div class="input-group input-group-sm">
+                <input type="number" name="delta" class="form-control" placeholder="Δ" min="-999" max="999">
+                <button class="btn btn-outline-danger" type="submit" title="Aplicar dano (negativo) ou cura (positivo)">±PV</button>
+              </div>
+            </form>
+          </div>
+          <div class="col-6">
+            <form method="post" action="{% url 'pv_atualizar' %}">
+              {% csrf_token %}
+              <input type="hidden" name="acao" value="set">
+              <div class="input-group input-group-sm">
+                <input type="number" name="valor" class="form-control" placeholder="Set PV" value="{{ personagem.pv_atual }}">
+                <button class="btn btn-outline-secondary" type="submit" title="Definir PV diretamente">Set</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        {# PV temporário #}
+        <form method="post" action="{% url 'pv_atualizar' %}" class="mb-3">
+          {% csrf_token %}
+          <input type="hidden" name="acao" value="set">
+          <input type="hidden" name="valor" value="{{ personagem.pv_atual }}">
+          <div class="input-group input-group-sm">
+            <input type="number" name="pv_temporario" class="form-control" placeholder="PV Temporário" value="{{ personagem.pv_temporario }}" min="0">
+            <button class="btn btn-outline-info" type="submit">Set Temp</button>
+          </div>
+        </form>
+
+        {# Stats rápidos #}
+        <div class="d-flex justify-content-around text-center border-top pt-2">
+          <div>
+            <div class="fs-5 fw-bold">{{ personagem.ca }}</div>
+            <div class="text-muted small">CA</div>
+          </div>
+          <div>
+            <div class="fs-5 fw-bold">{% if personagem.iniciativa >= 0 %}+{% endif %}{{ personagem.iniciativa }}</div>
+            <div class="text-muted small">Iniciativa</div>
+          </div>
+          <div>
+            <div class="fs-5 fw-bold">{{ personagem.deslocamento }}m</div>
+            <div class="text-muted small">Deslocamento</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {# ── Descanso ── #}
+    <div class="bel-card mt-3">
+      <div class="bel-card-header"><i class="bi bi-moon-stars-fill me-2"></i>Descanso</div>
+      <div class="p-3 d-flex gap-2">
+        <form method="post" action="{% url 'descanso' 'curto' %}" class="flex-fill">
+          {% csrf_token %}
+          <button class="btn btn-outline-secondary w-100"><i class="bi bi-cup-hot me-1"></i>Curto</button>
+        </form>
+        <form method="post" action="{% url 'descanso' 'longo' %}" class="flex-fill">
+          {% csrf_token %}
+          <button class="btn btn-outline-primary w-100"><i class="bi bi-moon-fill me-1"></i>Longo</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  {# ── Recursos de Combate ── #}
+  <div class="col-12 col-lg-8">
+    <div class="bel-card">
+      <div class="bel-card-header d-flex align-items-center justify-content-between">
+        <span><i class="bi bi-lightning-fill me-2"></i>Recursos de Combate</span>
+        <a href="{% url 'recurso_list' %}" class="btn btn-outline-secondary btn-sm py-0">Gerenciar</a>
+      </div>
+      {% if recursos_com_pips %}
+        <div class="row g-2 p-2">
+          {% for item in recursos_com_pips %}
+          <div class="col-12 col-sm-6">
+            <div class="bel-recurso-card">
+              <div class="d-flex align-items-start justify-content-between mb-1">
+                <div>
+                  <strong>{{ item.recurso.nome }}</strong>
+                  <span class="badge bg-secondary ms-1 small">{{ item.recurso.get_recuperacao_display }}</span>
+                </div>
+                <span class="bel-usos-count">{{ item.recurso.usos_restantes }}/{{ item.recurso.usos_totais }}</span>
+              </div>
+
+              {# Pips #}
+              <div class="bel-pips mb-2">
+                {% for filled in item.pips %}
+                  <span class="bel-pip {% if filled %}bel-pip-on{% endif %}">●</span>
+                {% endfor %}
+              </div>
+
+              {% if item.recurso.descricao %}
+                <p class="text-muted small mb-2" style="line-height:1.3">{{ item.recurso.descricao|truncatechars:80 }}</p>
+              {% endif %}
+
+              <div class="d-flex gap-1">
+                <form method="post" action="{% url 'recurso_usar' item.recurso.pk %}">
+                  {% csrf_token %}
+                  <button class="btn btn-danger btn-sm" {% if item.recurso.usos_restantes == 0 %}disabled{% endif %}>
+                    <i class="bi bi-dash-circle me-1"></i>Usar
+                  </button>
+                </form>
+                <form method="post" action="{% url 'recurso_restaurar' item.recurso.pk %}">
+                  {% csrf_token %}
+                  <button class="btn btn-outline-success btn-sm" {% if item.recurso.usos_restantes == item.recurso.usos_totais %}disabled{% endif %}>
+                    <i class="bi bi-arrow-counterclockwise me-1"></i>Restaurar
+                  </button>
+                </form>
+                <a href="{% url 'recurso_update' item.recurso.pk %}" class="btn btn-outline-secondary btn-sm ms-auto">
+                  <i class="bi bi-pencil"></i>
+                </a>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="p-3 text-muted">
+          Nenhum recurso cadastrado.
+          <a href="{% url 'recurso_create' %}">Adicionar</a>
+        </div>
+      {% endif %}
+    </div>
+
+    {# ── Itens Equipados ── #}
+    {% if itens_equipados %}
+    <div class="bel-card mt-3">
+      <div class="bel-card-header"><i class="bi bi-shield-fill-check me-2"></i>Equipado</div>
+      <div class="p-2">
+        <ul class="list-unstyled mb-0">
+          {% for item in itens_equipados %}
+            <li class="bel-list-row d-flex align-items-center justify-content-between py-1">
+              <div>
+                <strong>{{ item.nome }}</strong>
+                {% if item.atributos_efeito %}
+                  <span class="text-muted small ms-2">{{ item.atributos_efeito|truncatechars:60 }}</span>
+                {% endif %}
+              </div>
+              <a href="{% url 'item_update' item.pk %}" class="btn btn-outline-secondary btn-sm py-0">
+                <i class="bi bi-pencil"></i>
+              </a>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+</div>
+{% endif %}
+{% endblock %}

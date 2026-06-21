@@ -1,0 +1,48 @@
+{% extends "campanha/base.html" %}
+{% block title %}Inventário{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-3">
+  <h3 class="mb-0"><i class="bi bi-bag-fill me-2"></i>Inventário</h3>
+  <a href="{% url 'item_create' %}" class="btn btn-outline-success btn-sm"><i class="bi bi-plus-lg me-1"></i>Novo Item</a>
+</div>
+
+{% regroup object_list by get_tipo_display as grupos %}
+{% if object_list %}
+  {% for grupo in grupos %}
+    <div class="bel-card mb-3">
+      <div class="bel-card-header">{{ grupo.grouper }}</div>
+      <div class="table-responsive">
+        <table class="table table-sm mb-0 bel-table">
+          <thead>
+            <tr>
+              <th>Nome</th><th>Qtd</th><th>Efeito</th><th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in grupo.list %}
+              <tr>
+                <td>
+                  <strong>{{ item.nome }}</strong>
+                  {% if item.lore %}<i class="bi bi-book text-muted ms-1" title="Tem lore"></i>{% endif %}
+                </td>
+                <td>{{ item.quantidade }}</td>
+                <td class="text-muted small">{{ item.atributos_efeito|truncatechars:60 }}</td>
+                <td class="text-end text-nowrap">
+                  <a href="{% url 'item_update' item.pk %}" class="btn btn-outline-secondary btn-sm py-0"><i class="bi bi-pencil"></i></a>
+                  <a href="{% url 'item_delete' item.pk %}" class="btn btn-outline-danger btn-sm py-0"><i class="bi bi-trash3"></i></a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  {% endfor %}
+{% else %}
+  <div class="text-center text-muted py-5">
+    <i class="bi bi-bag fs-1"></i>
+    <p class="mt-2">Inventário vazio. <a href="{% url 'item_create' %}">Adicionar item</a></p>
+  </div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,145 @@
+{% extends "campanha/base.html" %}
+{% block title %}Editar Ficha{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-3">
+  <h3 class="mb-0">Editar Ficha — {{ personagem.nome }}</h3>
+  <a href="{% url 'ficha' %}" class="btn btn-outline-secondary btn-sm">
+    <i class="bi bi-arrow-left me-1"></i>Cancelar
+  </a>
+</div>
+
+<form method="post">
+  {% csrf_token %}
+
+  {# ── Identidade ── #}
+  <div class="bel-card mb-3">
+    <div class="bel-card-header">Identidade</div>
+    <div class="p-3">
+      <div class="row g-3">
+        <div class="col-12 col-md-4">
+          <label class="form-label">Nome</label>{{ form.nome }}
+        </div>
+        <div class="col-6 col-md-4">
+          <label class="form-label">Raça</label>{{ form.raca }}
+        </div>
+        <div class="col-6 col-md-4">
+          <label class="form-label">Classe</label>{{ form.classe }}
+        </div>
+        <div class="col-4 col-md-2">
+          <label class="form-label">Nível</label>{{ form.nivel }}
+        </div>
+        <div class="col-4 col-md-2">
+          <label class="form-label">Bônus Prof.</label>{{ form.bonus_proficiencia }}
+        </div>
+        <div class="col-4 col-md-2">
+          <label class="form-label">Deslocamento</label>{{ form.deslocamento }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {# ── Atributos ── #}
+  <div class="bel-card mb-3">
+    <div class="bel-card-header">Atributos</div>
+    <div class="p-3">
+      <div class="row g-3">
+        <div class="col-4 col-md-2"><label class="form-label">FOR</label>{{ form.forca }}</div>
+        <div class="col-4 col-md-2"><label class="form-label">DES</label>{{ form.destreza }}</div>
+        <div class="col-4 col-md-2"><label class="form-label">CON</label>{{ form.constituicao }}</div>
+        <div class="col-4 col-md-2"><label class="form-label">INT</label>{{ form.inteligencia }}</div>
+        <div class="col-4 col-md-2"><label class="form-label">SAB</label>{{ form.sabedoria }}</div>
+        <div class="col-4 col-md-2"><label class="form-label">CAR</label>{{ form.carisma }}</div>
+      </div>
+    </div>
+  </div>
+
+  {# ── Combate ── #}
+  <div class="bel-card mb-3">
+    <div class="bel-card-header">Combate</div>
+    <div class="p-3">
+      <div class="row g-3">
+        <div class="col-4 col-md-2"><label class="form-label">CA</label>{{ form.ca }}</div>
+        <div class="col-4 col-md-2"><label class="form-label">PV Máx.</label>{{ form.pv_maximo }}</div>
+        <div class="col-4 col-md-2"><label class="form-label">PV Atual</label>{{ form.pv_atual }}</div>
+        <div class="col-4 col-md-2"><label class="form-label">PV Temp.</label>{{ form.pv_temporario }}</div>
+      </div>
+    </div>
+  </div>
+
+  {# ── Salvaguardas ── #}
+  <div class="bel-card mb-3">
+    <div class="bel-card-header">Salvaguardas — marque as que tem proficiência</div>
+    {{ salvaguarda_fs.management_form }}
+    <div class="p-3">
+      <div class="row g-2">
+        {% for sform in salvaguarda_fs %}
+          {{ sform.id }}
+          <div class="col-6 col-md-4 col-lg-2">
+            <div class="form-check">
+              {{ sform.proficiente }}
+              <label class="form-check-label">{{ sform.instance.rotulo }}</label>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  {# ── Perícias ── #}
+  <div class="bel-card mb-3">
+    <div class="bel-card-header">Perícias — marque as que tem proficiência</div>
+    {{ pericia_fs.management_form }}
+    <div class="p-3">
+      <div class="row g-1">
+        {% for pform in pericia_fs %}
+          {{ pform.id }}
+          <div class="col-12 col-sm-6 col-md-4">
+            <div class="d-flex align-items-center gap-2 bel-skill-check-row">
+              {{ pform.proficiente }}
+              <label class="form-check-label flex-fill">
+                {{ pform.instance.rotulo }}
+                <span class="text-muted small ms-1">{{ pform.instance.atributo|slice:":3"|upper }}</span>
+              </label>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  {# ── Moedas ── #}
+  <div class="bel-card mb-3">
+    <div class="bel-card-header">Moedas</div>
+    <div class="p-3">
+      <div class="row g-3">
+        <div class="col-4 col-md-2"><label class="form-label">PC</label>{{ form.moedas_pc }}</div>
+        <div class="col-4 col-md-2"><label class="form-label">PP</label>{{ form.moedas_pp }}</div>
+        <div class="col-4 col-md-2"><label class="form-label">PE</label>{{ form.moedas_pe }}</div>
+        <div class="col-4 col-md-2"><label class="form-label">PO</label>{{ form.moedas_po }}</div>
+        <div class="col-4 col-md-2"><label class="form-label">PL</label>{{ form.moedas_pl }}</div>
+      </div>
+    </div>
+  </div>
+
+  {# ── Background ── #}
+  <div class="bel-card mb-3">
+    <div class="bel-card-header">Background / História</div>
+    <div class="p-3">{{ form.background }}</div>
+  </div>
+
+  {# Erros gerais #}
+  {% if form.errors %}
+    <div class="alert alert-danger">
+      {% for field, errors in form.errors.items %}
+        <strong>{{ field }}:</strong> {{ errors|join:", " }}<br>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <div class="d-flex gap-2 mb-4">
+    <button type="submit" class="btn btn-primary"><i class="bi bi-check2 me-1"></i>Salvar Ficha</button>
+    <a href="{% url 'ficha' %}" class="btn btn-outline-secondary">Cancelar</a>
+  </div>
+</form>
+{% endblock %}

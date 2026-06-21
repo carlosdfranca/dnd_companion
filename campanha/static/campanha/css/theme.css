@@ -1,0 +1,337 @@
+/* ── CSS Variables: Dark Mode (padrão) ─────────────────────────────── */
+:root {
+  --bel-surface-1: #0f0f14;
+  --bel-surface-2: #17171f;
+  --bel-surface-3: #1d1d28;
+  --bel-surface-raised: #232332;
+
+  --bel-text-primary: #e8e4dd;
+  --bel-text-secondary: #a0a0b4;
+  --bel-text-muted: #606078;
+
+  --bel-border: rgba(255,255,255,0.07);
+  --bel-border-hover: rgba(255,255,255,0.14);
+
+  --bel-accent: #c9a84c;      /* gold */
+  --bel-accent-dim: rgba(201,168,76,0.15);
+
+  --bel-navbar-bg: #12121a;
+  --bel-card-bg: var(--bel-surface-2);
+  --bel-card-header-bg: var(--bel-surface-3);
+}
+
+/* ── Light Mode overrides ───────────────────────────────────────────── */
+html[data-theme="light"] {
+  --bel-surface-1: #f4f1ec;
+  --bel-surface-2: #ffffff;
+  --bel-surface-3: #edeae4;
+  --bel-surface-raised: #ffffff;
+
+  --bel-text-primary: #1a1a24;
+  --bel-text-secondary: #505064;
+  --bel-text-muted: #8888a0;
+
+  --bel-border: rgba(0,0,0,0.09);
+  --bel-border-hover: rgba(0,0,0,0.18);
+
+  --bel-accent: #a07828;
+  --bel-accent-dim: rgba(160,120,40,0.1);
+
+  --bel-navbar-bg: #1a1a24;
+  --bel-card-bg: var(--bel-surface-2);
+  --bel-card-header-bg: var(--bel-surface-3);
+}
+
+/* ── Base ───────────────────────────────────────────────────────────── */
+body {
+  background-color: var(--bel-surface-1) !important;
+  color: var(--bel-text-primary) !important;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-size: 0.95rem;
+}
+
+/* ── Navbar ─────────────────────────────────────────────────────────── */
+.bel-navbar {
+  background-color: var(--bel-navbar-bg) !important;
+  border-bottom: 1px solid var(--bel-border);
+}
+
+.bel-brand {
+  color: var(--bel-accent) !important;
+  font-weight: 700;
+  font-size: 1.15rem;
+  letter-spacing: -.01em;
+}
+
+.bel-navbar .nav-link {
+  color: var(--bel-text-secondary) !important;
+  font-size: 0.9rem;
+}
+.bel-navbar .nav-link:hover {
+  color: var(--bel-text-primary) !important;
+}
+
+.bel-dropdown {
+  background-color: var(--bel-surface-raised) !important;
+  border: 1px solid var(--bel-border);
+}
+.bel-dropdown .dropdown-item {
+  color: var(--bel-text-secondary) !important;
+}
+.bel-dropdown .dropdown-item:hover {
+  background-color: var(--bel-surface-3) !important;
+  color: var(--bel-text-primary) !important;
+}
+
+.bel-theme-btn {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.10);
+  color: var(--bel-text-muted);
+  cursor: pointer;
+  transition: background .15s, color .15s, transform .2s;
+  display: flex; align-items: center; justify-content: center;
+}
+.bel-theme-btn:hover {
+  background: rgba(255,255,255,0.12);
+  color: var(--bel-text-primary);
+  transform: rotate(20deg) scale(1.1);
+}
+
+/* ── Cards ──────────────────────────────────────────────────────────── */
+.bel-card {
+  background-color: var(--bel-card-bg);
+  border: 1px solid var(--bel-border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.bel-card-header {
+  background-color: var(--bel-card-header-bg);
+  border-bottom: 1px solid var(--bel-border);
+  padding: .55rem .85rem;
+  font-size: .85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--bel-text-secondary);
+}
+
+/* ── Links ──────────────────────────────────────────────────────────── */
+.bel-link {
+  color: var(--bel-accent);
+  text-decoration: none;
+}
+.bel-link:hover { color: var(--bel-text-primary); text-decoration: underline; }
+
+/* ── Section labels ─────────────────────────────────────────────────── */
+.bel-section-label {
+  font-size: .78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: var(--bel-text-muted);
+  margin-bottom: .4rem;
+  margin-top: .6rem;
+}
+
+/* ── List rows ──────────────────────────────────────────────────────── */
+.bel-list-row {
+  border-bottom: 1px solid var(--bel-border);
+}
+.bel-list-row:last-child { border-bottom: none; }
+
+/* ── Character name ─────────────────────────────────────────────────── */
+.bel-char-name {
+  color: var(--bel-accent);
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+
+/* ── HP block (dashboard) ───────────────────────────────────────────── */
+.bel-hp-block { text-align: center; }
+.bel-hp-value {
+  font-size: 2.4rem;
+  font-weight: 800;
+  color: var(--bel-accent);
+  line-height: 1;
+}
+
+/* ── HP big (combate) ───────────────────────────────────────────────── */
+.bel-hp-big {
+  font-size: 4rem;
+  font-weight: 900;
+  color: var(--bel-accent);
+  line-height: 1;
+}
+.bel-hp-max {
+  font-size: 1.4rem;
+  color: var(--bel-text-muted);
+}
+
+/* ── Stat pills (dashboard) ─────────────────────────────────────────── */
+.bel-stat-pill {
+  display: flex; flex-direction: column; align-items: center;
+  background: var(--bel-surface-3);
+  border: 1px solid var(--bel-border);
+  border-radius: 8px;
+  padding: .4rem .7rem;
+  min-width: 52px;
+}
+.bel-stat-val { font-weight: 700; font-size: 1.05rem; }
+.bel-stat-lbl { font-size: .68rem; color: var(--bel-text-muted); text-transform: uppercase; letter-spacing: .05em; }
+
+/* ── Stat boxes (ficha/combate) ─────────────────────────────────────── */
+.bel-stat-box {
+  background: var(--bel-surface-3);
+  border: 1px solid var(--bel-border);
+  border-radius: 10px;
+  padding: .5rem .6rem;
+  text-align: center;
+}
+.bel-stat-box-val { font-size: 1.5rem; font-weight: 800; color: var(--bel-accent); }
+.bel-stat-box-max { font-size: .85rem; color: var(--bel-text-muted); font-weight: 400; }
+.bel-stat-box-lbl { font-size: .7rem; color: var(--bel-text-muted); text-transform: uppercase; letter-spacing: .04em; }
+
+/* ── Attribute boxes ────────────────────────────────────────────────── */
+.bel-attr-box {
+  background: var(--bel-surface-3);
+  border: 1px solid var(--bel-border);
+  border-radius: 10px;
+  padding: .6rem .4rem;
+  text-align: center;
+}
+.bel-attr-abrev {
+  font-size: .72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--bel-text-muted);
+}
+.bel-attr-mod {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--bel-accent);
+  line-height: 1.1;
+}
+.bel-attr-score {
+  font-size: .85rem;
+  color: var(--bel-text-secondary);
+  background: var(--bel-surface-raised);
+  border-radius: 50%;
+  width: 32px; height: 32px;
+  line-height: 32px;
+  margin: .3rem auto 0;
+}
+
+/* ── Skill rows ─────────────────────────────────────────────────────── */
+.bel-skill-row {
+  display: flex;
+  align-items: center;
+  gap: .35rem;
+  padding: .2rem .75rem;
+  border-bottom: 1px solid var(--bel-border);
+  font-size: .88rem;
+}
+.bel-skill-row:last-child { border-bottom: none; }
+
+.bel-prof-dot {
+  font-size: .6rem;
+  color: var(--bel-text-muted);
+  width: 14px; text-align: center;
+}
+.bel-prof-dot.proficiente { color: var(--bel-accent); }
+
+.bel-skill-mod {
+  font-weight: 700;
+  min-width: 28px;
+  text-align: right;
+  color: var(--bel-text-primary);
+}
+.bel-skill-nome { flex: 1; }
+.bel-skill-attr {
+  font-size: .72rem;
+  color: var(--bel-text-muted);
+  min-width: 28px;
+}
+
+/* ── Skill check row (ficha editar) ─────────────────────────────────── */
+.bel-skill-check-row {
+  padding: .2rem .5rem;
+  border-radius: 6px;
+}
+.bel-skill-check-row:hover { background: var(--bel-surface-3); }
+
+/* ── Resource cards ─────────────────────────────────────────────────── */
+.bel-recurso-card {
+  background: var(--bel-surface-3);
+  border: 1px solid var(--bel-border);
+  border-radius: 10px;
+  padding: .75rem;
+}
+.bel-usos-count {
+  font-size: .85rem;
+  font-weight: 700;
+  color: var(--bel-accent);
+}
+
+/* ── Resource pips ───────────────────────────────────────────────────── */
+.bel-pips { display: flex; gap: 4px; flex-wrap: wrap; }
+.bel-pip {
+  font-size: 1rem;
+  color: var(--bel-text-muted);
+  line-height: 1;
+}
+.bel-pip.bel-pip-on { color: var(--bel-accent); }
+
+/* ── Coins ───────────────────────────────────────────────────────────── */
+.bel-moeda-item { display: flex; flex-direction: column; align-items: center; min-width: 48px; }
+.bel-moeda-val { font-size: 1.3rem; font-weight: 700; }
+.bel-moeda-lbl { font-size: .7rem; text-transform: uppercase; color: var(--bel-text-muted); letter-spacing: .05em; }
+
+/* ── Text block (long text) ──────────────────────────────────────────── */
+.bel-text-block { line-height: 1.7; color: var(--bel-text-secondary); }
+
+/* ── Tables ──────────────────────────────────────────────────────────── */
+.bel-table {
+  color: var(--bel-text-primary) !important;
+}
+.bel-table thead th {
+  color: var(--bel-text-muted);
+  font-size: .78rem;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  border-bottom-color: var(--bel-border);
+  font-weight: 600;
+}
+.bel-table td {
+  border-bottom-color: var(--bel-border) !important;
+  vertical-align: middle;
+}
+
+/* ── NPC relation badges ─────────────────────────────────────────────── */
+.bel-relacao-aliado    { background-color: #1a5c38 !important; color: #a0f0b0 !important; }
+.bel-relacao-suspeito  { background-color: #6b4a0a !important; color: #f0d070 !important; }
+.bel-relacao-inimigo   { background-color: #5c1a1a !important; color: #f0a0a0 !important; }
+.bel-relacao-neutro    { background-color: #2a2a40 !important; color: #a0a0c0 !important; }
+.bel-relacao-desconhecido { background-color: #1e1e2e !important; color: #7070a0 !important; }
+
+/* ── Bootstrap overrides for dark mode compatibility ─────────────────── */
+.form-control, .form-select {
+  background-color: var(--bel-surface-3) !important;
+  border-color: var(--bel-border) !important;
+  color: var(--bel-text-primary) !important;
+}
+.form-control:focus, .form-select:focus {
+  border-color: var(--bel-accent) !important;
+  box-shadow: 0 0 0 .2rem var(--bel-accent-dim) !important;
+}
+.form-label { color: var(--bel-text-secondary); font-size: .88rem; margin-bottom: .3rem; }
+.form-check-label { color: var(--bel-text-secondary); font-size: .88rem; }
+
+html[data-theme="light"] .form-control,
+html[data-theme="light"] .form-select {
+  background-color: #ffffff !important;
+  border-color: rgba(0,0,0,0.18) !important;
+  color: #1a1a24 !important;
+}

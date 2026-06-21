@@ -1,0 +1,44 @@
+{% extends "campanha/base.html" %}
+{% block title %}Missões{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-3">
+  <h3 class="mb-0"><i class="bi bi-flag-fill me-2"></i>Missões</h3>
+  <a href="{% url 'missao_create' %}" class="btn btn-outline-success btn-sm"><i class="bi bi-plus-lg me-1"></i>Nova Missão</a>
+</div>
+
+{% regroup object_list by get_status_display as grupos %}
+{% for grupo in grupos %}
+  <h5 class="mt-3 mb-2 {% if grupo.grouper == 'Ativa' %}text-success{% else %}text-muted{% endif %}">
+    {{ grupo.grouper }}
+    <span class="badge bg-secondary">{{ grupo.list|length }}</span>
+  </h5>
+  {% for m in grupo.list %}
+    <div class="bel-card mb-2">
+      <div class="bel-card-header d-flex align-items-center justify-content-between">
+        <a href="{% url 'missao_detail' m.pk %}" class="bel-link fw-semibold">{{ m.titulo }}</a>
+        <div class="d-flex gap-1 align-items-center">
+          {% if m.status == 'ativa' %}
+            <form method="post" action="{% url 'missao_concluir' m.pk %}" class="d-inline">
+              {% csrf_token %}
+              <button class="btn btn-outline-success btn-sm py-0" title="Marcar como concluída">
+                <i class="bi bi-check2-circle me-1"></i>Concluir
+              </button>
+            </form>
+          {% endif %}
+          <a href="{% url 'missao_update' m.pk %}" class="btn btn-outline-secondary btn-sm py-0"><i class="bi bi-pencil"></i></a>
+          <a href="{% url 'missao_delete' m.pk %}" class="btn btn-outline-danger btn-sm py-0"><i class="bi bi-trash3"></i></a>
+        </div>
+      </div>
+      {% if m.descricao %}
+        <div class="p-2 small text-muted">{{ m.descricao|truncatechars:180 }}</div>
+      {% endif %}
+    </div>
+  {% endfor %}
+{% empty %}
+  <div class="text-center text-muted py-5">
+    <i class="bi bi-flag fs-1"></i>
+    <p class="mt-2">Nenhuma missão. <a href="{% url 'missao_create' %}">Adicionar</a></p>
+  </div>
+{% endfor %}
+{% endblock %}

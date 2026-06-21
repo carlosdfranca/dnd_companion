@@ -1,0 +1,37 @@
+{% extends "campanha/base.html" %}
+{% block title %}NPCs{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-3">
+  <h3 class="mb-0"><i class="bi bi-people-fill me-2"></i>NPCs</h3>
+  <a href="{% url 'npc_create' %}" class="btn btn-outline-success btn-sm"><i class="bi bi-plus-lg me-1"></i>Novo NPC</a>
+</div>
+
+{% if object_list %}
+  <div class="row g-3">
+    {% for npc in object_list %}
+      <div class="col-12 col-md-6 col-lg-4">
+        <div class="bel-card h-100">
+          <div class="bel-card-header d-flex justify-content-between align-items-center">
+            <a href="{% url 'npc_detail' npc.pk %}" class="bel-link fw-semibold">{{ npc.nome }}</a>
+            <span class="badge bel-relacao-{{ npc.relacao_grupo }}">{{ npc.get_relacao_grupo_display }}</span>
+          </div>
+          <div class="p-2">
+            {% if npc.local %}<p class="small text-muted mb-1"><i class="bi bi-geo-alt me-1"></i>{{ npc.local }}</p>{% endif %}
+            <p class="small text-muted mb-2">{{ npc.descricao|truncatechars:100 }}</p>
+            <div class="d-flex gap-1">
+              <a href="{% url 'npc_update' npc.pk %}" class="btn btn-outline-secondary btn-sm py-0"><i class="bi bi-pencil"></i></a>
+              <a href="{% url 'npc_delete' npc.pk %}" class="btn btn-outline-danger btn-sm py-0"><i class="bi bi-trash3"></i></a>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="text-center text-muted py-5">
+    <i class="bi bi-person-x fs-1"></i>
+    <p class="mt-2">Nenhum NPC. <a href="{% url 'npc_create' %}">Adicionar</a></p>
+  </div>
+{% endif %}
+{% endblock %}

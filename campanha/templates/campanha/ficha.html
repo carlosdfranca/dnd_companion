@@ -1,0 +1,122 @@
+{% extends "campanha/base.html" %}
+{% block title %}Ficha — {{ personagem.nome }}{% endblock %}
+
+{% block content %}
+{# ── Header ── #}
+<div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+  <div>
+    <h2 class="mb-0 bel-char-name">{{ personagem.nome }}</h2>
+    <span class="text-muted">{{ personagem.raca }} · {{ personagem.classe }} · Nível {{ personagem.nivel }}</span>
+  </div>
+  <a href="{% url 'ficha_editar' %}" class="btn btn-outline-primary btn-sm">
+    <i class="bi bi-pencil-fill me-1"></i>Editar Ficha
+  </a>
+</div>
+
+{# ── Stats de combate ── #}
+<div class="row g-2 mb-3">
+  <div class="col-6 col-sm-4 col-md-2">
+    <div class="bel-stat-box">
+      <div class="bel-stat-box-val {% if personagem.pv_atual <= 0 %}text-danger{% elif pv_pct < 40 %}text-warning{% endif %}">
+        {{ personagem.pv_atual }}<span class="bel-stat-box-max"> / {{ personagem.pv_maximo }}</span>
+      </div>
+      <div class="bel-stat-box-lbl">PV</div>
+      <div class="progress mt-1" style="height:4px">
+        <div class="progress-bar {% if pv_pct > 60 %}bg-success{% elif pv_pct > 30 %}bg-warning{% else %}bg-danger{% endif %}"
+             style="width:{{ pv_pct }}%"></div>
+      </div>
+    </div>
+  </div>
+  {% if personagem.pv_temporario %}
+  <div class="col-6 col-sm-4 col-md-2">
+    <div class="bel-stat-box">
+      <div class="bel-stat-box-val text-info">{{ personagem.pv_temporario }}</div>
+      <div class="bel-stat-box-lbl">PV Temp</div>
+    </div>
+  </div>
+  {% endif %}
+  <div class="col-6 col-sm-4 col-md-2">
+    <div class="bel-stat-box"><div class="bel-stat-box-val">{{ personagem.ca }}</div><div class="bel-stat-box-lbl">CA</div></div>
+  </div>
+  <div class="col-6 col-sm-4 col-md-2">
+    <div class="bel-stat-box">
+      <div class="bel-stat-box-val">{% if personagem.iniciativa >= 0 %}+{% endif %}{{ personagem.iniciativa }}</div>
+      <div class="bel-stat-box-lbl">Iniciativa</div>
+    </div>
+  </div>
+  <div class="col-6 col-sm-4 col-md-2">
+    <div class="bel-stat-box"><div class="bel-stat-box-val">{{ personagem.deslocamento }}m</div><div class="bel-stat-box-lbl">Deslocamento</div></div>
+  </div>
+  <div class="col-6 col-sm-4 col-md-2">
+    <div class="bel-stat-box"><div class="bel-stat-box-val">+{{ personagem.bonus_proficiencia }}</div><div class="bel-stat-box-lbl">Proficiência</div></div>
+  </div>
+</div>
+
+{# ── Atributos ── #}
+<div class="row g-2 mb-3">
+  {% for a in atributos_data %}
+  <div class="col-4 col-md-2">
+    <div class="bel-attr-box">
+      <div class="bel-attr-abrev">{{ a.abrev }}</div>
+      <div class="bel-attr-mod">{% if a.mod >= 0 %}+{% endif %}{{ a.mod }}</div>
+      <div class="bel-attr-score">{{ a.score }}</div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+{# ── Salvaguardas + Perícias ── #}
+<div class="row g-3 mb-3">
+  <div class="col-12 col-md-4">
+    <div class="bel-card">
+      <div class="bel-card-header">Salvaguardas</div>
+      {% for sv in salvaguardas %}
+        <div class="bel-skill-row">
+          <span class="bel-prof-dot {% if sv.proficiente %}proficiente{% endif %}">{% if sv.proficiente %}●{% else %}○{% endif %}</span>
+          <span class="bel-skill-mod">{% if sv.modificador_total >= 0 %}+{% endif %}{{ sv.modificador_total }}</span>
+          <span class="bel-skill-nome">{{ sv.rotulo }}</span>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="col-12 col-md-8">
+    <div class="bel-card">
+      <div class="bel-card-header">Perícias</div>
+      <div class="row g-0">
+        {% for pc in pericias %}
+          <div class="col-12 col-sm-6">
+            <div class="bel-skill-row">
+              <span class="bel-prof-dot {% if pc.proficiente %}proficiente{% endif %}">{% if pc.proficiente %}●{% else %}○{% endif %}</span>
+              <span class="bel-skill-mod">{% if pc.modificador_total >= 0 %}+{% endif %}{{ pc.modificador_total }}</span>
+              <span class="bel-skill-nome">{{ pc.rotulo }}</span>
+              <span class="bel-skill-attr">{{ pc.atributo|slice:":3"|upper }}</span>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+
+{# ── Background ── #}
+{% if personagem.background %}
+<div class="bel-card mb-3">
+  <div class="bel-card-header"><i class="bi bi-book me-2"></i>Background / História</div>
+  <div class="p-3 bel-text-block">{{ personagem.background|linebreaks }}</div>
+</div>
+{% endif %}
+
+{# ── Moedas ── #}
+<div class="bel-card">
+  <div class="bel-card-header"><i class="bi bi-coin me-2"></i>Moedas</div>
+  <div class="d-flex flex-wrap gap-3 p-3">
+    <div class="bel-moeda-item"><span class="bel-moeda-val">{{ personagem.moedas_pc }}</span><span class="bel-moeda-lbl">PC</span></div>
+    <div class="bel-moeda-item"><span class="bel-moeda-val">{{ personagem.moedas_pp }}</span><span class="bel-moeda-lbl">PP</span></div>
+    <div class="bel-moeda-item"><span class="bel-moeda-val">{{ personagem.moedas_pe }}</span><span class="bel-moeda-lbl">PE</span></div>
+    <div class="bel-moeda-item"><span class="bel-moeda-val text-warning">{{ personagem.moedas_po }}</span><span class="bel-moeda-lbl">PO</span></div>
+    <div class="bel-moeda-item"><span class="bel-moeda-val text-info">{{ personagem.moedas_pl }}</span><span class="bel-moeda-lbl">PL</span></div>
+  </div>
+</div>
+
+{% endblock %}
