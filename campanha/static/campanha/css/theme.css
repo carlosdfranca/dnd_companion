@@ -1,44 +1,44 @@
 /* ── CSS Variables: Dark Mode (padrão) ─────────────────────────────── */
 :root {
-  --bel-surface-1: #0f0f14;
-  --bel-surface-2: #17171f;
-  --bel-surface-3: #1d1d28;
-  --bel-surface-raised: #232332;
+  --bel-surface-1:      #13140f;
+  --bel-surface-2:      #191c14;
+  --bel-surface-3:      #1f2319;
+  --bel-surface-raised: #232618;
 
-  --bel-text-primary: #e8e4dd;
-  --bel-text-secondary: #a0a0b4;
-  --bel-text-muted: #606078;
+  --bel-text-primary:   #e8ebe4;
+  --bel-text-secondary: #b8bacf;
+  --bel-text-muted:     #798071;
 
-  --bel-border: rgba(255,255,255,0.07);
-  --bel-border-hover: rgba(255,255,255,0.14);
+  --bel-border:         rgba(255,255,255,0.07);
+  --bel-border-hover:   rgba(255,255,255,0.14);
 
-  --bel-accent: #c9a84c;      /* gold */
-  --bel-accent-dim: rgba(201,168,76,0.15);
+  --bel-accent:         #999ac6;
+  --bel-accent-dim:     rgba(153,154,198,0.15);
 
-  --bel-navbar-bg: #12121a;
-  --bel-card-bg: var(--bel-surface-2);
+  --bel-navbar-bg:      #10120d;
+  --bel-card-bg:        var(--bel-surface-2);
   --bel-card-header-bg: var(--bel-surface-3);
 }
 
 /* ── Light Mode overrides ───────────────────────────────────────────── */
 html[data-theme="light"] {
-  --bel-surface-1: #f4f1ec;
-  --bel-surface-2: #ffffff;
-  --bel-surface-3: #edeae4;
-  --bel-surface-raised: #ffffff;
+  --bel-surface-1:      #e8ebe4;
+  --bel-surface-2:      #ffffff;
+  --bel-surface-3:      #d2d5dd;
+  --bel-surface-raised: #f4f6f2;
 
-  --bel-text-primary: #1a1a24;
-  --bel-text-secondary: #505064;
-  --bel-text-muted: #8888a0;
+  --bel-text-primary:   #1a1d15;
+  --bel-text-secondary: #4a4c5e;
+  --bel-text-muted:     #7a7d74;
 
-  --bel-border: rgba(0,0,0,0.09);
-  --bel-border-hover: rgba(0,0,0,0.18);
+  --bel-border:         rgba(0,0,0,0.09);
+  --bel-border-hover:   rgba(0,0,0,0.18);
 
-  --bel-accent: #a07828;
-  --bel-accent-dim: rgba(160,120,40,0.1);
+  --bel-accent:         #7e7fb8;
+  --bel-accent-dim:     rgba(126,127,184,0.12);
 
-  --bel-navbar-bg: #1a1a24;
-  --bel-card-bg: var(--bel-surface-2);
+  --bel-navbar-bg:      #1f2319;
+  --bel-card-bg:        var(--bel-surface-2);
   --bel-card-header-bg: var(--bel-surface-3);
 }
 
@@ -333,5 +333,5 @@ html[data-theme="light"] .form-control,
 html[data-theme="light"] .form-select {
   background-color: #ffffff !important;
   border-color: rgba(0,0,0,0.18) !important;
-  color: #1a1a24 !important;
+  color: #1a1d15 !important;
 }
