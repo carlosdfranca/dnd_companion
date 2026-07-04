@@ -36,6 +36,18 @@ class PersonagemForm(BootstrapFormMixin, forms.ModelForm):
         exclude = ["criado_em", "atualizado_em"]
         widgets = {
             "background": forms.Textarea(attrs={"rows": 6}),
+            "forca": forms.NumberInput(attrs={"min": 1, "max": 30}),
+            "destreza": forms.NumberInput(attrs={"min": 1, "max": 30}),
+            "constituicao": forms.NumberInput(attrs={"min": 1, "max": 30}),
+            "inteligencia": forms.NumberInput(attrs={"min": 1, "max": 30}),
+            "sabedoria": forms.NumberInput(attrs={"min": 1, "max": 30}),
+            "carisma": forms.NumberInput(attrs={"min": 1, "max": 30}),
+            "nivel": forms.NumberInput(attrs={"min": 1, "max": 20}),
+            "bonus_proficiencia": forms.NumberInput(attrs={"min": 2, "max": 6}),
+            "ca": forms.NumberInput(attrs={"min": 0}),
+            "pv_maximo": forms.NumberInput(attrs={"min": 0}),
+            "pv_temporario": forms.NumberInput(attrs={"min": 0}),
+            "deslocamento": forms.NumberInput(attrs={"min": 0}),
         }
 
 
@@ -44,7 +56,7 @@ class PericiaForm(forms.ModelForm):
         model = Pericia
         fields = ["proficiente"]
         widgets = {
-            "proficiente": forms.CheckboxInput(attrs={"class": "form-check-input"}),
+            "proficiente": forms.CheckboxInput(attrs={"class": "btn-check", "autocomplete": "off"}),
         }
 
 
@@ -53,7 +65,7 @@ class SalvaguardaForm(forms.ModelForm):
         model = Salvaguarda
         fields = ["proficiente"]
         widgets = {
-            "proficiente": forms.CheckboxInput(attrs={"class": "form-check-input"}),
+            "proficiente": forms.CheckboxInput(attrs={"class": "btn-check", "autocomplete": "off"}),
         }
 
 

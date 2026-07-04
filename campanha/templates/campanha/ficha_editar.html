@@ -2,144 +2,318 @@
 {% block title %}Editar Ficha{% endblock %}
 
 {% block content %}
-<div class="d-flex align-items-center justify-content-between mb-3">
-  <h3 class="mb-0">Editar Ficha — {{ personagem.nome }}</h3>
-  <a href="{% url 'ficha' %}" class="btn btn-outline-secondary btn-sm">
-    <i class="bi bi-arrow-left me-1"></i>Cancelar
-  </a>
-</div>
-
-<form method="post">
+<form method="post" id="ficha-form" novalidate>
   {% csrf_token %}
 
-  {# ── Identidade ── #}
-  <div class="bel-card mb-3">
-    <div class="bel-card-header">Identidade</div>
-    <div class="p-3">
-      <div class="row g-3">
-        <div class="col-12 col-md-4">
-          <label class="form-label">Nome</label>{{ form.nome }}
-        </div>
-        <div class="col-6 col-md-4">
-          <label class="form-label">Raça</label>{{ form.raca }}
-        </div>
-        <div class="col-6 col-md-4">
-          <label class="form-label">Classe</label>{{ form.classe }}
-        </div>
-        <div class="col-4 col-md-2">
-          <label class="form-label">Nível</label>{{ form.nivel }}
-        </div>
-        <div class="col-4 col-md-2">
-          <label class="form-label">Bônus Prof.</label>{{ form.bonus_proficiencia }}
-        </div>
-        <div class="col-4 col-md-2">
-          <label class="form-label">Deslocamento</label>{{ form.deslocamento }}
-        </div>
-      </div>
+  {# ── Barra de ações (fixa no topo ao rolar) ── #}
+  <div class="bel-edit-toolbar mb-3">
+    <div>
+      <div class="bel-edit-toolbar-label">Editando ficha</div>
+      <h4 class="mb-0">{{ personagem.nome }}</h4>
+    </div>
+    <div class="d-flex align-items-center gap-2">
+      <span id="unsaved-badge" class="badge rounded-pill bel-unsaved-badge d-none">
+        <i class="bi bi-circle-fill me-1"></i>Alterações não salvas
+      </span>
+      <a href="{% url 'ficha' %}" class="btn btn-outline-secondary">Cancelar</a>
+      <button type="submit" class="btn btn-primary"><i class="bi bi-check2 me-1"></i>Salvar Ficha</button>
     </div>
   </div>
 
-  {# ── Atributos ── #}
-  <div class="bel-card mb-3">
-    <div class="bel-card-header">Atributos</div>
-    <div class="p-3">
-      <div class="row g-3">
-        <div class="col-4 col-md-2"><label class="form-label">FOR</label>{{ form.forca }}</div>
-        <div class="col-4 col-md-2"><label class="form-label">DES</label>{{ form.destreza }}</div>
-        <div class="col-4 col-md-2"><label class="form-label">CON</label>{{ form.constituicao }}</div>
-        <div class="col-4 col-md-2"><label class="form-label">INT</label>{{ form.inteligencia }}</div>
-        <div class="col-4 col-md-2"><label class="form-label">SAB</label>{{ form.sabedoria }}</div>
-        <div class="col-4 col-md-2"><label class="form-label">CAR</label>{{ form.carisma }}</div>
+  {% if form.errors or pericia_fs.non_form_errors or salvaguarda_fs.non_form_errors %}
+    <div class="alert alert-danger d-flex gap-2 align-items-start mb-3">
+      <i class="bi bi-exclamation-triangle-fill mt-1"></i>
+      <div>
+        <strong>Corrija os erros abaixo antes de salvar:</strong>
+        <ul class="mb-0 mt-1">
+          {% for field, errors in form.errors.items %}
+            <li><strong>{{ field }}:</strong> {{ errors|join:", " }}</li>
+          {% endfor %}
+          {% for err in pericia_fs.non_form_errors %}<li>{{ err }}</li>{% endfor %}
+          {% for err in salvaguarda_fs.non_form_errors %}<li>{{ err }}</li>{% endfor %}
+        </ul>
       </div>
     </div>
-  </div>
+  {% endif %}
 
-  {# ── Combate ── #}
-  <div class="bel-card mb-3">
-    <div class="bel-card-header">Combate</div>
-    <div class="p-3">
-      <div class="row g-3">
-        <div class="col-4 col-md-2"><label class="form-label">CA</label>{{ form.ca }}</div>
-        <div class="col-4 col-md-2"><label class="form-label">PV Máx.</label>{{ form.pv_maximo }}</div>
-        <div class="col-4 col-md-2"><label class="form-label">PV Atual</label>{{ form.pv_atual }}</div>
-        <div class="col-4 col-md-2"><label class="form-label">PV Temp.</label>{{ form.pv_temporario }}</div>
+  <div class="row g-3">
+    <div class="col-12 col-lg-7">
+
+      {# ── Identidade ── #}
+      <div class="bel-card mb-3">
+        <div class="bel-card-header"><i class="bi bi-person-badge me-2"></i>Identidade</div>
+        <div class="p-3">
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="form-label">Nome</label>{{ form.nome }}
+            </div>
+            <div class="col-6 col-md-4">
+              <label class="form-label">Raça</label>{{ form.raca }}
+            </div>
+            <div class="col-6 col-md-4">
+              <label class="form-label">Classe</label>{{ form.classe }}
+            </div>
+            <div class="col-4 col-md-4">
+              <label class="form-label">Nível</label>{{ form.nivel }}
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
-  </div>
 
-  {# ── Salvaguardas ── #}
-  <div class="bel-card mb-3">
-    <div class="bel-card-header">Salvaguardas — marque as que tem proficiência</div>
-    {{ salvaguarda_fs.management_form }}
-    <div class="p-3">
-      <div class="row g-2">
-        {% for sform in salvaguarda_fs %}
-          {{ sform.id }}
-          <div class="col-6 col-md-4 col-lg-2">
-            <div class="form-check">
+      {# ── Atributos ── #}
+      <div class="bel-card mb-3">
+        <div class="bel-card-header"><i class="bi bi-lightning-charge me-2"></i>Atributos</div>
+        <div class="p-3">
+          <div class="bel-attr-edit-strip">
+            <div class="bel-attr-edit-col">
+              <label class="bel-attr-edit-abrev" for="id_forca">FOR</label>
+              {{ form.forca }}
+              <div class="bel-attr-edit-mod" id="mod-forca">+0</div>
+            </div>
+            <div class="bel-attr-edit-col">
+              <label class="bel-attr-edit-abrev" for="id_destreza">DES</label>
+              {{ form.destreza }}
+              <div class="bel-attr-edit-mod" id="mod-destreza">+0</div>
+            </div>
+            <div class="bel-attr-edit-col">
+              <label class="bel-attr-edit-abrev" for="id_constituicao">CON</label>
+              {{ form.constituicao }}
+              <div class="bel-attr-edit-mod" id="mod-constituicao">+0</div>
+            </div>
+            <div class="bel-attr-edit-col">
+              <label class="bel-attr-edit-abrev" for="id_inteligencia">INT</label>
+              {{ form.inteligencia }}
+              <div class="bel-attr-edit-mod" id="mod-inteligencia">+0</div>
+            </div>
+            <div class="bel-attr-edit-col">
+              <label class="bel-attr-edit-abrev" for="id_sabedoria">SAB</label>
+              {{ form.sabedoria }}
+              <div class="bel-attr-edit-mod" id="mod-sabedoria">+0</div>
+            </div>
+            <div class="bel-attr-edit-col">
+              <label class="bel-attr-edit-abrev" for="id_carisma">CAR</label>
+              {{ form.carisma }}
+              <div class="bel-attr-edit-mod" id="mod-carisma">+0</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {# ── Combate ── #}
+      <div class="bel-card mb-3">
+        <div class="bel-card-header"><i class="bi bi-shield-shaded me-2"></i>Combate</div>
+        <div class="p-3">
+          <div class="row g-2 mb-3">
+            <div class="col-4 col-md-2">
+              <div class="bel-stat-box bel-stat-box-edit">
+                <div class="bel-stat-box-lbl mb-1">CA</div>
+                {{ form.ca }}
+              </div>
+            </div>
+            <div class="col-4 col-md-2">
+              <div class="bel-stat-box bel-stat-box-edit">
+                <div class="bel-stat-box-lbl mb-1">PV Máx.</div>
+                {{ form.pv_maximo }}
+              </div>
+            </div>
+            <div class="col-4 col-md-2">
+              <div class="bel-stat-box bel-stat-box-edit">
+                <div class="bel-stat-box-lbl mb-1">PV Atual</div>
+                {{ form.pv_atual }}
+              </div>
+            </div>
+            <div class="col-4 col-md-2">
+              <div class="bel-stat-box bel-stat-box-edit">
+                <div class="bel-stat-box-lbl mb-1">PV Temp.</div>
+                {{ form.pv_temporario }}
+              </div>
+            </div>
+            <div class="col-4 col-md-2">
+              <div class="bel-stat-box bel-stat-box-edit">
+                <div class="bel-stat-box-lbl mb-1">Deslocam.</div>
+                {{ form.deslocamento }}
+              </div>
+            </div>
+            <div class="col-4 col-md-2">
+              <div class="bel-stat-box bel-stat-box-edit">
+                <div class="bel-stat-box-lbl mb-1">Bônus Prof.</div>
+                {{ form.bonus_proficiencia }}
+              </div>
+            </div>
+          </div>
+          <div class="row g-2 align-items-end">
+            <div class="col-6 col-md-4">
+              <label class="form-label">Bônus extra de Iniciativa</label>
+              {{ form.iniciativa_bonus }}
+            </div>
+            <div class="col-6 col-md-4">
+              <div class="bel-stat-box bel-stat-box-readonly">
+                <div class="bel-stat-box-lbl mb-1">Iniciativa total</div>
+                <div class="bel-stat-box-val" id="iniciativa-preview">+0</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {# ── Moedas ── #}
+      <div class="bel-card mb-3">
+        <div class="bel-card-header"><i class="bi bi-coin me-2"></i>Moedas</div>
+        <div class="p-3">
+          <div class="row g-2">
+            <div class="col-4 col-md-2">
+              <div class="bel-stat-box bel-stat-box-edit">
+                <div class="bel-stat-box-lbl mb-1">PC</div>
+                {{ form.moedas_pc }}
+              </div>
+            </div>
+            <div class="col-4 col-md-2">
+              <div class="bel-stat-box bel-stat-box-edit">
+                <div class="bel-stat-box-lbl mb-1">PP</div>
+                {{ form.moedas_pp }}
+              </div>
+            </div>
+            <div class="col-4 col-md-2">
+              <div class="bel-stat-box bel-stat-box-edit">
+                <div class="bel-stat-box-lbl mb-1">PE</div>
+                {{ form.moedas_pe }}
+              </div>
+            </div>
+            <div class="col-4 col-md-2">
+              <div class="bel-stat-box bel-stat-box-edit">
+                <div class="bel-stat-box-lbl mb-1">PO</div>
+                {{ form.moedas_po }}
+              </div>
+            </div>
+            <div class="col-4 col-md-2">
+              <div class="bel-stat-box bel-stat-box-edit">
+                <div class="bel-stat-box-lbl mb-1">PL</div>
+                {{ form.moedas_pl }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="col-12 col-lg-5">
+
+      {# ── Salvaguardas ── #}
+      <div class="bel-card mb-3">
+        <div class="bel-card-header"><i class="bi bi-shield-check me-2"></i>Salvaguardas</div>
+        {{ salvaguarda_fs.management_form }}
+        <div class="p-3">
+          <div class="bel-chip-grid">
+            {% for sform in salvaguarda_forms %}
+              {{ sform.id }}
               {{ sform.proficiente }}
-              <label class="form-check-label">{{ sform.instance.rotulo }}</label>
-            </div>
-          </div>
-        {% endfor %}
-      </div>
-    </div>
-  </div>
-
-  {# ── Perícias ── #}
-  <div class="bel-card mb-3">
-    <div class="bel-card-header">Perícias — marque as que tem proficiência</div>
-    {{ pericia_fs.management_form }}
-    <div class="p-3">
-      <div class="row g-1">
-        {% for pform in pericia_fs %}
-          {{ pform.id }}
-          <div class="col-12 col-sm-6 col-md-4">
-            <div class="d-flex align-items-center gap-2 bel-skill-check-row">
-              {{ pform.proficiente }}
-              <label class="form-check-label flex-fill">
-                {{ pform.instance.rotulo }}
-                <span class="text-muted small ms-1">{{ pform.instance.atributo|slice:":3"|upper }}</span>
+              <label class="btn bel-chip" for="{{ sform.proficiente.id_for_label }}">
+                {{ sform.instance.rotulo }}
               </label>
-            </div>
+            {% endfor %}
           </div>
-        {% endfor %}
+        </div>
       </div>
-    </div>
-  </div>
 
-  {# ── Moedas ── #}
-  <div class="bel-card mb-3">
-    <div class="bel-card-header">Moedas</div>
-    <div class="p-3">
-      <div class="row g-3">
-        <div class="col-4 col-md-2"><label class="form-label">PC</label>{{ form.moedas_pc }}</div>
-        <div class="col-4 col-md-2"><label class="form-label">PP</label>{{ form.moedas_pp }}</div>
-        <div class="col-4 col-md-2"><label class="form-label">PE</label>{{ form.moedas_pe }}</div>
-        <div class="col-4 col-md-2"><label class="form-label">PO</label>{{ form.moedas_po }}</div>
-        <div class="col-4 col-md-2"><label class="form-label">PL</label>{{ form.moedas_pl }}</div>
+      {# ── Perícias ── #}
+      <div class="bel-card mb-3">
+        <div class="bel-card-header"><i class="bi bi-stars me-2"></i>Perícias</div>
+        {{ pericia_fs.management_form }}
+        <div class="p-3">
+          {% for group in pericia_groups %}
+            <div class="bel-section-label {% if not forloop.first %}mt-3{% endif %}">{{ group.label }}</div>
+            <div class="bel-chip-grid">
+              {% for pform in group.forms %}
+                {{ pform.id }}
+                {{ pform.proficiente }}
+                <label class="btn bel-chip" for="{{ pform.proficiente.id_for_label }}">
+                  {{ pform.instance.rotulo }}
+                  <span class="bel-chip-attr">{{ group.abrev }}</span>
+                </label>
+              {% endfor %}
+            </div>
+          {% endfor %}
+        </div>
       </div>
+
     </div>
   </div>
 
   {# ── Background ── #}
-  <div class="bel-card mb-3">
-    <div class="bel-card-header">Background / História</div>
+  <div class="bel-card mb-4">
+    <div class="bel-card-header"><i class="bi bi-book me-2"></i>Background / História</div>
     <div class="p-3">{{ form.background }}</div>
   </div>
 
-  {# Erros gerais #}
-  {% if form.errors %}
-    <div class="alert alert-danger">
-      {% for field, errors in form.errors.items %}
-        <strong>{{ field }}:</strong> {{ errors|join:", " }}<br>
-      {% endfor %}
-    </div>
-  {% endif %}
-
-  <div class="d-flex gap-2 mb-4">
-    <button type="submit" class="btn btn-primary"><i class="bi bi-check2 me-1"></i>Salvar Ficha</button>
-    <a href="{% url 'ficha' %}" class="btn btn-outline-secondary">Cancelar</a>
-  </div>
 </form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function () {
+  function mod(v) { return Math.floor((v - 10) / 2); }
+  function fmt(m) { return (m >= 0 ? '+' : '') + m; }
+
+  var ATTRS = ['forca', 'destreza', 'constituicao', 'inteligencia', 'sabedoria', 'carisma'];
+
+  function updateAttr(attr) {
+    var input = document.getElementById('id_' + attr);
+    var out = document.getElementById('mod-' + attr);
+    if (!input || !out) return;
+    var v = parseInt(input.value, 10);
+    if (isNaN(v)) v = 10;
+    out.textContent = fmt(mod(v));
+  }
+
+  function updateIniciativa() {
+    var des = document.getElementById('id_destreza');
+    var bonus = document.getElementById('id_iniciativa_bonus');
+    var out = document.getElementById('iniciativa-preview');
+    if (!des || !bonus || !out) return;
+    var vd = parseInt(des.value, 10); if (isNaN(vd)) vd = 10;
+    var vb = parseInt(bonus.value, 10); if (isNaN(vb)) vb = 0;
+    out.textContent = fmt(mod(vd) + vb);
+  }
+
+  ATTRS.forEach(function (attr) {
+    var input = document.getElementById('id_' + attr);
+    if (!input) return;
+    input.addEventListener('input', function () {
+      updateAttr(attr);
+      if (attr === 'destreza') updateIniciativa();
+    });
+    updateAttr(attr);
+  });
+
+  var bonusInput = document.getElementById('id_iniciativa_bonus');
+  if (bonusInput) bonusInput.addEventListener('input', updateIniciativa);
+  updateIniciativa();
+
+  // Background: textarea que cresce conforme o conteúdo
+  var bg = document.getElementById('id_background');
+  if (bg) {
+    var autosize = function () {
+      bg.style.height = 'auto';
+      bg.style.height = bg.scrollHeight + 'px';
+    };
+    bg.addEventListener('input', autosize);
+    autosize();
+  }
+
+  // Aviso de alterações não salvas
+  var form = document.getElementById('ficha-form');
+  var badge = document.getElementById('unsaved-badge');
+  var dirty = false;
+  if (form) {
+    form.addEventListener('input', function () {
+      if (!dirty) { dirty = true; if (badge) badge.classList.remove('d-none'); }
+    });
+    form.addEventListener('submit', function () { dirty = false; });
+  }
+  window.addEventListener('beforeunload', function (e) {
+    if (dirty) { e.preventDefault(); e.returnValue = ''; }
+  });
+})();
+</script>
 {% endblock %}

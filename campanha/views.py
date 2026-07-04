@@ -84,27 +84,44 @@ def ficha(request):
     })
 
 
+def _pericia_groups(pericia_fs):
+    """Agrupa os forms de perícia por atributo regente, na ordem de ATRIBUTOS."""
+    from . import constants
+    por_atributo = {attr: [] for attr, _, _ in constants.ATRIBUTOS}
+    for pform in pericia_fs.forms:
+        por_atributo.setdefault(pform.instance.atributo, []).append(pform)
+    grupos = []
+    for attr, label, abrev in constants.ATRIBUTOS:
+        forms_do_grupo = sorted(por_atributo.get(attr, []), key=lambda f: f.instance.rotulo)
+        if forms_do_grupo:
+            grupos.append({"attr": attr, "label": label, "abrev": abrev, "forms": forms_do_grupo})
+    return grupos
+
+
 class FichaEditView(View):
     template_name = "campanha/ficha_editar.html"
 
     def _get_personagem(self):
         return get_current_character(self.request)
 
+    def _context(self, p, form, pericia_fs, salvaguarda_fs):
+        salvaguarda_forms = sorted(salvaguarda_fs.forms, key=lambda f: f.instance.ordem)
+        return {
+            "form": form,
+            "pericia_fs": pericia_fs,
+            "salvaguarda_fs": salvaguarda_fs,
+            "pericia_groups": _pericia_groups(pericia_fs),
+            "salvaguarda_forms": salvaguarda_forms,
+            "personagem": p,
+        }
+
     def get(self, request):
         p = self._get_personagem()
         pericias_fs = PericiaFormSet(instance=p, prefix="pericias")
         salvaguardas_fs = SalvaguardaFormSet(instance=p, prefix="salvaguardas")
-        # Attach instance to each form so template can read rotulo/atributo
-        for frm in pericias_fs.forms:
-            frm.instance_obj = frm.instance
-        for frm in salvaguardas_fs.forms:
-            frm.instance_obj = frm.instance
-        return render(request, self.template_name, {
-            "form": PersonagemForm(instance=p),
-            "pericia_fs": pericias_fs,
-            "salvaguarda_fs": salvaguardas_fs,
-            "personagem": p,
-        })
+        return render(request, self.template_name, self._context(
+            p, PersonagemForm(instance=p), pericias_fs, salvaguardas_fs,
+        ))
 
     def post(self, request):
         p = self._get_personagem()
@@ -116,12 +133,9 @@ class FichaEditView(View):
             pericia_fs.save()
             salvaguarda_fs.save()
             return redirect("ficha")
-        return render(request, self.template_name, {
-            "form": form,
-            "pericia_fs": pericia_fs,
-            "salvaguarda_fs": salvaguarda_fs,
-            "personagem": p,
-        })
+        return render(request, self.template_name, self._context(
+            p, form, pericia_fs, salvaguarda_fs,
+        ))
 
 
 # ── Central de Combate ────────────────────────────────────────────────────────

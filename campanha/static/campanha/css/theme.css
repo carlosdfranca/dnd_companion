@@ -996,6 +996,156 @@ html[data-theme="light"] .form-select {
   font-weight: 800;
 }
 
+/* ── Ficha: página de edição ─────────────────────────────────────────── */
+
+.bel-edit-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  background: var(--bel-surface-1);
+  padding: .75rem 0;
+  border-bottom: 1px solid var(--bel-border);
+}
+
+.bel-edit-toolbar-label {
+  font-size: .72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  color: var(--bel-text-muted);
+}
+
+.bel-unsaved-badge {
+  background: var(--bel-accent-dim) !important;
+  color: var(--bel-accent) !important;
+  font-size: .72rem;
+  font-weight: 600;
+  padding: .35rem .65rem;
+}
+.bel-unsaved-badge i { font-size: .5rem; }
+
+/* Attribute edit strip */
+.bel-attr-edit-strip {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: .5rem;
+}
+@media (max-width: 479px) {
+  .bel-attr-edit-strip { grid-template-columns: repeat(3, 1fr); }
+}
+
+.bel-attr-edit-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .4rem;
+  background: var(--bel-surface-3);
+  border: 1px solid var(--bel-border);
+  border-radius: 10px;
+  padding: .65rem .3rem .55rem;
+}
+
+.bel-attr-edit-abrev {
+  font-size: .65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--bel-text-muted);
+  cursor: default;
+}
+
+.bel-attr-edit-strip input.form-control {
+  width: 3.1rem;
+  text-align: center;
+  font-size: 1.2rem;
+  font-weight: 700;
+  padding: .15rem .2rem;
+}
+
+.bel-attr-edit-mod {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--bel-accent);
+  line-height: 1;
+}
+
+/* Stat boxes com input embutido (combate / moedas) */
+.bel-stat-box-edit input.form-control {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  text-align: center;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--bel-accent) !important;
+  padding: 0;
+  width: 100%;
+}
+
+.bel-stat-box-readonly {
+  background: var(--bel-surface-3);
+  border: 1px solid var(--bel-border);
+  border-radius: 10px;
+  padding: .5rem .6rem;
+  text-align: center;
+}
+
+/* Toggle chips (proficiências) — usa o padrão btn-check do Bootstrap */
+.bel-chip-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+}
+
+.bel-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  padding: .3rem .7rem;
+  border-radius: 20px;
+  border: 1px solid var(--bel-border);
+  background: var(--bel-surface-3);
+  color: var(--bel-text-secondary);
+  font-size: .82rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background .15s, border-color .15s, color .15s;
+}
+.bel-chip:hover { border-color: var(--bel-border-hover); }
+
+.btn-check:checked + .bel-chip {
+  background: var(--bel-accent-dim);
+  border-color: var(--bel-accent);
+  color: var(--bel-accent);
+  font-weight: 700;
+}
+.btn-check:focus-visible + .bel-chip {
+  outline: 2px solid var(--bel-accent);
+  outline-offset: 1px;
+}
+
+.bel-chip-attr {
+  font-size: .68rem;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: var(--bel-text-muted);
+}
+.btn-check:checked + .bel-chip .bel-chip-attr { color: var(--bel-accent); opacity: .85; }
+
+/* Background textarea cresce com o conteúdo */
+#id_background {
+  resize: none;
+  overflow: hidden;
+  min-height: 6rem;
+  line-height: 1.6;
+}
+
 /* ── Short rest dice inputs ──────────────────────────────────────────── */
 .bel-dado-prefix {
   background: var(--bel-surface-3) !important;
