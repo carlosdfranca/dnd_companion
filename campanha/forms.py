@@ -33,7 +33,11 @@ class BootstrapFormMixin:
 class PersonagemForm(BootstrapFormMixin, forms.ModelForm):
     class Meta:
         model = Personagem
-        exclude = ["criado_em", "atualizado_em"]
+        # Moedas são editadas na tela de Inventário (MoedasForm), não na ficha.
+        exclude = [
+            "criado_em", "atualizado_em",
+            "moedas_pc", "moedas_pp", "moedas_pe", "moedas_po", "moedas_pl",
+        ]
         widgets = {
             "background": forms.Textarea(attrs={"rows": 6}),
             "forca": forms.NumberInput(attrs={"min": 1, "max": 30}),
@@ -82,6 +86,21 @@ SalvaguardaFormSet = inlineformset_factory(
     extra=0,
     can_delete=False,
 )
+
+
+class MoedasForm(BootstrapFormMixin, forms.ModelForm):
+    """Edição rápida das moedas do personagem (usada na tela de Inventário)."""
+
+    class Meta:
+        model = Personagem
+        fields = ["moedas_pc", "moedas_pp", "moedas_pe", "moedas_po", "moedas_pl"]
+        widgets = {
+            "moedas_pc": forms.NumberInput(attrs={"min": 0}),
+            "moedas_pp": forms.NumberInput(attrs={"min": 0}),
+            "moedas_pe": forms.NumberInput(attrs={"min": 0}),
+            "moedas_po": forms.NumberInput(attrs={"min": 0}),
+            "moedas_pl": forms.NumberInput(attrs={"min": 0}),
+        }
 
 
 class RecursoDeCombateForm(BootstrapFormMixin, forms.ModelForm):

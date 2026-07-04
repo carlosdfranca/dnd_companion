@@ -251,18 +251,36 @@
 
     {% if itens_equipados %}
     <div class="bel-card mt-3">
-      <div class="bel-card-header"><i class="bi bi-shield-fill-check me-2"></i>Equipado</div>
+      <div class="bel-card-header d-flex align-items-center justify-content-between">
+        <span><i class="bi bi-shield-fill-check me-2"></i>Equipado</span>
+        <span class="bel-magico-counter {% if excedeu_magicos %}bel-magico-counter-over{% elif magicos_equipados == limite_magicos %}bel-magico-counter-full{% endif %}"
+              title="Itens mágicos equipados">
+          <i class="bi bi-stars me-1"></i>Mágicos {{ magicos_equipados }}/{{ limite_magicos }}
+        </span>
+      </div>
+      {% if excedeu_magicos %}
+        <div class="bel-inv-warning">
+          <i class="bi bi-exclamation-triangle-fill me-2"></i>
+          {{ magicos_equipados }} itens mágicos equipados — limite é {{ limite_magicos }}.
+        </div>
+      {% endif %}
       <div class="p-2">
         <ul class="list-unstyled mb-0">
           {% for item in itens_equipados %}
-            <li class="bel-list-row d-flex align-items-center justify-content-between py-1">
-              <div>
+            <li class="bel-list-row d-flex align-items-center justify-content-between py-1 gap-2">
+              <div class="min-w-0">
                 <strong>{{ item.nome }}</strong>
+                {% if item.magico %}
+                  <span class="bel-tag-item bel-tag-magico" title="Item mágico"><i class="bi bi-stars"></i>Mágico</span>
+                {% endif %}
+                {% if item.requer_sintonizacao %}
+                  <span class="bel-tag-item bel-tag-sintonia" title="Requer sintonização — não pode ser trocado livremente (exige descanso)"><i class="bi bi-gem"></i>Sintonização</span>
+                {% endif %}
                 {% if item.atributos_efeito %}
                   <span class="text-muted small ms-2">{{ item.atributos_efeito|truncatechars:60 }}</span>
                 {% endif %}
               </div>
-              <a href="{% url 'item_update' item.pk %}" class="btn btn-outline-secondary btn-sm py-0">
+              <a href="{% url 'item_update' item.pk %}" class="btn btn-outline-secondary btn-sm py-0 flex-shrink-0">
                 <i class="bi bi-pencil"></i>
               </a>
             </li>

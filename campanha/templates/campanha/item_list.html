@@ -2,47 +2,98 @@
 {% block title %}Inventário{% endblock %}
 
 {% block content %}
-<div class="d-flex align-items-center justify-content-between mb-3">
+
+{# ── Header ── #}
+<div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
   <h3 class="mb-0"><i class="bi bi-bag-fill me-2"></i>Inventário</h3>
   <a href="{% url 'item_create' %}" class="btn btn-outline-success btn-sm"><i class="bi bi-plus-lg me-1"></i>Novo Item</a>
 </div>
 
-{% regroup object_list by get_tipo_display as grupos %}
-{% if object_list %}
-  {% for grupo in grupos %}
-    <div class="bel-card mb-3">
-      <div class="bel-card-header">{{ grupo.grouper }}</div>
-      <div class="table-responsive">
-        <table class="table table-sm mb-0 bel-table">
-          <thead>
-            <tr>
-              <th>Nome</th><th>Qtd</th><th>Efeito</th><th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for item in grupo.list %}
-              <tr>
-                <td>
-                  <strong>{{ item.nome }}</strong>
-                  {% if item.lore %}<i class="bi bi-book text-muted ms-1" title="Tem lore"></i>{% endif %}
-                </td>
-                <td>{{ item.quantidade }}</td>
-                <td class="text-muted small">{{ item.atributos_efeito|truncatechars:60 }}</td>
-                <td class="text-end text-nowrap">
-                  <a href="{% url 'item_update' item.pk %}" class="btn btn-outline-secondary btn-sm py-0"><i class="bi bi-pencil"></i></a>
-                  <a href="{% url 'item_delete' item.pk %}" class="btn btn-outline-danger btn-sm py-0"><i class="bi bi-trash3"></i></a>
-                </td>
-              </tr>
-            {% endfor %}
-          </tbody>
-        </table>
+{# ── Moedas ── #}
+<div class="bel-card mb-3">
+  <div class="bel-card-header"><i class="bi bi-coin me-2"></i>Moedas</div>
+  <form method="post" action="{% url 'moedas_atualizar' %}">
+    {% csrf_token %}
+    <div class="bel-coin-strip">
+      <div class="bel-coin-box bel-coin-pc">
+        <span class="bel-coin-lbl">PC</span>
+        {{ moedas_form.moedas_pc }}
+        <span class="bel-coin-name">Cobre</span>
+      </div>
+      <div class="bel-coin-box bel-coin-pp">
+        <span class="bel-coin-lbl">PP</span>
+        {{ moedas_form.moedas_pp }}
+        <span class="bel-coin-name">Prata</span>
+      </div>
+      <div class="bel-coin-box bel-coin-pe">
+        <span class="bel-coin-lbl">PE</span>
+        {{ moedas_form.moedas_pe }}
+        <span class="bel-coin-name">Electro</span>
+      </div>
+      <div class="bel-coin-box bel-coin-po">
+        <span class="bel-coin-lbl">PO</span>
+        {{ moedas_form.moedas_po }}
+        <span class="bel-coin-name">Ouro</span>
+      </div>
+      <div class="bel-coin-box bel-coin-pl">
+        <span class="bel-coin-lbl">PL</span>
+        {{ moedas_form.moedas_pl }}
+        <span class="bel-coin-name">Platina</span>
+      </div>
+      <div class="bel-coin-save">
+        <button type="submit" class="btn btn-primary btn-sm w-100"><i class="bi bi-check2 me-1"></i>Salvar moedas</button>
       </div>
     </div>
-  {% endfor %}
-{% else %}
-  <div class="text-center text-muted py-5">
+  </form>
+</div>
+
+{# ── Equipados ── #}
+<div class="bel-card mb-3">
+  <div class="bel-card-header d-flex align-items-center justify-content-between">
+    <span><i class="bi bi-shield-fill-check me-2"></i>Equipado</span>
+    <span class="bel-magico-counter {% if excedeu_magicos %}bel-magico-counter-over{% elif magicos_equipados == limite_magicos %}bel-magico-counter-full{% endif %}"
+          title="Itens mágicos equipados">
+      <i class="bi bi-stars me-1"></i>Mágicos {{ magicos_equipados }}/{{ limite_magicos }}
+    </span>
+  </div>
+
+  {% if excedeu_magicos %}
+    <div class="bel-inv-warning">
+      <i class="bi bi-exclamation-triangle-fill me-2"></i>
+      Você está com <strong>{{ magicos_equipados }}</strong> itens mágicos equipados — o limite é <strong>{{ limite_magicos }}</strong>. Desequipe algum.
+    </div>
+  {% endif %}
+
+  {% if equipados %}
+    <div class="bel-inv-list">
+      {% for item in equipados %}
+        {% include "campanha/_inv_item_row.html" %}
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="p-3 text-muted small"><i class="bi bi-shield-slash me-1"></i>Nenhum item equipado.</div>
+  {% endif %}
+</div>
+
+{# ── Mochila ── #}
+<div class="bel-card mb-3">
+  <div class="bel-card-header"><i class="bi bi-backpack2-fill me-2"></i>Mochila</div>
+  {% if mochila %}
+    <div class="bel-inv-list">
+      {% for item in mochila %}
+        {% include "campanha/_inv_item_row.html" %}
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="p-3 text-muted small"><i class="bi bi-bag me-1"></i>Mochila vazia.</div>
+  {% endif %}
+</div>
+
+{% if not equipados and not mochila %}
+  <div class="text-center text-muted py-4">
     <i class="bi bi-bag fs-1"></i>
     <p class="mt-2">Inventário vazio. <a href="{% url 'item_create' %}">Adicionar item</a></p>
   </div>
 {% endif %}
+
 {% endblock %}

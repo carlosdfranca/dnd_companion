@@ -1,0 +1,1301 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grimório — D&D Companion · Brandbook</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* === PALETA PRIMÁRIA — ARCANA === */
+    --arcane-900:      #1A0E2E;   /* violeta-noite profundo — base do sistema */
+    --arcane-700:      #2D1B4E;   /* violeta arcano — superfícies elevadas */
+    --arcane-500:      #6D4AC7;   /* magia viva — primária aplicada */
+    --arcane-400:      #8B6BE0;   /* hover / brilho arcano */
+    --arcane-glow:     #A98CFF;   /* accent luminoso — realces raros */
+
+    /* === SECUNDÁRIA — BRASA === */
+    --ember-deep:      #7A2318;   /* brasa profunda */
+    --ember:           #C4472C;   /* fogo — ação secundária / dano */
+    --ember-light:     #E0653F;   /* hover brasa */
+
+    /* === ACCENT METÁLICO — OURO ANTIGO === */
+    --gold:            #C9A24B;   /* ouro fosco — detalhes nobres */
+    --gold-soft:       #E3C878;   /* ouro claro — realce sobre escuro */
+
+    /* === NEUTROS — PEDRA & PERGAMINHO === */
+    --stone-950:       #0E0B14;   /* background principal (dark) */
+    --stone-900:       #14101E;   /* background app */
+    --stone-850:       #1B1626;   /* superfície / card */
+    --stone-800:       #241E32;   /* superfície elevada */
+    --stone-700:       #322A44;   /* borders sutis */
+    --stone-600:       #453B5C;   /* borders / divisores */
+    --stone-500:       #6E6484;   /* texto terciário */
+    --stone-400:       #9A90AE;   /* texto secundário */
+    --stone-300:       #C7BFD6;   /* texto de apoio */
+
+    --parchment:       #EDE6D6;   /* texto principal — pergaminho quente */
+    --parchment-soft:  #C9C0AE;   /* texto suave sobre escuro */
+
+    /* === FUNCIONAIS === */
+    --status-success:  #4FA574;   /* verde-cura / poção */
+    --status-warn:     #D89B3C;   /* âmbar — atenção */
+    --status-error:    #D0463A;   /* rubi — perigo / crítico */
+    --status-info:     #4A8FC7;   /* azul-mana — informação */
+
+    /* === TIPOGRAFIA === */
+    --font-display: 'Cormorant Garamond', Georgia, serif;
+    --font-body:    'Space Grotesk', -apple-system, sans-serif;
+    --font-mono:    'JetBrains Mono', monospace;
+
+    /* === TOKENS — RAIO === */
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 16px;
+    --radius-full: 999px;
+
+    /* === TOKENS — SOMBRAS (glow arcano) === */
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.4), 0 1px 3px rgba(0,0,0,0.3);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.45), 0 8px 24px rgba(0,0,0,0.3);
+    --shadow-lg: 0 12px 32px rgba(0,0,0,0.5), 0 24px 64px rgba(0,0,0,0.4);
+    --glow-arcane: 0 0 24px rgba(109,74,199,0.35);
+    --glow-gold: 0 0 20px rgba(201,162,75,0.25);
+
+    /* === TOKENS — ESPAÇAMENTO === */
+    --sp-1: 4px;
+    --sp-2: 8px;
+    --sp-3: 12px;
+    --sp-4: 16px;
+    --sp-6: 24px;
+    --sp-8: 32px;
+    --sp-12: 48px;
+    --sp-16: 64px;
+    --sp-24: 96px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: var(--font-body);
+    background: var(--stone-950);
+    color: var(--parchment);
+    font-size: 16px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  ::selection { background: rgba(109,74,199,0.4); color: var(--parchment); }
+
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 32px; }
+
+  /* === HERO === */
+  .hero {
+    background:
+      radial-gradient(circle at 15% 20%, rgba(109,74,199,0.22) 0%, transparent 45%),
+      radial-gradient(circle at 85% 75%, rgba(196,71,44,0.14) 0%, transparent 50%),
+      linear-gradient(160deg, var(--stone-950) 0%, var(--arcane-900) 60%, var(--stone-950) 100%);
+    color: var(--parchment);
+    padding: 120px 0 100px;
+    position: relative;
+    overflow: hidden;
+    border-bottom: 1px solid var(--stone-700);
+  }
+  .hero::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(rgba(169,140,255,0.06) 1px, transparent 1px);
+    background-size: 32px 32px;
+    mask-image: radial-gradient(circle at 50% 40%, black 0%, transparent 75%);
+    pointer-events: none;
+  }
+  .hero-inner { position: relative; z-index: 2; }
+  .hero-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--gold-soft);
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .hero-eyebrow::before {
+    content: "";
+    width: 40px;
+    height: 1px;
+    background: linear-gradient(90deg, var(--gold), transparent);
+  }
+  .hero h1 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(56px, 8vw, 104px);
+    line-height: 0.98;
+    letter-spacing: -0.02em;
+    margin-bottom: 28px;
+  }
+  .hero h1 em {
+    font-style: italic;
+    color: var(--arcane-glow);
+    font-weight: 400;
+    text-shadow: 0 0 40px rgba(169,140,255,0.4);
+  }
+  .hero-sub {
+    font-size: 20px;
+    max-width: 620px;
+    color: var(--stone-300);
+    line-height: 1.6;
+    margin-bottom: 48px;
+    font-weight: 300;
+  }
+  .hero-meta {
+    display: flex;
+    gap: 48px;
+    flex-wrap: wrap;
+    padding-top: 36px;
+    border-top: 1px solid var(--stone-700);
+  }
+  .hero-meta div { display: flex; flex-direction: column; gap: 4px; }
+  .hero-meta dt {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+  .hero-meta dd { font-size: 15px; color: var(--parchment); }
+
+  /* === NAV STICKY === */
+  nav.toc {
+    position: sticky;
+    top: 0;
+    background: rgba(14,11,20,0.85);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--stone-700);
+    z-index: 100;
+    padding: 14px 0;
+  }
+  nav.toc ul {
+    display: flex;
+    gap: 4px;
+    list-style: none;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  nav.toc ul::-webkit-scrollbar { display: none; }
+  nav.toc a {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--stone-400);
+    text-decoration: none;
+    padding: 8px 14px;
+    border-radius: var(--radius-full);
+    white-space: nowrap;
+    transition: all 0.2s;
+  }
+  nav.toc a:hover { background: var(--stone-800); color: var(--arcane-glow); }
+
+  /* === SEÇÕES === */
+  section { padding: 96px 0; border-bottom: 1px solid var(--stone-700); }
+  section:last-of-type { border-bottom: none; }
+  .section-num {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: var(--arcane-glow);
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    display: block;
+  }
+  h2 {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: clamp(38px, 5vw, 60px);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    margin-bottom: 20px;
+    color: var(--parchment);
+  }
+  h2 em { font-style: italic; color: var(--arcane-glow); font-weight: 400; }
+  .lede {
+    font-size: 19px;
+    color: var(--stone-400);
+    max-width: 720px;
+    margin-bottom: 56px;
+    line-height: 1.6;
+    font-weight: 300;
+  }
+  h3 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 26px;
+    letter-spacing: -0.01em;
+    margin: 40px 0 16px;
+    color: var(--parchment);
+  }
+  h4 {
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    color: var(--gold);
+  }
+  p { color: var(--stone-400); margin-bottom: 16px; max-width: 760px; }
+  p strong { color: var(--parchment); font-weight: 600; }
+  code {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    background: var(--stone-800);
+    color: var(--arcane-glow);
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+  ul.bullets { list-style: none; margin: 12px 0 24px; }
+  ul.bullets li {
+    padding-left: 24px;
+    position: relative;
+    margin-bottom: 10px;
+    color: var(--stone-400);
+  }
+  ul.bullets li::before {
+    content: "◆";
+    position: absolute;
+    left: 0;
+    top: 0;
+    color: var(--arcane-500);
+    font-size: 10px;
+  }
+
+  /* === 1. CONCEITO === */
+  .concept-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin-top: 40px;
+  }
+  .concept-card {
+    background: var(--stone-850);
+    border: 1px solid var(--stone-700);
+    border-radius: var(--radius-md);
+    padding: 32px 28px;
+    transition: all 0.3s;
+  }
+  .concept-card:hover {
+    border-color: var(--arcane-500);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md), var(--glow-arcane);
+  }
+  .concept-card .icon {
+    width: 44px;
+    height: 44px;
+    border: 1px solid var(--arcane-500);
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+    color: var(--arcane-glow);
+    font-size: 20px;
+    background: rgba(109,74,199,0.1);
+  }
+  .concept-card h3 { margin: 0 0 8px; font-size: 22px; }
+  .concept-card p { font-size: 14.5px; margin: 0; line-height: 1.55; }
+
+  .pillar-quote {
+    margin: 56px 0 0;
+    padding: 48px 52px;
+    background:
+      radial-gradient(circle at 100% 0%, rgba(109,74,199,0.18) 0%, transparent 55%),
+      var(--stone-900);
+    color: var(--parchment);
+    border-radius: var(--radius-lg);
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--stone-700);
+  }
+  .pillar-quote::before {
+    content: "";
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 4px;
+    background: linear-gradient(180deg, var(--arcane-glow) 0%, var(--gold) 100%);
+  }
+  .pillar-quote p {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 28px;
+    line-height: 1.4;
+    color: var(--parchment);
+    max-width: none;
+    margin: 0;
+    font-weight: 400;
+  }
+  .pillar-quote cite {
+    display: block;
+    margin-top: 20px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-style: normal;
+    color: var(--gold);
+  }
+
+  /* === 2. CORES === */
+  .palette-section { margin-bottom: 48px; }
+  .palette-section-title {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--stone-400);
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--stone-700);
+  }
+  .color-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+  }
+  .color-grid.col-5 { grid-template-columns: repeat(5, 1fr); }
+  .swatch {
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    border: 1px solid var(--stone-700);
+    background: var(--stone-850);
+    transition: transform 0.2s;
+  }
+  .swatch:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+  .swatch .chip {
+    height: 120px;
+    display: flex;
+    align-items: flex-end;
+    padding: 14px;
+    color: rgba(255,255,255,0.9);
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.08em;
+  }
+  .swatch.light .chip { color: rgba(14,11,20,0.75); }
+  .swatch-meta { padding: 14px 16px; }
+  .swatch-name {
+    font-weight: 600;
+    font-size: 13.5px;
+    color: var(--parchment);
+    margin-bottom: 2px;
+  }
+  .swatch-role {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--stone-500);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    line-height: 1.4;
+  }
+
+  .palette-rationale {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+    margin-top: 48px;
+    padding: 40px;
+    background: var(--stone-850);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--stone-700);
+  }
+  .palette-rationale p { font-size: 14.5px; margin-bottom: 12px; max-width: none; }
+
+  /* === 3. TIPOGRAFIA === */
+  .typo-showcase {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 32px;
+    margin-bottom: 40px;
+  }
+  .typo-card {
+    background: var(--stone-850);
+    border: 1px solid var(--stone-700);
+    border-radius: var(--radius-lg);
+    padding: 40px;
+  }
+  .typo-sample-display {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 76px;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: var(--parchment);
+    margin-bottom: 24px;
+  }
+  .typo-sample-display em { font-style: italic; color: var(--arcane-glow); }
+  .typo-card .label {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 18px;
+  }
+  .typo-sample-body {
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--stone-300);
+    font-weight: 300;
+  }
+  .typo-card.mono-card { background: var(--stone-900); }
+  .typo-sample-mono {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    line-height: 1.8;
+    color: var(--arcane-glow);
+  }
+  .typo-sample-mono .dim { color: var(--stone-500); }
+
+  .typo-scale {
+    display: grid;
+    grid-template-columns: 90px 90px 110px 1fr;
+    gap: 16px;
+    align-items: baseline;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--stone-700);
+  }
+  .typo-scale:last-child { border-bottom: none; }
+  .typo-scale .role {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--arcane-glow);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .typo-scale .size, .typo-scale .weight {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--stone-500);
+  }
+  .typo-scale .demo { font-family: var(--font-display); color: var(--parchment); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  /* === 4. ICONOGRAFIA === */
+  .icon-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 16px;
+    margin-top: 32px;
+  }
+  .icon-cell {
+    aspect-ratio: 1;
+    background: var(--stone-850);
+    border: 1px solid var(--stone-700);
+    border-radius: var(--radius-md);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: all 0.25s;
+  }
+  .icon-cell:hover { border-color: var(--arcane-500); color: var(--arcane-glow); box-shadow: var(--glow-arcane); }
+  .icon-cell svg { width: 30px; height: 30px; stroke: var(--parchment-soft); fill: none; stroke-width: 1.5; }
+  .icon-cell:hover svg { stroke: var(--arcane-glow); }
+  .icon-cell span {
+    font-family: var(--font-mono);
+    font-size: 9.5px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--stone-500);
+  }
+  .deco-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 32px; }
+  .deco-card {
+    background: var(--stone-850);
+    border: 1px solid var(--stone-700);
+    border-radius: var(--radius-md);
+    padding: 28px;
+  }
+  .deco-preview {
+    height: 90px;
+    border-radius: var(--radius-sm);
+    margin-bottom: 16px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .deco-runes { background: repeating-linear-gradient(45deg, var(--stone-800) 0 8px, var(--stone-850) 8px 16px); position: relative; overflow: hidden; }
+  .deco-runes::after { content: "✦ ⟡ ✧ ⟡ ✦"; color: var(--arcane-400); letter-spacing: 0.5em; font-size: 18px; }
+  .deco-glow { background: radial-gradient(circle, rgba(109,74,199,0.4) 0%, var(--stone-900) 70%); }
+  .deco-hairline { background: var(--stone-900); position: relative; }
+  .deco-hairline::after { content: ""; width: 70%; height: 1px; background: linear-gradient(90deg, transparent, var(--gold), transparent); }
+
+  /* === 5. COMPONENTES UI === */
+  .ui-mockup {
+    background: var(--stone-850);
+    border: 1px solid var(--stone-700);
+    border-radius: var(--radius-lg);
+    padding: 40px;
+    margin-bottom: 24px;
+  }
+  .ui-mockup .comp-label {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--stone-500);
+    margin-bottom: 24px;
+  }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 22px;
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 14px;
+    border-radius: var(--radius-sm);
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+    letter-spacing: 0.01em;
+  }
+  .btn-primary {
+    background: var(--arcane-500);
+    color: #fff;
+    border-color: var(--arcane-500);
+  }
+  .btn-primary:hover { background: var(--arcane-400); box-shadow: var(--glow-arcane); }
+  .btn-secondary {
+    background: transparent;
+    color: var(--parchment);
+    border-color: var(--stone-600);
+  }
+  .btn-secondary:hover { background: var(--stone-800); border-color: var(--arcane-500); }
+  .btn-ghost {
+    background: transparent;
+    color: var(--arcane-glow);
+    border-color: transparent;
+  }
+  .btn-ghost:hover { background: rgba(109,74,199,0.12); }
+  .btn-danger {
+    background: var(--ember);
+    color: #fff;
+    border-color: var(--ember);
+  }
+  .btn-danger:hover { background: var(--ember-light); box-shadow: 0 0 20px rgba(196,71,44,0.35); }
+
+  .button-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+
+  /* Inputs */
+  .input-group { display: flex; flex-direction: column; gap: 6px; max-width: 360px; }
+  .input-group label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--parchment);
+  }
+  .input {
+    padding: 11px 14px;
+    border: 1px solid var(--stone-600);
+    border-radius: var(--radius-sm);
+    background: var(--stone-900);
+    font-family: var(--font-body);
+    font-size: 14.5px;
+    color: var(--parchment);
+    transition: all 0.2s;
+  }
+  .input::placeholder { color: var(--stone-500); }
+  .input:focus {
+    outline: none;
+    border-color: var(--arcane-500);
+    box-shadow: 0 0 0 3px rgba(109,74,199,0.25);
+  }
+  .input-hint { font-size: 12px; color: var(--stone-500); }
+
+  /* Badges */
+  .badges-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 11px;
+    border-radius: var(--radius-full);
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    font-family: var(--font-body);
+  }
+  .badge::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+  .badge-success { background: rgba(79,165,116,0.15); color: var(--status-success); }
+  .badge-warning { background: rgba(216,155,60,0.15); color: var(--status-warn); }
+  .badge-error   { background: rgba(208,70,58,0.15); color: var(--status-error); }
+  .badge-info    { background: rgba(74,143,199,0.15); color: var(--status-info); }
+  .badge-arcane  { background: rgba(109,74,199,0.18); color: var(--arcane-glow); }
+  .badge-neutral { background: var(--stone-800); color: var(--stone-400); }
+
+  /* Cards */
+  .card-demo-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+  .char-card {
+    background: var(--stone-900);
+    border: 1px solid var(--stone-700);
+    border-radius: var(--radius-md);
+    padding: 24px;
+    transition: all 0.25s;
+    position: relative;
+    overflow: hidden;
+  }
+  .char-card::before {
+    content: "";
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--arcane-500), var(--gold));
+  }
+  .char-card:hover { border-color: var(--arcane-500); transform: translateY(-2px); box-shadow: var(--shadow-md); }
+  .char-card-head { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; }
+  .char-avatar {
+    width: 48px; height: 48px;
+    border-radius: var(--radius-md);
+    background: linear-gradient(135deg, var(--arcane-700), var(--arcane-500));
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-display); font-style: italic; font-weight: 600;
+    color: var(--gold-soft); font-size: 22px;
+    border: 1px solid var(--arcane-400);
+  }
+  .char-name { font-family: var(--font-display); font-size: 22px; font-weight: 600; color: var(--parchment); line-height: 1.1; }
+  .char-class { font-family: var(--font-mono); font-size: 11px; color: var(--stone-400); letter-spacing: 0.06em; text-transform: uppercase; }
+  .stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .stat {
+    text-align: center;
+    padding: 10px 8px;
+    background: var(--stone-850);
+    border: 1px solid var(--stone-700);
+    border-radius: var(--radius-sm);
+  }
+  .stat .val { font-family: var(--font-display); font-size: 26px; font-weight: 600; color: var(--arcane-glow); line-height: 1; }
+  .stat .key { font-family: var(--font-mono); font-size: 9px; color: var(--stone-500); letter-spacing: 0.1em; text-transform: uppercase; margin-top: 4px; }
+
+  /* Table */
+  .tbl-wrap { border: 1px solid var(--stone-700); border-radius: var(--radius-md); overflow: hidden; margin-top: 8px; }
+  table.grimoire { width: 100%; border-collapse: collapse; font-size: 14px; }
+  table.grimoire thead th {
+    background: var(--stone-800);
+    text-align: left;
+    padding: 12px 18px;
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--gold);
+    font-weight: 500;
+    border-bottom: 1px solid var(--stone-700);
+  }
+  table.grimoire tbody td { padding: 13px 18px; border-bottom: 1px solid var(--stone-700); color: var(--stone-300); }
+  table.grimoire tbody tr:last-child td { border-bottom: none; }
+  table.grimoire tbody tr:hover { background: var(--stone-800); }
+  table.grimoire td.spell { font-family: var(--font-display); font-size: 16px; color: var(--parchment); font-weight: 600; }
+
+  /* Nav demo */
+  .nav-demo {
+    display: flex; gap: 6px;
+    background: var(--stone-900);
+    padding: 8px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--stone-700);
+    flex-wrap: wrap;
+  }
+  .nav-demo a {
+    font-family: var(--font-body);
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--stone-400);
+    text-decoration: none;
+    padding: 9px 16px;
+    border-radius: var(--radius-sm);
+    display: inline-flex; align-items: center; gap: 8px;
+    transition: all 0.18s;
+  }
+  .nav-demo a:hover { color: var(--parchment); background: var(--stone-800); }
+  .nav-demo a.active { background: rgba(109,74,199,0.2); color: var(--arcane-glow); }
+
+  /* === 6. TOKENS === */
+  .token-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 32px; }
+  .token-block {
+    background: var(--stone-850);
+    border: 1px solid var(--stone-700);
+    border-radius: var(--radius-lg);
+    padding: 32px;
+  }
+  .token-row {
+    display: flex; align-items: center; gap: 18px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--stone-700);
+  }
+  .token-row:last-child { border-bottom: none; }
+  .token-name { font-family: var(--font-mono); font-size: 12px; color: var(--arcane-glow); min-width: 120px; }
+  .token-val { font-family: var(--font-mono); font-size: 11.5px; color: var(--stone-500); }
+  .radius-demo { background: var(--arcane-700); border: 1px solid var(--arcane-500); width: 56px; height: 40px; flex-shrink: 0; }
+  .shadow-demo { width: 56px; height: 40px; background: var(--stone-800); border-radius: var(--radius-sm); flex-shrink: 0; border: 1px solid var(--stone-700); }
+  .space-demo { background: var(--arcane-500); height: 20px; border-radius: 3px; }
+
+  .bp-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 20px; }
+  .bp {
+    background: var(--stone-850);
+    border: 1px solid var(--stone-700);
+    border-radius: var(--radius-md);
+    padding: 20px 24px;
+    flex: 1; min-width: 160px;
+  }
+  .bp .bp-name { font-family: var(--font-mono); font-size: 11px; color: var(--gold); letter-spacing: 0.08em; text-transform: uppercase; }
+  .bp .bp-val { font-family: var(--font-display); font-size: 30px; color: var(--parchment); font-weight: 600; margin: 6px 0 2px; }
+  .bp .bp-desc { font-size: 12.5px; color: var(--stone-500); }
+
+  /* === 7. DARK MODE / APP MOCKUP === */
+  .app-frame {
+    background: var(--stone-950);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    margin-top: 32px;
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--stone-700);
+  }
+  .app-topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 22px;
+    background: var(--stone-900);
+    border-bottom: 1px solid var(--stone-700);
+  }
+  .app-logo {
+    font-family: var(--font-display);
+    font-weight: 600;
+    color: var(--parchment);
+    font-size: 18px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .app-logo .mark {
+    width: 30px; height: 30px;
+    background: linear-gradient(135deg, var(--arcane-700), var(--arcane-500));
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--gold-soft);
+    font-family: var(--font-display); font-style: italic; font-size: 17px; font-weight: 600;
+    border: 1px solid var(--arcane-400);
+  }
+  .app-top-right { display: flex; gap: 16px; align-items: center; }
+  .app-top-right .mono { color: var(--stone-500); font-size: 12px; font-family: var(--font-mono); }
+  .app-avatar { width: 30px; height: 30px; border-radius: 50%; background: linear-gradient(135deg, var(--ember), var(--gold)); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 12px; font-weight: 600; }
+  .app-body { display: grid; grid-template-columns: 210px 1fr; min-height: 520px; }
+  .app-sidebar { background: var(--stone-900); border-right: 1px solid var(--stone-700); padding: 22px 14px; }
+  .side-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--stone-500); padding: 0 10px; margin: 18px 0 8px; }
+  .side-label:first-child { margin-top: 0; }
+  .side-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: var(--radius-sm); color: var(--stone-400); font-size: 13.5px; font-weight: 500; cursor: pointer; transition: all 0.15s; margin-bottom: 2px; }
+  .side-item:hover { background: var(--stone-800); color: var(--parchment); }
+  .side-item.active { background: rgba(109,74,199,0.18); color: var(--arcane-glow); border-left: 2px solid var(--arcane-400); padding-left: 10px; }
+  .side-item svg { width: 17px; height: 17px; stroke: currentColor; fill: none; stroke-width: 1.6; }
+  .app-main { background: var(--stone-950); padding: 30px 34px; }
+  .app-main-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 26px; }
+  .app-h1 { font-family: var(--font-display); font-weight: 600; font-size: 30px; color: var(--parchment); letter-spacing: -0.01em; margin-bottom: 4px; }
+  .app-sub { font-size: 13.5px; color: var(--stone-500); }
+  .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 26px; }
+  .kpi { background: var(--stone-850); border: 1px solid var(--stone-700); border-radius: var(--radius-md); padding: 18px 20px; }
+  .kpi .label { font-family: var(--font-mono); font-size: 9.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--stone-500); margin-bottom: 8px; }
+  .kpi .value { font-family: var(--font-display); font-size: 32px; font-weight: 600; color: var(--parchment); line-height: 1; }
+  .kpi .value em { font-style: normal; color: var(--arcane-glow); }
+  .kpi .delta { font-size: 11px; color: var(--status-success); margin-top: 6px; font-family: var(--font-mono); }
+
+  /* === FOOTER === */
+  footer {
+    background: var(--stone-900);
+    padding: 72px 0 56px;
+    text-align: center;
+    border-top: 1px solid var(--stone-700);
+  }
+  .footer-mark {
+    font-family: var(--font-display);
+    font-size: 40px;
+    font-weight: 600;
+    color: var(--parchment);
+    margin-bottom: 12px;
+  }
+  .footer-mark em { font-style: italic; color: var(--arcane-glow); }
+  footer p { color: var(--stone-500); max-width: none; margin-bottom: 4px; font-size: 13px; }
+  footer p:first-of-type { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.1em; }
+
+  /* === RESPONSIVE === */
+  @media (max-width: 860px) {
+    .concept-grid, .color-grid, .color-grid.col-5, .card-demo-row, .token-grid, .kpi-row { grid-template-columns: repeat(2, 1fr); }
+    .typo-showcase, .palette-rationale { grid-template-columns: 1fr; }
+    .icon-grid { grid-template-columns: repeat(3, 1fr); }
+    .deco-row { grid-template-columns: 1fr; }
+    .app-body { grid-template-columns: 1fr; }
+    .app-sidebar { display: none; }
+    .typo-scale { grid-template-columns: 70px 70px 1fr; }
+    .typo-scale .demo { display: none; }
+  }
+  @media (max-width: 520px) {
+    .concept-grid, .color-grid, .color-grid.col-5, .kpi-row, .icon-grid { grid-template-columns: 1fr; }
+    .wrap { padding: 0 20px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- === HERO === -->
+<header class="hero">
+  <div class="wrap hero-inner">
+    <div class="hero-eyebrow">Brandbook · Identidade Visual</div>
+    <h1>Grimório<br><em>D&D Companion</em></h1>
+    <p class="hero-sub">O companheiro digital do mestre e dos jogadores. Onde a mesa encontra a máquina — fichas, magias, encontros e crônicas em uma interface pensada para viver na penumbra da sessão.</p>
+    <dl class="hero-meta">
+      <div><dt>Versão</dt><dd>Brandbook v1.0</dd></div>
+      <div><dt>Modo Principal</dt><dd>Dark / Penumbra</dd></div>
+      <div><dt>Universo</dt><dd>Fantasia · RPG de Mesa</dd></div>
+      <div><dt>Natureza</dt><dd>Plataforma web pessoal</dd></div>
+    </dl>
+  </div>
+</header>
+
+<!-- === NAV === -->
+<nav class="toc">
+  <div class="wrap">
+    <ul>
+      <li><a href="#conceito">01 · Conceito</a></li>
+      <li><a href="#paleta">02 · Paleta</a></li>
+      <li><a href="#tipografia">03 · Tipografia</a></li>
+      <li><a href="#iconografia">04 · Iconografia</a></li>
+      <li><a href="#componentes">05 · Componentes</a></li>
+      <li><a href="#tokens">06 · Tokens</a></li>
+      <li><a href="#darkmode">07 · Dark Mode</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- === 1. CONCEITO === -->
+<section id="conceito">
+  <div class="wrap">
+    <span class="section-num">01 — Conceito & Posicionamento</span>
+    <h2>Um grimório que <em>respira</em> junto com a mesa.</h2>
+    <p class="lede">O D&D Companion não imita um livro de couro empoeirado nem um videogame saturado. É uma ferramenta digital contemporânea que carrega a atmosfera do RPG — luz de tocha filtrada por vitrais arcanos, o brilho tênue de uma runa ativa — sem cair no clichê medieval.</p>
+
+    <div class="concept-grid">
+      <div class="concept-card">
+        <div class="icon">◈</div>
+        <h3>Imersivo</h3>
+        <p>Fundo escuro como padrão, luz que emana dos elementos. A interface parece iluminada por magia, não por LEDs de escritório.</p>
+      </div>
+      <div class="concept-card">
+        <div class="icon">✦</div>
+        <h3>Contemporâneo</h3>
+        <p>Tipografia editorial, espaçamento generoso, transições sutis. A referência é uma ferramenta digital atual — Linear e Notion, não pergaminho digitalizado.</p>
+      </div>
+      <div class="concept-card">
+        <div class="icon">⟡</div>
+        <h3>Temático com sobriedade</h3>
+        <p>O universo aparece em detalhes — nomes de seções, ícones, o glow arcano — nunca em texturas kitsch ou fontes góticas ilegíveis.</p>
+      </div>
+    </div>
+
+    <h3>Personalidade da marca</h3>
+    <ul class="bullets">
+      <li><strong>Companheira, não protagonista.</strong> Serve a narrativa da mesa; nunca a atrapalha.</li>
+      <li><strong>Misteriosa, mas clara.</strong> Atmosfera de penumbra com legibilidade impecável.</li>
+      <li><strong>Precisa como um dado de 20 faces.</strong> Números, regras e status sempre exatos e visíveis.</li>
+      <li><strong>Calorosa nos rituais, funcional na batalha.</strong> Sabe ser evocativa e sabe ser rápida.</li>
+    </ul>
+
+    <h3>Tom de voz</h3>
+    <p>Evocativo sem ser pomposo. "Conjurar encontro" em vez de "criar item". "Descansar a party" em vez de "salvar sessão". O vocabulário abraça o universo de D&D, mas a instrução final é sempre direta e sem ambiguidade. Fala como um mestre experiente: envolve na história, mas nunca deixa dúvida sobre o próximo passo.</p>
+
+    <div class="pillar-quote">
+      <p>"Nenhuma mesa deveria pausar a aventura para procurar uma regra. O Grimório lembra por você — para que a história nunca esfrie."</p>
+      <cite>— Princípio de Produto</cite>
+    </div>
+  </div>
+</section>
+
+<!-- === 2. PALETA === -->
+<section id="paleta">
+  <div class="wrap">
+    <span class="section-num">02 — Paleta de Cores</span>
+    <h2>Pensada para a <em>penumbra</em>.</h2>
+    <p class="lede">A paleta nasce do dark mode. Base de pedra violeta-noite, magia arcana como cor primária, brasa para o perigo e ouro antigo para o que é nobre. Toda cor foi calibrada para brilhar sobre fundo escuro sem cansar os olhos em sessões de horas.</p>
+
+    <div class="palette-section">
+      <div class="palette-section-title">Primária · Arcana</div>
+      <div class="color-grid">
+        <div class="swatch"><div class="chip" style="background:#1A0E2E">#1A0E2E</div><div class="swatch-meta"><div class="swatch-name">Arcane 900</div><div class="swatch-role">Base do sistema · fundo profundo</div></div></div>
+        <div class="swatch"><div class="chip" style="background:#2D1B4E">#2D1B4E</div><div class="swatch-meta"><div class="swatch-name">Arcane 700</div><div class="swatch-role">Superfícies elevadas · gradientes</div></div></div>
+        <div class="swatch"><div class="chip" style="background:#6D4AC7">#6D4AC7</div><div class="swatch-meta"><div class="swatch-name">Arcane 500</div><div class="swatch-role">Primária aplicada · botões · foco</div></div></div>
+        <div class="swatch"><div class="chip" style="background:#A98CFF">#A98CFF</div><div class="swatch-meta"><div class="swatch-name">Arcane Glow</div><div class="swatch-role">Realce luminoso · links · ênfase</div></div></div>
+      </div>
+    </div>
+
+    <div class="palette-section">
+      <div class="palette-section-title">Secundária · Brasa & Ouro</div>
+      <div class="color-grid">
+        <div class="swatch"><div class="chip" style="background:#7A2318">#7A2318</div><div class="swatch-meta"><div class="swatch-name">Ember Deep</div><div class="swatch-role">Brasa profunda · pressed</div></div></div>
+        <div class="swatch"><div class="chip" style="background:#C4472C">#C4472C</div><div class="swatch-meta"><div class="swatch-name">Ember</div><div class="swatch-role">Ação de dano · destaque quente</div></div></div>
+        <div class="swatch"><div class="chip" style="background:#C9A24B">#C9A24B</div><div class="swatch-meta"><div class="swatch-name">Gold</div><div class="swatch-role">Ouro fosco · detalhes nobres</div></div></div>
+        <div class="swatch light"><div class="chip" style="background:#E3C878">#E3C878</div><div class="swatch-meta"><div class="swatch-name">Gold Soft</div><div class="swatch-role">Realce dourado sobre escuro</div></div></div>
+      </div>
+    </div>
+
+    <div class="palette-section">
+      <div class="palette-section-title">Neutros · Pedra & Pergaminho</div>
+      <div class="color-grid col-5">
+        <div class="swatch"><div class="chip" style="background:#0E0B14">#0E0B14</div><div class="swatch-meta"><div class="swatch-name">Stone 950</div><div class="swatch-role">Background principal</div></div></div>
+        <div class="swatch"><div class="chip" style="background:#1B1626">#1B1626</div><div class="swatch-meta"><div class="swatch-name">Stone 850</div><div class="swatch-role">Card · superfície</div></div></div>
+        <div class="swatch"><div class="chip" style="background:#322A44">#322A44</div><div class="swatch-meta"><div class="swatch-name">Stone 700</div><div class="swatch-role">Borders · divisores</div></div></div>
+        <div class="swatch"><div class="chip" style="background:#9A90AE">#9A90AE</div><div class="swatch-meta"><div class="swatch-name">Stone 400</div><div class="swatch-role">Texto secundário</div></div></div>
+        <div class="swatch light"><div class="chip" style="background:#EDE6D6">#EDE6D6</div><div class="swatch-meta"><div class="swatch-name">Parchment</div><div class="swatch-role">Texto principal</div></div></div>
+      </div>
+    </div>
+
+    <div class="palette-section">
+      <div class="palette-section-title">Funcionais · Status</div>
+      <div class="color-grid">
+        <div class="swatch"><div class="chip" style="background:#4FA574">#4FA574</div><div class="swatch-meta"><div class="swatch-name">Cura · Sucesso</div><div class="swatch-role">Verde-poção · confirmações</div></div></div>
+        <div class="swatch"><div class="chip" style="background:#D89B3C">#D89B3C</div><div class="swatch-meta"><div class="swatch-name">Âmbar · Alerta</div><div class="swatch-role">Atenção · avisos</div></div></div>
+        <div class="swatch"><div class="chip" style="background:#D0463A">#D0463A</div><div class="swatch-meta"><div class="swatch-name">Rubi · Erro</div><div class="swatch-role">Perigo · crítico · falha</div></div></div>
+        <div class="swatch"><div class="chip" style="background:#4A8FC7">#4A8FC7</div><div class="swatch-meta"><div class="swatch-name">Mana · Info</div><div class="swatch-role">Informação · dicas</div></div></div>
+      </div>
+    </div>
+
+    <div class="palette-rationale">
+      <div>
+        <h4>Por que violeta arcano?</h4>
+        <p>O roxo é a cor cultural da magia — de mantos de mago a auras de conjuração. Escolhemos um violeta profundo e dessaturado como base para que não pareça infantil, com um tom luminoso reservado para os momentos que realmente importam.</p>
+      </div>
+      <div>
+        <h4>Por que ouro e brasa como par?</h4>
+        <p>O ouro traz nobreza sem ostentação — para tesouros, conquistas e detalhes de valor. A brasa é o calor do perigo: dano, alertas críticos e a tensão do combate. Juntos, dão à penumbra arcana seus pontos de vida.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- === 3. TIPOGRAFIA === -->
+<section id="tipografia">
+  <div class="wrap">
+    <span class="section-num">03 — Tipografia</span>
+    <h2>Uma serifada que <em>encanta</em>, uma sem-serifa que <em>organiza</em>.</h2>
+    <p class="lede">Cormorant Garamond dá voz épica aos títulos, nomes de personagens e magias — elegante, alta, com itálicos que evocam manuscritos. Space Grotesk cuida da leitura funcional com clareza geométrica moderna. JetBrains Mono marca dados, rolagens e metadados técnicos.</p>
+
+    <div class="typo-showcase">
+      <div class="typo-card">
+        <div class="label">Display · Cormorant Garamond</div>
+        <div class="typo-sample-display">Bola de <em>Fogo</em></div>
+        <div class="typo-sample-body">Usada em títulos, nomes de personagens, magias e headers de seção. Seus itálicos remetem a manuscritos iluminados sem sacrificar a legibilidade em telas.</div>
+      </div>
+      <div class="typo-card mono-card">
+        <div class="label">Corpo · Space Grotesk</div>
+        <div class="typo-sample-body" style="font-size:17px;color:var(--parchment)">A party avança pela cripta. O ar é frio e cheira a poeira antiga. Ao fundo, uma porta de pedra selada por runas pulsa fracamente.</div>
+        <div style="height:24px"></div>
+        <div class="label">Mono · JetBrains Mono</div>
+        <div class="typo-sample-mono"><span class="dim">// rolagem</span><br>1d20 + 5 = <span style="color:var(--gold-soft)">18</span> <span class="dim">(acerto)</span></div>
+      </div>
+    </div>
+
+    <h3>Escala tipográfica</h3>
+    <div>
+      <div class="typo-scale"><span class="role">Display XL</span><span class="size">76px</span><span class="weight">500 · Cormorant</span><span class="demo" style="font-size:34px">Encontro Aleatório</span></div>
+      <div class="typo-scale"><span class="role">H1</span><span class="size">48px</span><span class="weight">600 · Cormorant</span><span class="demo" style="font-size:28px">Ficha de Personagem</span></div>
+      <div class="typo-scale"><span class="role">H2</span><span class="size">32px</span><span class="weight">600 · Cormorant</span><span class="demo" style="font-size:24px">Magias Preparadas</span></div>
+      <div class="typo-scale"><span class="role">H3</span><span class="size">24px</span><span class="weight">600 · Cormorant</span><span class="demo" style="font-size:20px">Inventário</span></div>
+      <div class="typo-scale"><span class="role">Body</span><span class="size">16px</span><span class="weight">400 · Grotesk</span><span class="demo" style="font-family:var(--font-body);font-size:16px;color:var(--stone-300)">Texto de leitura confortável.</span></div>
+      <div class="typo-scale"><span class="role">Small</span><span class="size">13px</span><span class="weight">500 · Grotesk</span><span class="demo" style="font-family:var(--font-body);font-size:13px;color:var(--stone-400)">Legendas e apoio.</span></div>
+      <div class="typo-scale"><span class="role">Mono</span><span class="size">12px</span><span class="weight">400 · JetBrains</span><span class="demo" style="font-family:var(--font-mono);font-size:12px;color:var(--arcane-glow)">CA 16 · PV 42/42</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- === 4. ICONOGRAFIA === -->
+<section id="iconografia">
+  <div class="wrap">
+    <span class="section-num">04 — Iconografia & Estilo Visual</span>
+    <h2>Linhas finas, <em>símbolos arcanos</em>.</h2>
+    <p class="lede">Ícones de traço fino (1.5px), cantos levemente arredondados, geometria limpa — no espírito de conjuntos como Lucide, mas com repertório temático de RPG. Sem clipart, sem ícones preenchidos e barrocos. Os elementos decorativos são discretos: glow arcano, hairlines douradas e runas sutis.</p>
+
+    <div class="icon-grid">
+      <div class="icon-cell"><svg viewBox="0 0 24 24"><path d="M12 2l7 4v6c0 5-3 8-7 10-4-2-7-5-7-10V6z"/></svg><span>Escudo</span></div>
+      <div class="icon-cell"><svg viewBox="0 0 24 24"><path d="M4 20L18 6M14 4h6v6"/><path d="M4 20l3-1 12-12"/></svg><span>Espada</span></div>
+      <div class="icon-cell"><svg viewBox="0 0 24 24"><path d="M12 2v20M2 12h20M5 5l14 14M19 5L5 19"/></svg><span>Magia</span></div>
+      <div class="icon-cell"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/><circle cx="9" cy="9" r="1.3"/><circle cx="15" cy="15" r="1.3"/><circle cx="15" cy="9" r="1.3"/><circle cx="9" cy="15" r="1.3"/></svg><span>Dado</span></div>
+      <div class="icon-cell"><svg viewBox="0 0 24 24"><path d="M6 3h12v4a6 6 0 01-12 0zM9 15h6M12 13v2M8 21h8"/></svg><span>Poção</span></div>
+      <div class="icon-cell"><svg viewBox="0 0 24 24"><path d="M5 4h11l3 3v13H5zM8 4v16M16 4v3h3"/></svg><span>Grimório</span></div>
+      <div class="icon-cell"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg><span>Personagem</span></div>
+      <div class="icon-cell"><svg viewBox="0 0 24 24"><path d="M12 3l2.5 5.5L20 9l-4 4 1 6-5-3-5 3 1-6-4-4 5.5-.5z"/></svg><span>XP</span></div>
+      <div class="icon-cell"><svg viewBox="0 0 24 24"><path d="M12 21s-7-4.5-7-10a7 7 0 0114 0c0 5.5-7 10-7 10z"/><circle cx="12" cy="11" r="2.5"/></svg><span>Mapa</span></div>
+      <div class="icon-cell"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="14" rx="2"/><path d="M3 10h18M8 3v4"/></svg><span>Sessão</span></div>
+      <div class="icon-cell"><svg viewBox="0 0 24 24"><path d="M12 2a5 5 0 015 5c0 3-5 8-5 8s-5-5-5-8a5 5 0 015-5zM7 15l-3 7 8-3 8 3-3-7"/></svg><span>Encontro</span></div>
+      <div class="icon-cell"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>Turno</span></div>
+    </div>
+
+    <h3>Elementos decorativos</h3>
+    <div class="deco-row">
+      <div class="deco-card">
+        <div class="deco-preview deco-glow"></div>
+        <h4>Glow Arcano</h4>
+        <p style="font-size:13.5px;margin:0">Halo suave de luz violeta ao redor de elementos ativos, foco e ações primárias. Usado com parcimônia para pontuar o que importa.</p>
+      </div>
+      <div class="deco-card">
+        <div class="deco-preview deco-hairline"></div>
+        <h4>Hairline Dourada</h4>
+        <p style="font-size:13.5px;margin:0">Fio de luz que desvanece nas pontas, separando seções nobres — como uma iluminura marginal de manuscrito.</p>
+      </div>
+      <div class="deco-card">
+        <div class="deco-preview deco-runes"></div>
+        <h4>Runas Sutis</h4>
+        <p style="font-size:13.5px;margin:0">Padrões de símbolos discretos em fundos e estados vazios. Textura temática que nunca compete com o conteúdo.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- === 5. COMPONENTES === -->
+<section id="componentes">
+  <div class="wrap">
+    <span class="section-num">05 — Componentes de UI</span>
+    <h2>A identidade <em>aplicada</em>.</h2>
+    <p class="lede">Todos os componentes renderizados abaixo usam exatamente os tokens e cores definidos. É assim que o Grimório se parece na prática — botões, inputs, badges, cards, tabelas e navegação.</p>
+
+    <div class="ui-mockup">
+      <div class="comp-label">Botões — primário · secundário · ghost · danger</div>
+      <div class="button-row">
+        <a class="btn btn-primary">Conjurar Encontro</a>
+        <a class="btn btn-secondary">Salvar Rascunho</a>
+        <a class="btn btn-ghost">Cancelar</a>
+        <a class="btn btn-danger">Aplicar Dano</a>
+      </div>
+    </div>
+
+    <div class="ui-mockup">
+      <div class="comp-label">Inputs — campo de formulário com foco arcano</div>
+      <div style="display:flex;gap:32px;flex-wrap:wrap">
+        <div class="input-group">
+          <label>Nome do Personagem</label>
+          <input class="input" type="text" placeholder="Ex: Thalindra Meiassombra" value="Thalindra Meiassombra">
+          <span class="input-hint">Este nome aparece na ficha e no rastreador de iniciativa.</span>
+        </div>
+        <div class="input-group">
+          <label>Classe de Armadura (CA)</label>
+          <input class="input" type="text" placeholder="16">
+          <span class="input-hint">Clique no campo para ver o glow de foco.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="ui-mockup">
+      <div class="comp-label">Badges — status funcionais</div>
+      <div class="badges-row">
+        <span class="badge badge-success">Descansado</span>
+        <span class="badge badge-warning">Ferido</span>
+        <span class="badge badge-error">Inconsciente</span>
+        <span class="badge badge-info">Concentração</span>
+        <span class="badge badge-arcane">Magia Ativa</span>
+        <span class="badge badge-neutral">NPC</span>
+      </div>
+    </div>
+
+    <div class="ui-mockup">
+      <div class="comp-label">Cards — ficha resumida de personagem</div>
+      <div class="card-demo-row">
+        <div class="char-card">
+          <div class="char-card-head">
+            <div class="char-avatar">T</div>
+            <div>
+              <div class="char-name">Thalindra</div>
+              <div class="char-class">Elfa · Feiticeira · Nv 7</div>
+            </div>
+          </div>
+          <div class="stat-row">
+            <div class="stat"><div class="val">42</div><div class="key">PV</div></div>
+            <div class="stat"><div class="val">15</div><div class="key">CA</div></div>
+            <div class="stat"><div class="val">+3</div><div class="key">Inic</div></div>
+          </div>
+        </div>
+        <div class="char-card">
+          <div class="char-card-head">
+            <div class="char-avatar">B</div>
+            <div>
+              <div class="char-name">Bruenor</div>
+              <div class="char-class">Anão · Guerreiro · Nv 8</div>
+            </div>
+          </div>
+          <div class="stat-row">
+            <div class="stat"><div class="val">76</div><div class="key">PV</div></div>
+            <div class="stat"><div class="val">18</div><div class="key">CA</div></div>
+            <div class="stat"><div class="val">+1</div><div class="key">Inic</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ui-mockup">
+      <div class="comp-label">Tabela — grimório de magias</div>
+      <div class="tbl-wrap">
+        <table class="grimoire">
+          <thead>
+            <tr><th>Magia</th><th>Nível</th><th>Escola</th><th>Alcance</th><th>Status</th></tr>
+          </thead>
+          <tbody>
+            <tr><td class="spell">Bola de Fogo</td><td>3</td><td>Evocação</td><td>45 m</td><td><span class="badge badge-arcane">Preparada</span></td></tr>
+            <tr><td class="spell">Curar Ferimentos</td><td>1</td><td>Evocação</td><td>Toque</td><td><span class="badge badge-success">Disponível</span></td></tr>
+            <tr><td class="spell">Enfeitiçar Pessoa</td><td>1</td><td>Encantamento</td><td>9 m</td><td><span class="badge badge-neutral">Não prep.</span></td></tr>
+            <tr><td class="spell">Escudo Arcano</td><td>1</td><td>Abjuração</td><td>Pessoal</td><td><span class="badge badge-warning">Usada</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="ui-mockup">
+      <div class="comp-label">Navegação — abas / segmented</div>
+      <div class="nav-demo">
+        <a class="active">Ficha</a>
+        <a>Magias</a>
+        <a>Inventário</a>
+        <a>Anotações</a>
+        <a>Crônica</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- === 6. TOKENS === -->
+<section id="tokens">
+  <div class="wrap">
+    <span class="section-num">06 — Tokens de Design</span>
+    <h2>As <em>constantes</em> do sistema.</h2>
+    <p class="lede">Border-radius, sombras, espaçamento e breakpoints definidos como variáveis CSS no <code>:root</code>. Um único vocabulário para manter consistência em toda a plataforma.</p>
+
+    <div class="token-grid">
+      <div class="token-block">
+        <h4>Border Radius</h4>
+        <div class="token-row"><span class="radius-demo" style="border-radius:6px"></span><span class="token-name">--radius-sm</span><span class="token-val">6px · inputs, botões</span></div>
+        <div class="token-row"><span class="radius-demo" style="border-radius:10px"></span><span class="token-name">--radius-md</span><span class="token-val">10px · cards, KPIs</span></div>
+        <div class="token-row"><span class="radius-demo" style="border-radius:16px"></span><span class="token-name">--radius-lg</span><span class="token-val">16px · painéis, modais</span></div>
+        <div class="token-row"><span class="radius-demo" style="border-radius:999px"></span><span class="token-name">--radius-full</span><span class="token-val">999px · badges, pills</span></div>
+      </div>
+      <div class="token-block">
+        <h4>Sombras & Glow</h4>
+        <div class="token-row"><span class="shadow-demo" style="box-shadow:var(--shadow-sm)"></span><span class="token-name">--shadow-sm</span><span class="token-val">elevação sutil</span></div>
+        <div class="token-row"><span class="shadow-demo" style="box-shadow:var(--shadow-md)"></span><span class="token-name">--shadow-md</span><span class="token-val">cards em hover</span></div>
+        <div class="token-row"><span class="shadow-demo" style="box-shadow:var(--shadow-lg)"></span><span class="token-name">--shadow-lg</span><span class="token-val">modais, painéis</span></div>
+        <div class="token-row"><span class="shadow-demo" style="box-shadow:var(--glow-arcane);border-color:var(--arcane-500)"></span><span class="token-name">--glow-arcane</span><span class="token-val">foco, elementos ativos</span></div>
+      </div>
+      <div class="token-block">
+        <h4>Espaçamento</h4>
+        <div class="token-row"><span class="token-name" style="min-width:80px">--sp-2</span><div style="flex:1"><div class="space-demo" style="width:8px"></div></div><span class="token-val">8px</span></div>
+        <div class="token-row"><span class="token-name" style="min-width:80px">--sp-4</span><div style="flex:1"><div class="space-demo" style="width:16px"></div></div><span class="token-val">16px</span></div>
+        <div class="token-row"><span class="token-name" style="min-width:80px">--sp-6</span><div style="flex:1"><div class="space-demo" style="width:24px"></div></div><span class="token-val">24px</span></div>
+        <div class="token-row"><span class="token-name" style="min-width:80px">--sp-8</span><div style="flex:1"><div class="space-demo" style="width:32px"></div></div><span class="token-val">32px</span></div>
+        <div class="token-row"><span class="token-name" style="min-width:80px">--sp-12</span><div style="flex:1"><div class="space-demo" style="width:48px"></div></div><span class="token-val">48px</span></div>
+      </div>
+      <div class="token-block">
+        <h4>Fundamento</h4>
+        <p style="font-size:13.5px">Escala de espaçamento em múltiplos de 4px — <code>--sp-1</code> a <code>--sp-24</code>. Isso garante ritmo vertical previsível e alinhamento consistente entre componentes. Nunca use valores mágicos: sempre um token.</p>
+        <p style="font-size:13.5px;margin:0">Os raios seguem uma progressão suave: quanto maior a superfície, maior o arredondamento. Sombras crescem em profundidade conforme a elevação real do elemento no eixo Z.</p>
+      </div>
+    </div>
+
+    <h3>Breakpoints</h3>
+    <div class="bp-row">
+      <div class="bp"><div class="bp-name">Mobile</div><div class="bp-val">≤ 520px</div><div class="bp-desc">Coluna única · sidebar oculta</div></div>
+      <div class="bp"><div class="bp-name">Tablet</div><div class="bp-val">≤ 860px</div><div class="bp-desc">Grids em 2 colunas</div></div>
+      <div class="bp"><div class="bp-name">Desktop</div><div class="bp-val">≥ 861px</div><div class="bp-desc">Layout completo · sidebar fixa</div></div>
+      <div class="bp"><div class="bp-name">Wide</div><div class="bp-val">≥ 1180px</div><div class="bp-desc">Largura máxima do conteúdo</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- === 7. DARK MODE === -->
+<section id="darkmode">
+  <div class="wrap">
+    <span class="section-num">07 — Dark Mode (Modo Principal)</span>
+    <h2>O Grimório <em>vive na penumbra</em>.</h2>
+    <p class="lede">O dark mode não é uma alternativa — é o modo padrão da plataforma. Uma sessão de D&D acontece à luz de velas e telas atenuadas. A interface abaixo demonstra a paleta e os componentes trabalhando juntos numa tela real de dashboard de mestre.</p>
+
+    <div class="app-frame">
+      <div class="app-topbar">
+        <div class="app-logo"><span class="mark">G</span> Grimório</div>
+        <div class="app-top-right">
+          <span class="mono">Sessão · Cripta de Barovia</span>
+          <div class="app-avatar">DM</div>
+        </div>
+      </div>
+      <div class="app-body">
+        <aside class="app-sidebar">
+          <div class="side-label">Campanha</div>
+          <div class="side-item active"><svg viewBox="0 0 24 24"><path d="M3 12l9-9 9 9M5 10v10h14V10"/></svg> Painel</div>
+          <div class="side-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg> Personagens</div>
+          <div class="side-item"><svg viewBox="0 0 24 24"><path d="M5 4h11l3 3v13H5zM8 4v16"/></svg> Grimório</div>
+          <div class="side-item"><svg viewBox="0 0 24 24"><path d="M12 2a5 5 0 015 5c0 3-5 8-5 8s-5-5-5-8a5 5 0 015-5z"/></svg> Encontros</div>
+          <div class="side-label">Mesa</div>
+          <div class="side-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> Iniciativa</div>
+          <div class="side-item"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="14" rx="2"/><path d="M3 10h18M8 3v4"/></svg> Crônica</div>
+        </aside>
+        <main class="app-main">
+          <div class="app-main-head">
+            <div>
+              <div class="app-h1">Painel do Mestre</div>
+              <div class="app-sub">Sessão 12 · A party desce à cripta selada</div>
+            </div>
+            <a class="btn btn-primary">+ Novo Encontro</a>
+          </div>
+          <div class="kpi-row">
+            <div class="kpi"><div class="label">Jogadores</div><div class="value">4</div><div class="delta">todos presentes</div></div>
+            <div class="kpi"><div class="label">Nível médio</div><div class="value"><em>7</em></div><div class="delta">+1 desde sessão 10</div></div>
+            <div class="kpi"><div class="label">Encontros hoje</div><div class="value">3</div><div class="delta" style="color:var(--stone-500)">1 restante</div></div>
+            <div class="kpi"><div class="label">XP concedido</div><div class="value" style="font-size:26px">2.450</div><div class="delta">nesta sessão</div></div>
+          </div>
+          <div class="tbl-wrap">
+            <table class="grimoire">
+              <thead><tr><th>Ordem</th><th>Combatente</th><th>Iniciativa</th><th>PV</th><th>Status</th></tr></thead>
+              <tbody>
+                <tr><td>1</td><td class="spell">Thalindra</td><td>21</td><td>42/42</td><td><span class="badge badge-success">Saudável</span></td></tr>
+                <tr><td>2</td><td class="spell">Dragão Jovem</td><td>18</td><td>136/178</td><td><span class="badge badge-error">Hostil</span></td></tr>
+                <tr><td>3</td><td class="spell">Bruenor</td><td>14</td><td>51/76</td><td><span class="badge badge-warning">Ferido</span></td></tr>
+                <tr><td>4</td><td class="spell">Vex</td><td>9</td><td>38/38</td><td><span class="badge badge-info">Concentração</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <div class="palette-rationale" style="margin-top:40px">
+      <div>
+        <h4>Por que dark por padrão?</h4>
+        <p>Sessões de RPG acontecem em ambientes de luz baixa. Um fundo escuro reduz o ofuscamento na mesa, preserva a atmosfera imersiva e diminui a fadiga ocular em jornadas de várias horas. A luz emana do conteúdo, não da tela inteira.</p>
+      </div>
+      <div>
+        <h4>Como a paleta se comporta</h4>
+        <p>Neutros de pedra criam profundidade em camadas — cada superfície é levemente mais clara que a anterior. O violeta arcano guia a atenção sem gritar, e as cores funcionais mantêm contraste suficiente para leitura segura de status críticos em combate.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- === FOOTER === -->
+<footer>
+  <div class="wrap">
+    <div class="footer-mark">Grimório · <em>D&D Companion</em></div>
+    <p>Brandbook v1.0 · Identidade Visual</p>
+    <p>Imersivo · Contemporâneo · Temático com sobriedade</p>
+  </div>
+</footer>
+
+</body>
+</html>

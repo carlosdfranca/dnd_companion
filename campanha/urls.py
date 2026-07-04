@@ -24,6 +24,7 @@ urlpatterns = [
 
     # Itens
     path("itens/", views.ItemListView.as_view(), name="item_list"),
+    path("itens/moedas/", views.atualizar_moedas, name="moedas_atualizar"),
     path("itens/novo/", views.ItemCreateView.as_view(), name="item_create"),
     path("itens/<int:pk>/editar/", views.ItemUpdateView.as_view(), name="item_update"),
     path("itens/<int:pk>/excluir/", views.ItemDeleteView.as_view(), name="item_delete"),

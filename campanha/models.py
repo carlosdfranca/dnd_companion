@@ -206,19 +206,28 @@ class RecursoDeCombate(models.Model):
 
 
 class ItemInventario(models.Model):
-    """Item do inventário do personagem."""
+    """Item do inventário do personagem.
+
+    'tipo' indica a localização (equipado ou na mochila). Se o item é mágico
+    e/ou requer sintonização são flags independentes — um item pode ser
+    equipado e mágico ao mesmo tempo.
+    """
 
     TIPOS = [
         ("equipado", "Equipado"),
         ("mochila", "Mochila"),
-        ("magico", "Item Mágico"),
     ]
 
     personagem = models.ForeignKey(
         Personagem, related_name="itens", on_delete=models.CASCADE
     )
     nome = models.CharField("Nome", max_length=150)
-    tipo = models.CharField("Tipo", max_length=10, choices=TIPOS, default="mochila")
+    tipo = models.CharField("Localização", max_length=10, choices=TIPOS, default="mochila")
+    magico = models.BooleanField("Item Mágico", default=False)
+    requer_sintonizacao = models.BooleanField(
+        "Requer Sintonização", default=False,
+        help_text="Itens sintonizados não podem ser trocados livremente (exige descanso).",
+    )
     quantidade = models.PositiveIntegerField("Quantidade", default=1)
     atributos_efeito = models.TextField("Atributos / Efeito", blank=True)
     lore = models.TextField("Lore / História", blank=True)

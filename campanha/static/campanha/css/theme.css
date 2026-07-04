@@ -1,53 +1,113 @@
-/* ── CSS Variables: Dark Mode (padrão) ─────────────────────────────── */
+/* ══════════════════════════════════════════════════════════════════════
+   GRIMÓRIO — D&D COMPANION · Brandbook v1.0
+   Dark mode é o modo único e padrão da plataforma.
+   ════════════════════════════════════════════════════════════════════ */
+
 :root {
-  --bel-surface-1:      #13140f;
-  --bel-surface-2:      #191c14;
-  --bel-surface-3:      #1f2319;
-  --bel-surface-raised: #232618;
+  /* === PALETA PRIMÁRIA — ARCANA === */
+  --arcane-900:      #1A0E2E;   /* violeta-noite profundo — base do sistema */
+  --arcane-700:      #2D1B4E;   /* violeta arcano — superfícies elevadas */
+  --arcane-500:      #6D4AC7;   /* magia viva — primária aplicada */
+  --arcane-400:      #8B6BE0;   /* hover / brilho arcano */
+  --arcane-glow:     #A98CFF;   /* accent luminoso — realces raros */
 
-  --bel-text-primary:   #e8ebe4;
-  --bel-text-secondary: #b8bacf;
-  --bel-text-muted:     #798071;
+  /* === SECUNDÁRIA — BRASA === */
+  --ember-deep:      #7A2318;   /* brasa profunda */
+  --ember:           #C4472C;   /* fogo — ação secundária / dano */
+  --ember-light:     #E0653F;   /* hover brasa */
 
-  --bel-border:         rgba(255,255,255,0.07);
-  --bel-border-hover:   rgba(255,255,255,0.14);
+  /* === ACCENT METÁLICO — OURO ANTIGO === */
+  --gold:            #C9A24B;   /* ouro fosco — detalhes nobres */
+  --gold-soft:       #E3C878;   /* ouro claro — realce sobre escuro */
 
-  --bel-accent:         #999ac6;
-  --bel-accent-dim:     rgba(153,154,198,0.15);
+  /* === NEUTROS — PEDRA & PERGAMINHO === */
+  --stone-950:       #0E0B14;   /* background principal (dark) */
+  --stone-900:       #14101E;   /* background app */
+  --stone-850:       #1B1626;   /* superfície / card */
+  --stone-800:       #241E32;   /* superfície elevada */
+  --stone-700:       #322A44;   /* borders sutis */
+  --stone-600:       #453B5C;   /* borders / divisores */
+  --stone-500:       #6E6484;   /* texto terciário */
+  --stone-400:       #9A90AE;   /* texto secundário */
+  --stone-300:       #C7BFD6;   /* texto de apoio */
 
-  --bel-navbar-bg:      #10120d;
-  --bel-card-bg:        var(--bel-surface-2);
-  --bel-card-header-bg: var(--bel-surface-3);
-}
+  --parchment:       #EDE6D6;   /* texto principal — pergaminho quente */
+  --parchment-soft:  #C9C0AE;   /* texto suave sobre escuro */
 
-/* ── Light Mode overrides ───────────────────────────────────────────── */
-html[data-theme="light"] {
-  --bel-surface-1:      #e8ebe4;
-  --bel-surface-2:      #ffffff;
-  --bel-surface-3:      #d2d5dd;
-  --bel-surface-raised: #f4f6f2;
+  /* === FUNCIONAIS === */
+  --status-success:  #4FA574;   /* verde-cura / poção */
+  --status-warn:     #D89B3C;   /* âmbar — atenção */
+  --status-error:    #D0463A;   /* rubi — perigo / crítico */
+  --status-info:     #4A8FC7;   /* azul-mana — informação */
 
-  --bel-text-primary:   #1a1d15;
-  --bel-text-secondary: #4a4c5e;
-  --bel-text-muted:     #7a7d74;
+  /* === TIPOGRAFIA === */
+  --font-display: 'Cormorant Garamond', Georgia, serif;
+  --font-body:    'Space Grotesk', -apple-system, sans-serif;
+  --font-mono:    'JetBrains Mono', monospace;
 
-  --bel-border:         rgba(0,0,0,0.09);
-  --bel-border-hover:   rgba(0,0,0,0.18);
+  /* === TOKENS — RAIO === */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-full: 999px;
 
-  --bel-accent:         #7e7fb8;
-  --bel-accent-dim:     rgba(126,127,184,0.12);
+  /* === TOKENS — SOMBRAS (glow arcano) === */
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.4), 0 1px 3px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.45), 0 8px 24px rgba(0,0,0,0.3);
+  --shadow-lg: 0 12px 32px rgba(0,0,0,0.5), 0 24px 64px rgba(0,0,0,0.4);
+  --glow-arcane: 0 0 24px rgba(109,74,199,0.35);
+  --glow-gold: 0 0 20px rgba(201,162,75,0.25);
 
-  --bel-navbar-bg:      #1f2319;
-  --bel-card-bg:        var(--bel-surface-2);
-  --bel-card-header-bg: var(--bel-surface-3);
+  /* === TOKENS — ESPAÇAMENTO === */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-6: 24px;
+  --sp-8: 32px;
+  --sp-12: 48px;
+  --sp-16: 64px;
+  --sp-24: 96px;
+
+  /* ══════════════════════════════════════════════════════════════════
+     ALIASES SEMÂNTICOS (--bel-*) — mapeiam os componentes existentes
+     para os tokens do brandbook. Reskina toda a UI de uma vez.
+     ══════════════════════════════════════════════════════════════════ */
+  --bel-surface-1:      var(--stone-950);   /* body / background */
+  --bel-surface-2:      var(--stone-900);   /* card base */
+  --bel-surface-3:      var(--stone-850);   /* superfície interna */
+  --bel-surface-raised: var(--stone-800);   /* superfície elevada */
+
+  --bel-text-primary:   var(--parchment);
+  --bel-text-secondary: var(--stone-300);
+  --bel-text-muted:     var(--stone-500);
+
+  --bel-border:         var(--stone-700);
+  --bel-border-hover:   var(--stone-600);
+
+  /* accent = highlight luminoso (texto/ênfase); primary = interativo (ação/foco) */
+  --bel-accent:         var(--arcane-glow);
+  --bel-accent-dim:     rgba(109,74,199,0.18);
+  --bel-primary:        var(--arcane-500);
+
+  --bel-navbar-bg:      var(--arcane-900);
+  --bel-card-bg:        var(--stone-850);
+  --bel-card-header-bg: var(--stone-800);
 }
 
 /* ── Base ───────────────────────────────────────────────────────────── */
 body {
   background-color: var(--bel-surface-1) !important;
   color: var(--bel-text-primary) !important;
-  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-  font-size: 0.95rem;
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background: rgba(109,74,199,0.4);
 }
 
 /* ── Navbar ─────────────────────────────────────────────────────────── */
@@ -57,18 +117,28 @@ body {
 }
 
 .bel-brand {
+  font-family: var(--font-display);
   color: var(--bel-accent) !important;
-  font-weight: 700;
-  font-size: 1.15rem;
-  letter-spacing: -.01em;
+  font-weight: 600;
+  font-size: 1.4rem;
+  letter-spacing: 0;
 }
 
 .bel-navbar .nav-link {
-  color: var(--bel-text-secondary) !important;
+  color: var(--stone-400) !important;
   font-size: 0.9rem;
+  border-radius: var(--radius-sm);
+  padding: .35rem .7rem;
+  transition: background .15s, color .15s;
 }
 .bel-navbar .nav-link:hover {
   color: var(--bel-text-primary) !important;
+  background: var(--stone-800);
+}
+.bel-navbar .nav-link.active,
+.bel-navbar .nav-item.dropdown.show > .nav-link {
+  color: var(--arcane-glow) !important;
+  background: rgba(109,74,199,0.2);
 }
 
 .bel-dropdown {
@@ -83,38 +153,39 @@ body {
   color: var(--bel-text-primary) !important;
 }
 
-.bel-theme-btn {
-  width: 32px; height: 32px;
-  border-radius: 8px;
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.10);
-  color: var(--bel-text-muted);
-  cursor: pointer;
-  transition: background .15s, color .15s, transform .2s;
-  display: flex; align-items: center; justify-content: center;
-}
-.bel-theme-btn:hover {
-  background: rgba(255,255,255,0.12);
-  color: var(--bel-text-primary);
-  transform: rotate(20deg) scale(1.1);
-}
-
 /* ── Cards ──────────────────────────────────────────────────────────── */
 .bel-card {
+  position: relative;
   background-color: var(--bel-card-bg);
   border: 1px solid var(--bel-border);
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   overflow: hidden;
+  transition: border-color .25s, transform .25s, box-shadow .25s;
+}
+/* Barra de topo arcano→ouro (marca do brandbook) */
+.bel-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--arcane-500), var(--gold));
+  opacity: .8;
+}
+.bel-card:hover {
+  border-color: var(--arcane-500);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
 }
 .bel-card-header {
   background-color: var(--bel-card-header-bg);
   border-bottom: 1px solid var(--bel-border);
   padding: .55rem .85rem;
-  font-size: .85rem;
-  font-weight: 600;
+  font-family: var(--font-mono);
+  font-size: .72rem;
+  font-weight: 500;
   text-transform: uppercase;
-  letter-spacing: .04em;
-  color: var(--bel-text-secondary);
+  letter-spacing: .1em;
+  color: var(--gold);
 }
 
 /* ── Links ──────────────────────────────────────────────────────────── */
@@ -124,13 +195,14 @@ body {
 }
 .bel-link:hover { color: var(--bel-text-primary); text-decoration: underline; }
 
-/* ── Section labels ─────────────────────────────────────────────────── */
+/* ── Section labels (eyebrows em mono) ──────────────────────────────── */
 .bel-section-label {
-  font-size: .78rem;
-  font-weight: 600;
+  font-family: var(--font-mono);
+  font-size: .7rem;
+  font-weight: 500;
   text-transform: uppercase;
-  letter-spacing: .05em;
-  color: var(--bel-text-muted);
+  letter-spacing: .1em;
+  color: var(--gold);
   margin-bottom: .4rem;
   margin-top: .6rem;
 }
@@ -143,9 +215,11 @@ body {
 
 /* ── Character name ─────────────────────────────────────────────────── */
 .bel-char-name {
+  font-family: var(--font-display);
   color: var(--bel-accent);
-  font-size: 1.6rem;
-  font-weight: 700;
+  font-size: 1.9rem;
+  font-weight: 600;
+  letter-spacing: -.01em;
 }
 
 /* ── HP block (dashboard) ───────────────────────────────────────────── */
@@ -292,57 +366,199 @@ body {
 /* ── Text block (long text) ──────────────────────────────────────────── */
 .bel-text-block { line-height: 1.7; color: var(--bel-text-secondary); }
 
-/* ── Tables ──────────────────────────────────────────────────────────── */
+/* ── Tables (grimoire) ───────────────────────────────────────────────── */
 .bel-table {
-  color: var(--bel-text-primary) !important;
+  color: var(--stone-300) !important;
 }
 .bel-table thead th {
-  color: var(--bel-text-muted);
-  font-size: .78rem;
+  background-color: var(--stone-800);
+  color: var(--gold);
+  font-family: var(--font-mono);
+  font-size: .66rem;
   text-transform: uppercase;
-  letter-spacing: .04em;
+  letter-spacing: .1em;
   border-bottom-color: var(--bel-border);
-  font-weight: 600;
+  font-weight: 500;
 }
 .bel-table td {
   border-bottom-color: var(--bel-border) !important;
   vertical-align: middle;
+  padding: .75rem 1rem;
+}
+.bel-table tbody tr:hover td {
+  background-color: var(--stone-800);
 }
 
-/* ── NPC relation badges ─────────────────────────────────────────────── */
-.bel-relacao-aliado    { background-color: #1a5c38 !important; color: #a0f0b0 !important; }
-.bel-relacao-suspeito  { background-color: #6b4a0a !important; color: #f0d070 !important; }
-.bel-relacao-inimigo   { background-color: #5c1a1a !important; color: #f0a0a0 !important; }
-.bel-relacao-neutro    { background-color: #2a2a40 !important; color: #a0a0c0 !important; }
-.bel-relacao-desconhecido { background-color: #1e1e2e !important; color: #7070a0 !important; }
+/* ── NPC relation badges (tokens de status + alfa) ───────────────────── */
+.bel-relacao-aliado       { background-color: rgba(79,165,116,0.15) !important;  color: var(--status-success) !important; }
+.bel-relacao-suspeito     { background-color: rgba(216,155,60,0.15) !important;  color: var(--status-warn) !important; }
+.bel-relacao-inimigo      { background-color: rgba(208,70,58,0.15) !important;   color: var(--status-error) !important; }
+.bel-relacao-neutro       { background-color: rgba(109,74,199,0.18) !important;  color: var(--arcane-glow) !important; }
+.bel-relacao-desconhecido { background-color: var(--stone-800) !important;       color: var(--stone-400) !important; }
 
 /* ── Bootstrap overrides for dark mode compatibility ─────────────────── */
 .form-control, .form-select {
-  background-color: var(--bel-surface-3) !important;
-  border-color: var(--bel-border) !important;
+  background-color: var(--stone-900) !important;
+  border-color: var(--stone-600) !important;
+  border-radius: var(--radius-sm) !important;
   color: var(--bel-text-primary) !important;
 }
+.form-control::placeholder { color: var(--stone-500) !important; }
 .form-control:focus, .form-select:focus {
-  border-color: var(--bel-accent) !important;
-  box-shadow: 0 0 0 .2rem var(--bel-accent-dim) !important;
+  border-color: var(--arcane-500) !important;
+  box-shadow: 0 0 0 3px rgba(109,74,199,0.25) !important;
 }
-.form-label { color: var(--bel-text-secondary); font-size: .88rem; margin-bottom: .3rem; }
+.form-label { color: var(--bel-text-secondary); font-size: 13px; font-weight: 600; margin-bottom: .3rem; }
 .form-check-label { color: var(--bel-text-secondary); font-size: .88rem; }
+.form-check-input:checked { background-color: var(--arcane-500); border-color: var(--arcane-500); }
+.form-check-input:focus { border-color: var(--arcane-500); box-shadow: 0 0 0 3px rgba(109,74,199,0.25); }
 
-html[data-theme="light"] .form-control,
-html[data-theme="light"] .form-select {
-  background-color: #ffffff !important;
-  border-color: rgba(0,0,0,0.18) !important;
-  color: #1a1d15 !important;
+/* ── Botões (brandbook) ─────────────────────────────────────────────── */
+.btn {
+  --bs-btn-border-radius: var(--radius-sm);
+  --bs-btn-font-family: var(--font-body);
+  --bs-btn-font-weight: 600;
+  --bs-btn-focus-shadow-rgb: 109,74,199;
+  letter-spacing: .01em;
 }
+
+.btn-primary {
+  --bs-btn-color: #fff;
+  --bs-btn-bg: var(--arcane-500);
+  --bs-btn-border-color: var(--arcane-500);
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: var(--arcane-400);
+  --bs-btn-hover-border-color: var(--arcane-400);
+  --bs-btn-active-bg: var(--arcane-400);
+  --bs-btn-active-border-color: var(--arcane-400);
+  --bs-btn-disabled-bg: var(--arcane-500);
+  --bs-btn-disabled-border-color: var(--arcane-500);
+}
+.btn-primary:hover { box-shadow: var(--glow-arcane); }
+
+.btn-outline-primary {
+  --bs-btn-color: var(--arcane-glow);
+  --bs-btn-border-color: var(--arcane-500);
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: var(--arcane-500);
+  --bs-btn-hover-border-color: var(--arcane-500);
+  --bs-btn-active-bg: var(--arcane-500);
+  --bs-btn-active-border-color: var(--arcane-500);
+}
+
+/* secondary = transparente/borda pedra, hover arcano (spec brandbook) */
+.btn-outline-secondary {
+  --bs-btn-color: var(--parchment);
+  --bs-btn-border-color: var(--stone-600);
+  --bs-btn-hover-color: var(--parchment);
+  --bs-btn-hover-bg: var(--stone-800);
+  --bs-btn-hover-border-color: var(--arcane-500);
+  --bs-btn-active-color: var(--parchment);
+  --bs-btn-active-bg: var(--stone-800);
+  --bs-btn-active-border-color: var(--arcane-500);
+}
+
+.btn-outline-success {
+  --bs-btn-color: var(--status-success);
+  --bs-btn-border-color: var(--status-success);
+  --bs-btn-hover-color: var(--stone-950);
+  --bs-btn-hover-bg: var(--status-success);
+  --bs-btn-hover-border-color: var(--status-success);
+  --bs-btn-active-bg: var(--status-success);
+  --bs-btn-active-border-color: var(--status-success);
+}
+.btn-success {
+  --bs-btn-color: #fff;
+  --bs-btn-bg: var(--status-success);
+  --bs-btn-border-color: var(--status-success);
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: #5cb884;
+  --bs-btn-hover-border-color: #5cb884;
+  --bs-btn-active-bg: #5cb884;
+}
+
+.btn-outline-info {
+  --bs-btn-color: var(--status-info);
+  --bs-btn-border-color: var(--status-info);
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: var(--status-info);
+  --bs-btn-hover-border-color: var(--status-info);
+  --bs-btn-active-bg: var(--status-info);
+}
+
+/* danger = brasa (ember) */
+.btn-danger {
+  --bs-btn-color: #fff;
+  --bs-btn-bg: var(--ember);
+  --bs-btn-border-color: var(--ember);
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: var(--ember-light);
+  --bs-btn-hover-border-color: var(--ember-light);
+  --bs-btn-active-bg: var(--ember-light);
+  --bs-btn-active-border-color: var(--ember-light);
+}
+.btn-danger:hover { box-shadow: 0 0 20px rgba(196,71,44,0.35); }
+.btn-outline-danger {
+  --bs-btn-color: var(--ember-light);
+  --bs-btn-border-color: var(--ember);
+  --bs-btn-hover-color: #fff;
+  --bs-btn-hover-bg: var(--ember);
+  --bs-btn-hover-border-color: var(--ember);
+  --bs-btn-active-bg: var(--ember);
+  --bs-btn-active-border-color: var(--ember);
+}
+
+.btn-link {
+  --bs-btn-color: var(--arcane-glow);
+  --bs-btn-hover-color: var(--parchment);
+  text-decoration: none;
+}
+
+/* ── Badges (brandbook — bg alfa + texto na cor) ─────────────────────── */
+.badge { font-weight: 600; letter-spacing: .01em; }
+.badge.bg-secondary {
+  background-color: var(--stone-800) !important;
+  color: var(--stone-400) !important;
+}
+.badge.bg-info {
+  background-color: rgba(74,143,199,0.15) !important;
+  color: var(--status-info) !important;
+}
+.badge.bg-success {
+  background-color: rgba(79,165,116,0.15) !important;
+  color: var(--status-success) !important;
+}
+.badge.bg-warning {
+  background-color: rgba(216,155,60,0.15) !important;
+  color: var(--status-warn) !important;
+}
+.badge.bg-danger {
+  background-color: rgba(208,70,58,0.15) !important;
+  color: var(--status-error) !important;
+}
+
+/* ── Alerts (mensagens Django) ───────────────────────────────────────── */
+.alert-success { --bs-alert-color: var(--status-success); --bs-alert-bg: rgba(79,165,116,0.12); --bs-alert-border-color: rgba(79,165,116,0.3); }
+.alert-danger, .alert-error { --bs-alert-color: var(--status-error); --bs-alert-bg: rgba(208,70,58,0.12); --bs-alert-border-color: rgba(208,70,58,0.3); }
+.alert-warning { --bs-alert-color: var(--status-warn); --bs-alert-bg: rgba(216,155,60,0.12); --bs-alert-border-color: rgba(216,155,60,0.3); }
+.alert-info { --bs-alert-color: var(--status-info); --bs-alert-bg: rgba(74,143,199,0.12); --bs-alert-border-color: rgba(74,143,199,0.3); }
+
+/* ── Utilitários de texto (Bootstrap → brand) ────────────────────────── */
+.text-muted   { color: var(--stone-500) !important; }
+.text-warning { color: var(--status-warn) !important; }
+.text-danger  { color: var(--status-error) !important; }
+.text-success { color: var(--status-success) !important; }
+.text-info    { color: var(--status-info) !important; }
+.text-primary { color: var(--arcane-glow) !important; }
 
 /* ── Dashboard ───────────────────────────────────────────────────────── */
 .bel-dash-char-name {
-  font-size: 1.55rem;
-  font-weight: 800;
+  font-family: var(--font-display);
+  font-size: 1.9rem;
+  font-weight: 600;
   color: var(--bel-accent);
   line-height: 1.15;
-  letter-spacing: -.02em;
+  letter-spacing: -.01em;
 }
 
 /* HP strip — sem padding lateral para barra full-bleed */
@@ -414,7 +630,7 @@ html[data-theme="light"] .form-select {
   color: var(--bel-accent);
   opacity: .75;
 }
-.bel-mission-dot-principal  { color: #d4a93a !important; opacity: 1; }
+.bel-mission-dot-principal  { color: var(--gold) !important; opacity: 1; }
 .bel-mission-dot-contrato   { color: var(--bel-accent) !important; opacity: 1; }
 .bel-mission-dot-secundaria { color: var(--bel-text-muted) !important; opacity: .9; }
 
@@ -473,7 +689,7 @@ html[data-theme="light"] .form-select {
 }
 
 .bel-nota-pre {
-  font-family: 'Segoe UI', system-ui, sans-serif;
+  font-family: var(--font-body);
   font-size: .85rem;
   line-height: 1.6;
   color: var(--bel-text-secondary);
@@ -498,7 +714,7 @@ html[data-theme="light"] .form-select {
 .bel-nota-md h2,
 .bel-nota-md h3,
 .bel-nota-md h4 {
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: var(--font-display);
   color: var(--bel-accent);
   margin: 1rem 0 .35rem;
   line-height: 1.25;
@@ -536,7 +752,7 @@ html[data-theme="light"] .form-select {
 }
 
 .bel-nota-md code {
-  font-family: 'Cascadia Code', 'Consolas', monospace;
+  font-family: var(--font-mono);
   font-size: .82rem;
   background: var(--bel-surface-raised);
   border: 1px solid var(--bel-border);
@@ -615,12 +831,12 @@ html[data-theme="light"] .form-select {
 }
 
 /* Cor da borda superior por tipo */
-.bel-kanban-principal { border-top: 3px solid #d4a93a; }
+.bel-kanban-principal { border-top: 3px solid var(--gold); }
 .bel-kanban-contrato  { border-top: 3px solid var(--bel-accent); }
 .bel-kanban-secundaria{ border-top: 3px solid var(--bel-text-muted); }
 
 /* Cor do título por tipo */
-.bel-kanban-principal .bel-kanban-col-title { color: #d4a93a; }
+.bel-kanban-principal .bel-kanban-col-title { color: var(--gold); }
 .bel-kanban-contrato  .bel-kanban-col-title { color: var(--bel-accent); }
 .bel-kanban-secundaria .bel-kanban-col-title{ color: var(--bel-text-muted); }
 
@@ -663,7 +879,7 @@ html[data-theme="light"] .form-select {
   flex-shrink: 0;
   margin-top: .3rem;
 }
-.bel-kanban-dot-principal  { background: #d4a93a; }
+.bel-kanban-dot-principal  { background: var(--gold); }
 .bel-kanban-dot-contrato   { background: var(--bel-accent); }
 .bel-kanban-dot-secundaria { background: var(--bel-text-muted); }
 
@@ -682,7 +898,7 @@ html[data-theme="light"] .form-select {
 .bel-kanban-concluida:hover { opacity: 1; }
 
 /* Badges de tipo nas concluídas */
-.bel-badge-tipo-principal  { background: rgba(212,169,58,.18)  !important; color: #d4a93a !important; }
+.bel-badge-tipo-principal  { background: rgba(201,162,75,.18)  !important; color: var(--gold) !important; }
 .bel-badge-tipo-contrato   { background: var(--bel-accent-dim) !important; color: var(--bel-accent) !important; }
 .bel-badge-tipo-secundaria { background: rgba(121,128,113,.18) !important; color: var(--bel-text-muted) !important; }
 
@@ -699,7 +915,7 @@ html[data-theme="light"] .form-select {
   font-size: .75rem;
   font-weight: 500;
   text-decoration: none;
-  border: 1px solid rgba(255,255,255,.08);
+  border: 1px solid var(--stone-700);
   transition: opacity .15s, transform .1s;
   line-height: 1.4;
 }
@@ -770,8 +986,8 @@ html[data-theme="light"] .form-select {
   padding: .75rem .5rem;
 }
 
-.bel-pv-dano { background: rgba(220,53,69,.06); border-right: 1px solid var(--bel-border); }
-.bel-pv-cura { background: rgba(25,135,84,.06); }
+.bel-pv-dano { background: rgba(208,70,58,.06); border-right: 1px solid var(--bel-border); }
+.bel-pv-cura { background: rgba(79,165,116,.06); }
 
 .bel-pv-action-label {
   font-size: .75rem;
@@ -780,8 +996,8 @@ html[data-theme="light"] .form-select {
   letter-spacing: .06em;
   color: var(--bel-text-muted);
 }
-.bel-pv-dano .bel-pv-action-label { color: #e57373; }
-.bel-pv-cura .bel-pv-action-label { color: #66bb6a; }
+.bel-pv-dano .bel-pv-action-label { color: var(--status-error); }
+.bel-pv-cura .bel-pv-action-label { color: var(--status-success); }
 
 .bel-pv-input {
   width: 100%;
@@ -796,8 +1012,8 @@ html[data-theme="light"] .form-select {
   padding: .1rem .3rem;
   box-shadow: none !important;
 }
-.bel-pv-dano .bel-pv-input:focus { border-bottom-color: #e57373 !important; }
-.bel-pv-cura .bel-pv-input:focus { border-bottom-color: #66bb6a !important; }
+.bel-pv-dano .bel-pv-input:focus { border-bottom-color: var(--status-error) !important; }
+.bel-pv-cura .bel-pv-input:focus { border-bottom-color: var(--status-success) !important; }
 .bel-pv-input::-webkit-inner-spin-button,
 .bel-pv-input::-webkit-outer-spin-button { opacity: 0; }
 
@@ -811,10 +1027,10 @@ html[data-theme="light"] .form-select {
   cursor: pointer;
   transition: background .15s;
 }
-.bel-pv-btn-dano { background: rgba(220,53,69,.18); color: #e57373; }
-.bel-pv-btn-dano:hover { background: rgba(220,53,69,.32); }
-.bel-pv-btn-cura { background: rgba(25,135,84,.18); color: #66bb6a; }
-.bel-pv-btn-cura:hover { background: rgba(25,135,84,.32); }
+.bel-pv-btn-dano { background: rgba(208,70,58,.18); color: var(--status-error); }
+.bel-pv-btn-dano:hover { background: rgba(208,70,58,.32); }
+.bel-pv-btn-cura { background: rgba(79,165,116,.18); color: var(--status-success); }
+.bel-pv-btn-cura:hover { background: rgba(79,165,116,.32); }
 
 /* ── Ficha de personagem ─────────────────────────────────────────────── */
 
@@ -824,7 +1040,7 @@ html[data-theme="light"] .form-select {
 }
 
 .bel-ficha-nome {
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: var(--font-display);
   font-size: 2rem;
   font-weight: 700;
   letter-spacing: -.015em;
@@ -845,7 +1061,7 @@ html[data-theme="light"] .form-select {
 }
 .bel-ficha-tag-class {
   background: var(--bel-accent-dim);
-  border-color: rgba(153,154,198,.4);
+  border-color: rgba(109,74,199,.4);
   color: var(--bel-accent);
 }
 
@@ -963,7 +1179,7 @@ html[data-theme="light"] .form-select {
 
 /* Georgia serif for the modifier — the only serif element in the UI */
 .bel-attr-col-mod {
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: var(--font-display);
   font-size: 2.1rem;
   font-weight: 700;
   color: var(--bel-accent);
@@ -1068,7 +1284,7 @@ html[data-theme="light"] .form-select {
 }
 
 .bel-attr-edit-mod {
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: var(--font-display);
   font-size: 1.05rem;
   font-weight: 700;
   color: var(--bel-accent);
@@ -1162,3 +1378,189 @@ html[data-theme="light"] .form-select {
   justify-content: center;
   font-weight: 600;
 }
+
+/* ══════════════════════════════════════════════════════════════════════
+   INVENTÁRIO — moedas, itens, tags mágicas e de sintonização
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ── Moedas (edição inline) ──────────────────────────────────────────── */
+.bel-coin-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .6rem;
+  padding: .85rem;
+  align-items: stretch;
+}
+
+.bel-coin-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .15rem;
+  flex: 1 1 88px;
+  min-width: 84px;
+  background: var(--bel-surface-3);
+  border: 1px solid var(--bel-border);
+  border-top: 3px solid var(--coin-color, var(--bel-border));
+  border-radius: 10px;
+  padding: .5rem .4rem;
+}
+
+.bel-coin-lbl {
+  font-family: var(--font-mono);
+  font-size: .7rem;
+  font-weight: 600;
+  letter-spacing: .08em;
+  color: var(--coin-color, var(--bel-text-muted));
+}
+
+.bel-coin-box input.form-control {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  text-align: center;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--bel-text-primary) !important;
+  padding: 0;
+  width: 100%;
+  -moz-appearance: textfield;
+}
+.bel-coin-box input.form-control::-webkit-inner-spin-button,
+.bel-coin-box input.form-control::-webkit-outer-spin-button { opacity: 0; }
+
+.bel-coin-name {
+  font-size: .62rem;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: var(--bel-text-muted);
+}
+
+.bel-coin-pc { --coin-color: #C77B3F; }   /* cobre  */
+.bel-coin-pp { --coin-color: #AEB6C2; }   /* prata  */
+.bel-coin-pe { --coin-color: #C3CC6E; }   /* electro */
+.bel-coin-po { --coin-color: var(--gold); }/* ouro  */
+.bel-coin-pl { --coin-color: #DCE4EE; }   /* platina */
+
+.bel-coin-save {
+  display: flex;
+  align-items: center;
+  flex: 1 1 130px;
+  min-width: 120px;
+}
+
+/* ── Lista de itens ──────────────────────────────────────────────────── */
+.bel-inv-list { display: flex; flex-direction: column; }
+
+.bel-inv-row {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  padding: .6rem .85rem;
+  border-bottom: 1px solid var(--bel-border);
+  border-left: 3px solid transparent;
+  transition: background .15s;
+}
+.bel-inv-row:last-child { border-bottom: none; }
+.bel-inv-row:hover { background: var(--bel-surface-3); }
+.bel-inv-row-magico { border-left-color: var(--bel-accent); }
+
+.bel-inv-main { flex: 1; min-width: 0; }
+
+.bel-inv-name-line {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .4rem;
+}
+
+.bel-inv-name { font-weight: 600; color: var(--bel-text-primary); }
+
+.bel-inv-qty {
+  font-family: var(--font-mono);
+  font-size: .78rem;
+  font-weight: 600;
+  color: var(--bel-text-muted);
+  background: var(--bel-surface-raised);
+  border-radius: 20px;
+  padding: .05rem .45rem;
+}
+
+.bel-inv-lore-icon { color: var(--bel-text-muted); font-size: .85rem; }
+
+.bel-inv-effect {
+  font-size: .82rem;
+  color: var(--bel-text-muted);
+  margin-top: .2rem;
+  line-height: 1.4;
+}
+
+.bel-inv-actions { display: flex; gap: .3rem; flex-shrink: 0; }
+
+/* ── Tags de item (mágico / sintonização) ────────────────────────────── */
+.bel-tag-item {
+  display: inline-flex;
+  align-items: center;
+  gap: .25rem;
+  font-size: .68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  padding: .1rem .5rem;
+  border-radius: 20px;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+.bel-tag-item i { font-size: .8rem; }
+
+.bel-tag-magico {
+  background: var(--bel-accent-dim);
+  border-color: rgba(109,74,199,.45);
+  color: var(--bel-accent);
+}
+.bel-tag-sintonia {
+  background: rgba(201,162,75,.15);
+  border-color: rgba(201,162,75,.45);
+  color: var(--gold-soft);
+}
+
+/* ── Contador de mágicos equipados ───────────────────────────────────── */
+.bel-magico-counter {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: .7rem;
+  font-weight: 600;
+  letter-spacing: .04em;
+  padding: .12rem .55rem;
+  border-radius: 20px;
+  background: var(--bel-accent-dim);
+  color: var(--bel-accent);
+  border: 1px solid rgba(109,74,199,.4);
+  text-transform: none;
+}
+.bel-magico-counter-full {
+  background: rgba(201,162,75,.15);
+  color: var(--gold-soft);
+  border-color: rgba(201,162,75,.5);
+}
+.bel-magico-counter-over {
+  background: rgba(208,70,58,.15);
+  color: var(--status-error);
+  border-color: rgba(208,70,58,.5);
+}
+
+/* ── Aviso de limite excedido ────────────────────────────────────────── */
+.bel-inv-warning {
+  display: flex;
+  align-items: center;
+  gap: .2rem;
+  font-size: .82rem;
+  color: var(--status-error);
+  background: rgba(208,70,58,.1);
+  border-bottom: 1px solid rgba(208,70,58,.3);
+  padding: .55rem .85rem;
+}
+
+/* ── Utilitário ──────────────────────────────────────────────────────── */
+.min-w-0 { min-width: 0; }

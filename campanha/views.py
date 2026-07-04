@@ -11,11 +11,14 @@ from .models import (
 )
 from .forms import (
     PersonagemForm, PericiaFormSet, SalvaguardaFormSet,
-    RecursoDeCombateForm, ItemInventarioForm,
+    RecursoDeCombateForm, ItemInventarioForm, MoedasForm,
     LocalForm, NPCForm, MissaoForm, ResumoSessaoForm, InformacaoImportanteForm,
     NotaCombateForm,
 )
 from .utils import get_current_character
+
+# Máximo de itens mágicos que podem estar equipados ao mesmo tempo.
+LIMITE_ITENS_MAGICOS = 3
 
 
 # ── Dashboard ─────────────────────────────────────────────────────────────────
@@ -145,6 +148,7 @@ def central_combate(request):
     pv_pct = 0
     recursos_com_pips = []
     itens_equipados = []
+    magicos_equipados = 0
     dado_range = range(0)
     if personagem:
         if personagem.pv_maximo:
@@ -153,6 +157,7 @@ def central_combate(request):
             pips = [i < r.usos_restantes for i in range(r.usos_totais)]
             recursos_com_pips.append({"recurso": r, "pips": pips})
         itens_equipados = personagem.itens.filter(tipo="equipado")
+        magicos_equipados = sum(1 for i in itens_equipados if i.magico)
         dado_range = range(personagem.nivel)
         notas_combate = personagem.notas_combate.all()
     return render(request, "campanha/central_combate.html", {
@@ -160,6 +165,9 @@ def central_combate(request):
         "pv_pct": pv_pct,
         "recursos_com_pips": recursos_com_pips,
         "itens_equipados": itens_equipados,
+        "magicos_equipados": magicos_equipados,
+        "limite_magicos": LIMITE_ITENS_MAGICOS,
+        "excedeu_magicos": magicos_equipados > LIMITE_ITENS_MAGICOS,
         "dado_range": dado_range,
         "notas_combate": notas_combate,
     })
@@ -311,6 +319,34 @@ class ItemListView(ListView):
 
     def get_queryset(self):
         return ItemInventario.objects.filter(personagem=get_current_character(self.request))
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        p = get_current_character(self.request)
+        itens = list(ctx["object_list"])
+        equipados = [i for i in itens if i.tipo == "equipado"]
+        mochila = [i for i in itens if i.tipo == "mochila"]
+        magicos_equipados = sum(1 for i in equipados if i.magico)
+        ctx.update({
+            "personagem": p,
+            "moedas_form": MoedasForm(instance=p),
+            "equipados": equipados,
+            "mochila": mochila,
+            "magicos_equipados": magicos_equipados,
+            "limite_magicos": LIMITE_ITENS_MAGICOS,
+            "excedeu_magicos": magicos_equipados > LIMITE_ITENS_MAGICOS,
+        })
+        return ctx
+
+
+@require_POST
+def atualizar_moedas(request):
+    p = get_current_character(request)
+    if p:
+        form = MoedasForm(request.POST, instance=p)
+        if form.is_valid():
+            form.save()
+    return redirect("item_list")
 
 
 class ItemCreateView(CreateView):

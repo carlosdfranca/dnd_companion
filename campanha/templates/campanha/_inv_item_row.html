@@ -1,0 +1,23 @@
+{# Linha de um item de inventário. Espera a variável `item`. #}
+<div class="bel-inv-row {% if item.magico %}bel-inv-row-magico{% endif %}">
+  <div class="bel-inv-main">
+    <div class="bel-inv-name-line">
+      <span class="bel-inv-name">{{ item.nome }}</span>
+      {% if item.quantidade > 1 %}<span class="bel-inv-qty">×{{ item.quantidade }}</span>{% endif %}
+      {% if item.magico %}
+        <span class="bel-tag-item bel-tag-magico" title="Item mágico"><i class="bi bi-stars"></i>Mágico</span>
+      {% endif %}
+      {% if item.requer_sintonizacao %}
+        <span class="bel-tag-item bel-tag-sintonia" title="Requer sintonização — não pode ser trocado livremente (exige descanso)"><i class="bi bi-gem"></i>Sintonização</span>
+      {% endif %}
+      {% if item.lore %}<i class="bi bi-book-half bel-inv-lore-icon" title="Tem lore"></i>{% endif %}
+    </div>
+    {% if item.atributos_efeito %}
+      <div class="bel-inv-effect">{{ item.atributos_efeito|truncatechars:130 }}</div>
+    {% endif %}
+  </div>
+  <div class="bel-inv-actions">
+    <a href="{% url 'item_update' item.pk %}" class="btn btn-outline-secondary btn-sm py-0" title="Editar"><i class="bi bi-pencil"></i></a>
+    <a href="{% url 'item_delete' item.pk %}" class="btn btn-outline-danger btn-sm py-0" title="Excluir"><i class="bi bi-trash3"></i></a>
+  </div>
+</div>
