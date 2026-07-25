@@ -1,4 +1,7 @@
+import json
+
 from django.db.models import F
+from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
@@ -636,6 +639,18 @@ def concluir_missao(request, pk):
     return redirect("missao_list")
 
 
+@require_POST
+def reordenar_missoes(request):
+    """Recebe a nova ordem (lista de pks) de uma coluna do kanban e persiste em `ordem`."""
+    try:
+        pks = json.loads(request.body).get("ordem", [])
+    except (ValueError, TypeError):
+        return JsonResponse({"ok": False}, status=400)
+    for indice, pk in enumerate(pks):
+        Missao.objects.filter(pk=pk).update(ordem=indice)
+    return JsonResponse({"ok": True})
+
+
 # ── Sessões ───────────────────────────────────────────────────────────────────
 
 class SessaoListView(ListView):
@@ -658,6 +673,8 @@ class SessaoCreateView(CreateView):
         ctx = super().get_context_data(**kwargs)
         ctx["titulo"] = "Nova Sessão"
         ctx["cancel_url"] = reverse_lazy("sessao_list")
+        ctx["full_width"] = True
+        ctx["inline_fields"] = ["numero", "titulo", "data"]
         return ctx
 
 
@@ -673,6 +690,8 @@ class SessaoUpdateView(UpdateView):
         ctx = super().get_context_data(**kwargs)
         ctx["titulo"] = f"Editar: {self.object}"
         ctx["cancel_url"] = reverse_lazy("sessao_detail", kwargs={"pk": self.object.pk})
+        ctx["full_width"] = True
+        ctx["inline_fields"] = ["numero", "titulo", "data"]
         return ctx
 
 

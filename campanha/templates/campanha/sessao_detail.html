@@ -1,4 +1,5 @@
 {% extends "campanha/base.html" %}
+{% load bel_filters %}
 {% block title %}Sessão {{ object.numero }}{% endblock %}
 
 {% block content %}
@@ -16,7 +17,7 @@
 {% if object.resumo %}
   <div class="bel-card">
     <div class="bel-card-header">Resumo</div>
-    <div class="p-3 bel-text-block">{{ object.resumo|linebreaks }}</div>
+    <div class="p-3 bel-nota-md bel-resumo-md">{{ object.resumo|md }}</div>
   </div>
 {% endif %}
 {% endblock %}

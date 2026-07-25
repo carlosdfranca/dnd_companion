@@ -11,12 +11,37 @@
   {% endif %}
 </div>
 
-<div class="bel-card" style="max-width:680px">
+<div class="bel-card"{% if not full_width %} style="max-width:680px"{% endif %}>
   <div class="p-3">
     <form method="post" enctype="multipart/form-data">
       {% csrf_token %}
+      {% if inline_fields %}
+        <div class="row g-2 mb-3">
+          {% for field in form %}
+            {% if field.name in inline_fields %}
+              {% if field.name == "numero" %}
+                <div class="col-4 col-md-2">
+              {% elif field.name == "titulo" %}
+                <div class="col-8 col-md-6">
+              {% else %}
+                <div class="col-12 col-md-4">
+              {% endif %}
+                <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                {{ field }}
+                {% if field.help_text %}
+                  <div class="form-text">{{ field.help_text }}</div>
+                {% endif %}
+                {% for err in field.errors %}
+                  <div class="text-danger small">{{ err }}</div>
+                {% endfor %}
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+      {% endif %}
       {% for field in form %}
-        {% if field.is_hidden %}
+        {% if inline_fields and field.name in inline_fields %}
+        {% elif field.is_hidden %}
           {{ field }}
         {% elif field.field.widget.input_type == "checkbox" %}
           <div class="mb-3 form-check">

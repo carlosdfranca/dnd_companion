@@ -701,6 +701,14 @@ body {
   padding: 0;
 }
 
+/* ── Markdown rendered in session summaries (larger, comfortable reading) ─── */
+.bel-resumo-md            { font-size: 1rem; line-height: 1.8; }
+.bel-resumo-md h1         { font-size: 1.5rem; }
+.bel-resumo-md h2         { font-size: 1.3rem; }
+.bel-resumo-md h3         { font-size: 1.12rem; }
+.bel-resumo-md h4         { font-size: 1rem; }
+.bel-resumo-md p          { margin: 0 0 .8rem; }
+
 /* ── Markdown rendered in combat notes ─── */
 .bel-nota-md {
   font-size: .875rem;
@@ -882,6 +890,23 @@ body {
 .bel-kanban-dot-principal  { background: var(--gold); }
 .bel-kanban-dot-contrato   { background: var(--bel-accent); }
 .bel-kanban-dot-secundaria { background: var(--bel-text-muted); }
+
+/* Alça de arraste (reordenar cards do kanban) */
+.bel-kanban-handle {
+  cursor: grab;
+  color: var(--bel-text-muted);
+  flex-shrink: 0;
+  margin-top: .15rem;
+  transition: color .15s;
+}
+.bel-kanban-handle:hover { color: var(--bel-text-primary); }
+.bel-kanban-handle:active { cursor: grabbing; }
+
+/* Feedback visual do card sendo arrastado */
+.bel-kanban-ghost {
+  opacity: .5;
+  border: 1px dashed var(--bel-accent) !important;
+}
 
 .bel-kanban-empty {
   display: flex;

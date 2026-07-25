@@ -37,7 +37,14 @@
   {% for local in object_list %}
     <div class="col-12 col-md-6 col-lg-4 bel-local-col"
          data-nome="{{ local.nome|lower }}">
-      <div class="bel-card h-100 d-flex flex-column">
+      <div class="bel-card h-100 d-flex flex-column overflow-hidden">
+
+        {% if local.imagem %}
+          <a href="{% url 'local_detail' local.pk %}">
+            <img src="{{ local.imagem.url }}" alt="{{ local.nome }}"
+                 style="width:100%;display:block;height:300px;object-fit:cover">
+          </a>
+        {% endif %}
 
         <div class="bel-card-header d-flex justify-content-between align-items-center">
           <a href="{% url 'local_detail' local.pk %}" class="bel-link fw-semibold">{{ local.nome }}</a>

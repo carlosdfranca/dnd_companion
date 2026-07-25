@@ -156,8 +156,19 @@ class ResumoSessaoForm(BootstrapFormMixin, forms.ModelForm):
         model = ResumoSessao
         fields = "__all__"
         widgets = {
-            "resumo": forms.Textarea(attrs={"rows": 12}),
+            "resumo": forms.Textarea(attrs={
+                "rows": 16,
+                "placeholder": "## Título da parte\n\nTexto... **negrito**, *itálico*.\n\n- item de lista\n- outro item",
+                "style": "font-family: monospace; font-size: .9rem;",
+            }),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["resumo"].help_text = (
+            "Formatação Markdown: # Título, **negrito**, *itálico*, - listas, "
+            "| tabelas |. As quebras de linha são preservadas."
+        )
 
 
 class InformacaoImportanteForm(BootstrapFormMixin, forms.ModelForm):

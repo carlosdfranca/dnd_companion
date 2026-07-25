@@ -1,4 +1,5 @@
 {% extends "campanha/base.html" %}
+{% load bel_filters %}
 {% block title %}Sessões{% endblock %}
 
 {% block content %}
@@ -21,7 +22,7 @@
         </div>
       </div>
       {% if s.resumo %}
-        <div class="p-2 small text-muted">{{ s.resumo|truncatechars:200 }}</div>
+        <div class="p-2 small text-muted">{{ s.resumo|md|striptags|truncatechars:200 }}</div>
       {% endif %}
     </div>
   {% endfor %}

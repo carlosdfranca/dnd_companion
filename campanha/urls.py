@@ -56,6 +56,7 @@ urlpatterns = [
     path("missoes/<int:pk>/editar/", views.MissaoUpdateView.as_view(), name="missao_update"),
     path("missoes/<int:pk>/excluir/", views.MissaoDeleteView.as_view(), name="missao_delete"),
     path("missoes/<int:pk>/concluir/", views.concluir_missao, name="missao_concluir"),
+    path("missoes/reordenar/", views.reordenar_missoes, name="missao_reordenar"),
 
     # Sessões
     path("sessoes/", views.SessaoListView.as_view(), name="sessao_list"),

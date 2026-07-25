@@ -9,6 +9,9 @@
   </a>
 </div>
 
+{# CSRF token para o fetch de reordenação (fora de qualquer <form>) #}
+{% csrf_token %}
+
 {# ── Kanban board ── #}
 <div class="bel-kanban-board">
   {% for col in colunas %}
@@ -23,11 +26,12 @@
     </div>
 
     {# Cards da coluna #}
-    <div class="bel-kanban-col-body">
+    <div class="bel-kanban-col-body js-kanban-col" data-tipo="{{ col.tipo }}">
       {% for m in col.missoes %}
-        <div class="bel-kanban-card">
+        <div class="bel-kanban-card" data-pk="{{ m.pk }}">
           <div class="d-flex align-items-start justify-content-between gap-2 mb-1">
-            <a href="{% url 'missao_detail' m.pk %}" class="bel-link fw-semibold" style="line-height:1.3">
+            <i class="bi bi-grip-vertical bel-kanban-handle" title="Arraste para reordenar"></i>
+            <a href="{% url 'missao_detail' m.pk %}" class="bel-link fw-semibold flex-fill" style="line-height:1.3">
               {{ m.titulo }}
             </a>
             <span class="bel-kanban-tipo-dot bel-kanban-dot-{{ col.tipo }}" title="{{ col.label }}"></span>
@@ -118,5 +122,33 @@ document.querySelectorAll('[data-bs-toggle="collapse"]').forEach(function (btn) 
   target.addEventListener('show.bs.collapse',  function () { btn.querySelector('.bel-chevron-toggle').style.transform = 'rotate(90deg)'; });
   target.addEventListener('hide.bs.collapse',  function () { btn.querySelector('.bel-chevron-toggle').style.transform = ''; });
 });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
+<script>
+// Kanban: arrastar para reordenar dentro da mesma coluna (sem trocar de tipo)
+(function () {
+  var csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
+  if (!csrfInput) return;
+  var csrf = csrfInput.value;
+
+  document.querySelectorAll('.js-kanban-col').forEach(function (col) {
+    new Sortable(col, {
+      handle: '.bel-kanban-handle',
+      animation: 150,
+      ghostClass: 'bel-kanban-ghost',
+      onEnd: function () {
+        var ordem = Array.from(col.querySelectorAll('.bel-kanban-card')).map(function (c) {
+          return c.dataset.pk;
+        });
+        fetch("{% url 'missao_reordenar' %}", {
+          method: "POST",
+          headers: {"Content-Type": "application/json", "X-CSRFToken": csrf},
+          body: JSON.stringify({ordem: ordem}),
+        });
+      },
+    });
+  });
+})();
 </script>
 {% endblock %}

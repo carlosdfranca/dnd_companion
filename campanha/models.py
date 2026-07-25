@@ -256,6 +256,11 @@ class Local(models.Model):
     tipo = models.CharField("Tipo", max_length=10, choices=TIPOS, blank=True)
     descricao = models.TextField("Descrição / Notas", blank=True)
     status = models.CharField("Status Atual", max_length=150, blank=True)
+    imagem = models.ImageField("Ilustração", upload_to="locais/", blank=True, null=True)
+    mapa = models.ImageField(
+        "Mapa", upload_to="locais/mapas/", blank=True, null=True,
+        help_text="Mapa do local, se houver.",
+    )
 
     class Meta:
         verbose_name = "Local"
@@ -315,11 +320,13 @@ class Missao(models.Model):
     tipo      = models.CharField("Tipo", max_length=12, choices=TIPOS, default="secundaria")
     status    = models.CharField("Status", max_length=10, choices=STATUS, default="ativa")
     resultado = models.TextField("Resultado", blank=True)
+    ordem     = models.PositiveSmallIntegerField("Ordem", default=0,
+                    help_text="Posição no kanban; menor aparece primeiro. Ajustado ao arrastar.")
 
     class Meta:
         verbose_name = "Missão"
         verbose_name_plural = "Missões"
-        ordering = ["tipo", "titulo"]
+        ordering = ["tipo", "ordem", "titulo"]
 
     def __str__(self):
         return self.titulo

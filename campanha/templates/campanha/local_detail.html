@@ -10,6 +10,34 @@
   </div>
 </div>
 
+{% if object.imagem or object.mapa %}
+<div class="row g-3 mb-3">
+  {% if object.imagem %}
+  <div class="col-12 col-md-6">
+    <div class="bel-card overflow-hidden h-100">
+      <div class="bel-card-header"><i class="bi bi-image me-1"></i>Ilustração</div>
+      <img src="{{ object.imagem.url }}" alt="{{ object.nome }}"
+           style="width:100%;display:block;object-fit:cover;max-height:420px">
+    </div>
+  </div>
+  {% endif %}
+  {% if object.mapa %}
+  <div class="col-12 col-md-6">
+    <div class="bel-card overflow-hidden h-100">
+      <div class="bel-card-header"><i class="bi bi-map me-1"></i>Mapa</div>
+      <a href="{{ object.mapa.url }}" target="_blank" rel="noopener" title="Clique para ampliar">
+        <img src="{{ object.mapa.url }}" alt="Mapa de {{ object.nome }}"
+             style="width:100%;display:block;object-fit:cover;max-height:420px;cursor:zoom-in">
+      </a>
+      <div class="p-1 text-center small text-muted">
+        <i class="bi bi-zoom-in me-1"></i>Clique para ampliar
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endif %}
+
 {% if object.status %}
   <div class="alert alert-warning py-2"><i class="bi bi-info-circle me-1"></i><strong>Status:</strong> {{ object.status }}</div>
 {% endif %}
