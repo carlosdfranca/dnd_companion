@@ -75,8 +75,12 @@ WSGI_APPLICATION = 'dnd_companion.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'dnd_companion',
+        'USER': 'admin',
+        'PASSWORD': 'cocodochico',
+        'HOST': 'localhost',
+        'PORT': '3306',
     }
 }
 
