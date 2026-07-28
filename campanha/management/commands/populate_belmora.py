@@ -10,6 +10,7 @@ from django.core.management.base import BaseCommand
 from django.db.models import F
 
 from campanha.models import (
+    Ataque,
     InformacaoImportante,
     ItemInventario,
     Local,
@@ -238,6 +239,7 @@ class Command(BaseCommand):
         personagem = self._criar_personagem()
         self._configurar_proficiencias(personagem)
         self._criar_recursos(personagem)
+        self._criar_ataques(personagem)
         self._criar_inventario(personagem)
         locais = self._criar_locais()
         npcs = self._criar_npcs(locais)
@@ -270,6 +272,7 @@ class Command(BaseCommand):
                 "pv_atual": 55,
                 "pv_temporario": 0,
                 "deslocamento": 12,
+                "bonus_dano_furia": 2,
                 "background": BACKGROUND_ROLLO,
                 "moedas_pc": 0,
                 "moedas_pp": 7,
@@ -347,6 +350,30 @@ class Command(BaseCommand):
             )
             label = "criado" if created else "já existia"
             self.stdout.write(f"  Recurso '{nome}' — {label}")
+
+    # ------------------------------------------------------------------ #
+    #  Ataques / Dano                                                      #
+    # ------------------------------------------------------------------ #
+    def _criar_ataques(self, personagem):
+        ataques = [
+            {
+                "nome": "Machado de Batalha",
+                "quantidade_dados": 1,
+                "faces_dado": 8,
+                "bonus_atributo": 5,
+                "ordem": 0,
+            },
+        ]
+
+        for a in ataques:
+            nome = a.pop("nome")
+            obj, created = Ataque.objects.get_or_create(
+                personagem=personagem,
+                nome=nome,
+                defaults=a,
+            )
+            label = "criado" if created else "já existia"
+            self.stdout.write(f"  Ataque '{nome}' — {label}")
 
     # ------------------------------------------------------------------ #
     #  Inventário                                                          #

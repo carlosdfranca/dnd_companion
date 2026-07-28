@@ -37,6 +37,11 @@ class Personagem(models.Model):
     pv_atual = models.IntegerField("PV Atual", default=1)  # pode chegar a 0/negativo
     pv_temporario = models.PositiveSmallIntegerField("PV Temporário", default=0)
     deslocamento = models.PositiveSmallIntegerField("Deslocamento (m)", default=9)
+    furia_ativa = models.BooleanField("Fúria ativa", default=False)
+    bonus_dano_furia = models.PositiveSmallIntegerField(
+        "Bônus de dano da Fúria", default=2,
+        help_text="Somado ao dano dos ataques enquanto a Fúria estiver ativa. Cresce com o nível de bárbaro.",
+    )
 
     background = models.TextField("Background / História", blank=True)
 
@@ -203,6 +208,50 @@ class RecursoDeCombate(models.Model):
 
     def __str__(self):
         return self.nome
+
+
+class Ataque(models.Model):
+    """Ataque/dano que o personagem pode desferir (arma ou habilidade)."""
+
+    FACES = [(4, "d4"), (6, "d6"), (8, "d8"), (10, "d10"), (12, "d12"), (20, "d20")]
+
+    personagem = models.ForeignKey(
+        Personagem, related_name="ataques", on_delete=models.CASCADE
+    )
+    nome = models.CharField("Nome", max_length=120)
+    quantidade_dados = models.PositiveSmallIntegerField("Quantidade de Dados", default=1)
+    faces_dado = models.PositiveSmallIntegerField("Dado", choices=FACES, default=8)
+    bonus_atributo = models.SmallIntegerField(
+        "Bônus de Atributo", default=0,
+        help_text="Bônus fixo somado ao dano (ex.: +5 de Força).",
+    )
+    ordem = models.PositiveSmallIntegerField("Ordem", default=0)
+
+    class Meta:
+        verbose_name = "Ataque"
+        verbose_name_plural = "Ataques"
+        ordering = ["ordem", "nome"]
+
+    def __str__(self):
+        return self.nome
+
+    @staticmethod
+    def _fmt(bonus):
+        if bonus == 0:
+            return ""
+        return f" +{bonus}" if bonus > 0 else f" −{abs(bonus)}"
+
+    @property
+    def dado(self):
+        return f"{self.quantidade_dados}d{self.faces_dado}"
+
+    @property
+    def formula(self):
+        return f"{self.dado}{self._fmt(self.bonus_atributo)}"
+
+    @property
+    def formula_furia(self):
+        return f"{self.dado}{self._fmt(self.bonus_atributo + self.personagem.bonus_dano_furia)}"
 
 
 class ItemInventario(models.Model):

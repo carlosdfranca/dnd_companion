@@ -2,7 +2,7 @@ from django import forms
 from django.forms import inlineformset_factory
 
 from .models import (
-    Personagem, Pericia, Salvaguarda, RecursoDeCombate,
+    Personagem, Pericia, Salvaguarda, RecursoDeCombate, Ataque,
     ItemInventario, Local, NPC, Missao, ResumoSessao, InformacaoImportante,
     NotaCombate,
 )
@@ -34,9 +34,11 @@ class PersonagemForm(BootstrapFormMixin, forms.ModelForm):
     class Meta:
         model = Personagem
         # Moedas são editadas na tela de Inventário (MoedasForm), não na ficha.
+        # furia_ativa/bonus_dano_furia são estado/config de combate, geridos na Central de Combate.
         exclude = [
             "criado_em", "atualizado_em",
             "moedas_pc", "moedas_pp", "moedas_pe", "moedas_po", "moedas_pl",
+            "furia_ativa", "bonus_dano_furia",
         ]
         widgets = {
             "background": forms.Textarea(attrs={"rows": 6}),
@@ -110,6 +112,27 @@ class RecursoDeCombateForm(BootstrapFormMixin, forms.ModelForm):
         widgets = {
             "descricao": forms.Textarea(attrs={"rows": 3}),
             "checklist_turno": forms.Textarea(attrs={"rows": 3}),
+        }
+
+
+class AtaqueForm(BootstrapFormMixin, forms.ModelForm):
+    class Meta:
+        model = Ataque
+        exclude = ["personagem"]
+        widgets = {
+            "quantidade_dados": forms.NumberInput(attrs={"min": 1, "max": 20}),
+            "ordem": forms.NumberInput(attrs={"min": 0}),
+        }
+
+
+class BonusFuriaForm(BootstrapFormMixin, forms.ModelForm):
+    """Edição rápida do bônus de dano da Fúria (usada na tela de Ataques)."""
+
+    class Meta:
+        model = Personagem
+        fields = ["bonus_dano_furia"]
+        widgets = {
+            "bonus_dano_furia": forms.NumberInput(attrs={"min": 0}),
         }
 
 

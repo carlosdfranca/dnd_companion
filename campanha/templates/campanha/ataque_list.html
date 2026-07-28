@@ -1,0 +1,59 @@
+{% extends "campanha/base.html" %}
+{% block title %}Ataques / Dano{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-3">
+  <h3 class="mb-0"><i class="bi bi-crosshair2 me-2"></i>Ataques / Dano</h3>
+  <a href="{% url 'ataque_create' %}" class="btn btn-outline-success btn-sm"><i class="bi bi-plus-lg me-1"></i>Novo Ataque</a>
+</div>
+
+{# ── Bônus de dano da Fúria ── #}
+<div class="bel-card mb-3">
+  <div class="bel-card-header"><i class="bi bi-lightning-fill me-2"></i>Bônus de Dano da Fúria</div>
+  <form method="post" action="{% url 'bonus_furia_atualizar' %}" class="p-3">
+    {% csrf_token %}
+    <div class="row g-2 align-items-end">
+      <div class="col-auto">
+        <label class="form-label small mb-1">Somado a todo ataque quando a Fúria estiver ativa</label>
+        {{ bonus_furia_form.bonus_dano_furia }}
+      </div>
+      <div class="col-auto">
+        <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-check2 me-1"></i>Salvar</button>
+      </div>
+    </div>
+    <p class="text-muted small mt-2 mb-0">Aumente esse valor conforme o nível de bárbaro subir (hoje +{{ personagem.bonus_dano_furia }}).</p>
+  </form>
+</div>
+
+{% if object_list %}
+  <div class="row g-3">
+    {% for a in object_list %}
+      <div class="col-12 col-md-6 col-lg-4">
+        <div class="bel-card">
+          <div class="bel-card-header d-flex justify-content-between align-items-center">
+            <span>{{ a.nome }}</span>
+            <span class="badge bg-secondary">{{ a.dado }}</span>
+          </div>
+          <div class="p-2">
+            <div class="d-flex align-items-center justify-content-between mb-1">
+              <span class="bel-usos-count">{{ a.formula }}</span>
+              <div class="d-flex gap-1">
+                <a href="{% url 'ataque_update' a.pk %}" class="btn btn-outline-secondary btn-sm py-0"><i class="bi bi-pencil"></i></a>
+                <a href="{% url 'ataque_delete' a.pk %}" class="btn btn-outline-danger btn-sm py-0"><i class="bi bi-trash3"></i></a>
+              </div>
+            </div>
+            <p class="text-muted small mb-0">
+              <i class="bi bi-lightning-fill me-1"></i>c/ Fúria → {{ a.formula_furia }}
+            </p>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="text-center text-muted py-5">
+    <i class="bi bi-crosshair2 fs-1"></i>
+    <p class="mt-2">Nenhum ataque cadastrado. <a href="{% url 'ataque_create' %}">Adicionar</a></p>
+  </div>
+{% endif %}
+{% endblock %}

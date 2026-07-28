@@ -16,6 +16,7 @@ urlpatterns = [
     path("combate/descanso/<str:tipo>/", views.aplicar_descanso, name="descanso"),
     path("combate/recurso/<int:pk>/usar/", views.usar_recurso, name="recurso_usar"),
     path("combate/recurso/<int:pk>/restaurar/", views.restaurar_recurso, name="recurso_restaurar"),
+    path("combate/furia/encerrar/", views.encerrar_furia, name="furia_encerrar"),
 
     # Notas de Combate
     path("combate/notas/nova/", views.NotaCombateCreateView.as_view(), name="nota_create"),
@@ -34,6 +35,13 @@ urlpatterns = [
     path("recursos/novo/", views.RecursoCreateView.as_view(), name="recurso_create"),
     path("recursos/<int:pk>/editar/", views.RecursoUpdateView.as_view(), name="recurso_update"),
     path("recursos/<int:pk>/excluir/", views.RecursoDeleteView.as_view(), name="recurso_delete"),
+
+    # Ataques / Dano
+    path("ataques/", views.AtaqueListView.as_view(), name="ataque_list"),
+    path("ataques/furia-bonus/", views.atualizar_bonus_furia, name="bonus_furia_atualizar"),
+    path("ataques/novo/", views.AtaqueCreateView.as_view(), name="ataque_create"),
+    path("ataques/<int:pk>/editar/", views.AtaqueUpdateView.as_view(), name="ataque_update"),
+    path("ataques/<int:pk>/excluir/", views.AtaqueDeleteView.as_view(), name="ataque_delete"),
 
     # Locais
     path("locais/", views.LocalListView.as_view(), name="local_list"),

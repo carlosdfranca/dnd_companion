@@ -9,12 +9,12 @@ from django.views.decorators.http import require_POST
 from django.urls import reverse_lazy
 
 from .models import (
-    Personagem, RecursoDeCombate, ItemInventario,
+    Personagem, RecursoDeCombate, Ataque, ItemInventario,
     Local, NPC, Missao, ResumoSessao, InformacaoImportante, NotaCombate,
 )
 from .forms import (
     PersonagemForm, PericiaFormSet, SalvaguardaFormSet,
-    RecursoDeCombateForm, ItemInventarioForm, MoedasForm,
+    RecursoDeCombateForm, AtaqueForm, BonusFuriaForm, ItemInventarioForm, MoedasForm,
     LocalForm, NPCForm, MissaoForm, ResumoSessaoForm, InformacaoImportanteForm,
     NotaCombateForm,
 )
@@ -153,6 +153,7 @@ def central_combate(request):
     itens_equipados = []
     magicos_equipados = 0
     dado_range = range(0)
+    ataques = []
     if personagem:
         if personagem.pv_maximo:
             pv_pct = max(0, min(100, round(personagem.pv_atual * 100 / personagem.pv_maximo)))
@@ -163,6 +164,7 @@ def central_combate(request):
         magicos_equipados = sum(1 for i in itens_equipados if i.magico)
         dado_range = range(personagem.nivel)
         notas_combate = personagem.notas_combate.all()
+        ataques = personagem.ataques.all()
     return render(request, "campanha/central_combate.html", {
         "personagem": personagem,
         "pv_pct": pv_pct,
@@ -173,6 +175,7 @@ def central_combate(request):
         "excedeu_magicos": magicos_equipados > LIMITE_ITENS_MAGICOS,
         "dado_range": dado_range,
         "notas_combate": notas_combate,
+        "ataques": ataques,
     })
 
 
@@ -185,6 +188,9 @@ def atualizar_pv(request):
         if acao == "dano":
             # Temp HP absorve primeiro; dano negativo ignorado
             dano = max(0, int(request.POST.get("valor", 0)))
+            if p.furia_ativa and request.POST.get("fisico"):
+                # Fúria: dano cortante/perfurante/concussão é reduzido à metade (arred. p/ cima)
+                dano = (dano + 1) // 2
             if p.pv_temporario > 0:
                 absorvido = min(dano, p.pv_temporario)
                 p.pv_temporario -= absorvido
@@ -221,7 +227,8 @@ def aplicar_descanso(request, tipo):
         if tipo == "longo":
             p.pv_atual = p.pv_maximo
             p.pv_temporario = 0
-            p.save(update_fields=["pv_atual", "pv_temporario"])
+            p.furia_ativa = False
+            p.save(update_fields=["pv_atual", "pv_temporario", "furia_ativa"])
             p.recursos.all().update(usos_restantes=F("usos_totais"))
     return redirect("combate")
 
@@ -260,6 +267,11 @@ def usar_recurso(request, pk):
     if r.usos_restantes > 0:
         r.usos_restantes -= 1
         r.save(update_fields=["usos_restantes"])
+        if r.nome == "Fúria":
+            p = r.personagem
+            p.furia_ativa = True
+            p.pv_temporario = max(p.pv_temporario, p.nivel)
+            p.save(update_fields=["furia_ativa", "pv_temporario"])
     return redirect("combate")
 
 
@@ -268,6 +280,16 @@ def restaurar_recurso(request, pk):
     r = get_object_or_404(RecursoDeCombate, pk=pk)
     r.usos_restantes = r.usos_totais
     r.save(update_fields=["usos_restantes"])
+    return redirect("combate")
+
+
+@require_POST
+def encerrar_furia(request):
+    """Desativa o estado de Fúria sem alterar os usos restantes do recurso."""
+    p = get_current_character(request)
+    if p:
+        p.furia_ativa = False
+        p.save(update_fields=["furia_ativa"])
     return redirect("combate")
 
 
@@ -441,6 +463,74 @@ class RecursoDeleteView(DeleteView):
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx["cancel_url"] = reverse_lazy("recurso_list")
+        return ctx
+
+
+# ── Ataques / Dano ────────────────────────────────────────────────────────────
+
+class AtaqueListView(ListView):
+    model = Ataque
+    template_name = "campanha/ataque_list.html"
+
+    def get_queryset(self):
+        return Ataque.objects.filter(personagem=get_current_character(self.request))
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        p = get_current_character(self.request)
+        ctx["personagem"] = p
+        ctx["bonus_furia_form"] = BonusFuriaForm(instance=p)
+        return ctx
+
+
+@require_POST
+def atualizar_bonus_furia(request):
+    p = get_current_character(request)
+    if p:
+        form = BonusFuriaForm(request.POST, instance=p)
+        if form.is_valid():
+            form.save()
+    return redirect("ataque_list")
+
+
+class AtaqueCreateView(CreateView):
+    model = Ataque
+    form_class = AtaqueForm
+    template_name = "campanha/generic_form.html"
+    success_url = reverse_lazy("ataque_list")
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["titulo"] = "Novo Ataque"
+        ctx["cancel_url"] = reverse_lazy("ataque_list")
+        return ctx
+
+    def form_valid(self, form):
+        form.instance.personagem = get_current_character(self.request)
+        return super().form_valid(form)
+
+
+class AtaqueUpdateView(UpdateView):
+    model = Ataque
+    form_class = AtaqueForm
+    template_name = "campanha/generic_form.html"
+    success_url = reverse_lazy("ataque_list")
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["titulo"] = f"Editar: {self.object.nome}"
+        ctx["cancel_url"] = reverse_lazy("ataque_list")
+        return ctx
+
+
+class AtaqueDeleteView(DeleteView):
+    model = Ataque
+    template_name = "campanha/generic_confirm_delete.html"
+    success_url = reverse_lazy("ataque_list")
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["cancel_url"] = reverse_lazy("ataque_list")
         return ctx
 
 

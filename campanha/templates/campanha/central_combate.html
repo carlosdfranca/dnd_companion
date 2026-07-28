@@ -54,6 +54,12 @@
             <div class="bel-pv-action-box bel-pv-dano">
               <div class="bel-pv-action-label"><i class="bi bi-arrow-down-circle me-1"></i>Dano</div>
               <input type="number" name="valor" class="bel-pv-input" placeholder="0" min="0" max="999" autocomplete="off">
+              {% if personagem.furia_ativa %}
+                <label class="d-flex align-items-center gap-1 small mt-1 mb-1">
+                  <input type="checkbox" name="fisico" value="1" class="form-check-input mt-0">
+                  Dano físico (C/P/Conc.)
+                </label>
+              {% endif %}
               <button type="submit" class="bel-pv-btn bel-pv-btn-dano">Aplicar</button>
             </div>
           </form>
@@ -143,7 +149,7 @@
 
   {# ── Recursos de Combate e Equipados ── #}
   <div class="col-12 col-lg-8">
-    <div class="bel-card">
+    <div class="bel-card mb-3">
       <div class="bel-card-header d-flex align-items-center justify-content-between">
         <span><i class="bi bi-lightning-fill me-2"></i>Recursos de Combate</span>
         <a href="{% url 'recurso_list' %}" class="btn btn-outline-secondary btn-sm py-0">Gerenciar</a>
@@ -157,6 +163,9 @@
                 <div>
                   <strong>{{ item.recurso.nome }}</strong>
                   <span class="badge bg-secondary ms-1 small">{{ item.recurso.get_recuperacao_display }}</span>
+                  {% if item.recurso.nome == "Fúria" and personagem.furia_ativa %}
+                    <span class="badge bg-danger ms-1 small">ATIVA</span>
+                  {% endif %}
                 </div>
                 <span class="bel-usos-count">{{ item.recurso.usos_restantes }}/{{ item.recurso.usos_totais }}</span>
               </div>
@@ -184,6 +193,14 @@
                     <i class="bi bi-arrow-counterclockwise me-1"></i>Restaurar
                   </button>
                 </form>
+                {% if item.recurso.nome == "Fúria" and personagem.furia_ativa %}
+                  <form method="post" action="{% url 'furia_encerrar' %}">
+                    {% csrf_token %}
+                    <button class="btn btn-outline-warning btn-sm">
+                      <i class="bi bi-x-circle me-1"></i>Encerrar Fúria
+                    </button>
+                  </form>
+                {% endif %}
                 <a href="{% url 'recurso_update' item.recurso.pk %}" class="btn btn-outline-secondary btn-sm ms-auto">
                   <i class="bi bi-pencil"></i>
                 </a>
@@ -195,6 +212,35 @@
       {% else %}
         <div class="p-3 text-muted">
           Nenhum recurso cadastrado. <a href="{% url 'recurso_create' %}">Adicionar</a>
+        </div>
+      {% endif %}
+    </div>
+
+    {# ── Ataques / Dano ── #}
+    <div class="bel-card mb-3">
+      <div class="bel-card-header d-flex align-items-center justify-content-between">
+        <span><i class="bi bi-crosshair2 me-2"></i>Ataques / Dano</span>
+        <a href="{% url 'ataque_list' %}" class="btn btn-outline-secondary btn-sm py-0">Gerenciar</a>
+      </div>
+      {% if ataques %}
+        <div class="row g-2 p-2">
+          {% for a in ataques %}
+            <div class="col-12 col-sm-6">
+              <div class="bel-ataque-card {% if personagem.furia_ativa %}bel-ataque-card-furia{% endif %}">
+                <div class="bel-ataque-nome">{{ a.nome }}</div>
+                <div class="bel-ataque-formula">
+                  {% if personagem.furia_ativa %}{{ a.formula_furia }}{% else %}{{ a.formula }}{% endif %}
+                </div>
+                {% if personagem.furia_ativa %}
+                  <span class="badge bg-danger mt-2"><i class="bi bi-lightning-fill me-1"></i>FÚRIA</span>
+                {% endif %}
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="p-3 text-muted">
+          Nenhum ataque cadastrado. <a href="{% url 'ataque_create' %}">Adicionar</a>
         </div>
       {% endif %}
     </div>
