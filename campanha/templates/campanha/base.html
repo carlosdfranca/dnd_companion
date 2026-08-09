@@ -16,7 +16,15 @@
 
   {% block extra_head %}{% endblock %}
 </head>
-<body>
+<body class="{% block body_class %}{% endblock %}">
+
+<div id="fx-flash" class="bel-fx-flash" aria-hidden="true"></div>
+<div id="fx-furia" class="bel-fx-furia" aria-hidden="true">
+  <div class="bel-fx-furia-vinheta"></div>
+  <div class="bel-fx-furia-chamas"></div>
+</div>
+<div id="fx-furia-burst" class="bel-furia-burst" aria-hidden="true"><span>RAAGE!!</span></div>
+<div id="fx-descanso-burst" class="bel-descanso-burst" aria-hidden="true"><i class="bi"></i></div>
 
 <nav class="navbar navbar-expand-lg bel-navbar">
   <div class="container-fluid px-3">
@@ -58,7 +66,7 @@
   </div>
 </nav>
 
-<main class="container-fluid py-3 px-3 px-lg-4">
+<main id="app-main" class="container-fluid py-3 px-3 px-lg-4">
   {% if messages %}
     {% for msg in messages %}
       <div class="alert alert-{{ msg.tags }} alert-dismissible fade show" role="alert">

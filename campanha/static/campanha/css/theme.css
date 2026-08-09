@@ -40,6 +40,10 @@
   --status-error:    #D0463A;   /* rubi — perigo / crítico */
   --status-info:     #4A8FC7;   /* azul-mana — informação */
 
+  /* === FÚRIA — controles de intensidade do ambiente (único lugar a ajustar) === */
+  --furia-opacidade: .45;   /* forte/dramática — baixar se cansar em sessões longas */
+  --furia-ciclo:     1.5s;  /* duração do pulso da vinheta/cards */
+
   /* === TIPOGRAFIA === */
   --font-display: 'Cormorant Garamond', Georgia, serif;
   --font-body:    'Space Grotesk', -apple-system, sans-serif;
@@ -374,10 +378,14 @@ body {
 }
 .bel-ataque-card-furia {
   border-color: var(--ember);
-  box-shadow: 0 0 0 1px var(--ember), 0 0 16px rgba(196,71,44,.4);
+  animation: bel-furia-card-pulso var(--furia-ciclo) ease-in-out infinite alternate;
 }
 .bel-ataque-card-furia .bel-ataque-formula {
   color: var(--ember-light);
+}
+@keyframes bel-furia-card-pulso {
+  0%   { box-shadow: 0 0 0 1px var(--ember), 0 0 10px rgba(196,71,44,.3); }
+  100% { box-shadow: 0 0 0 1px var(--ember-light), 0 0 26px rgba(196,71,44,.65); }
 }
 
 /* ── Resource pips ───────────────────────────────────────────────────── */
@@ -1620,3 +1628,235 @@ body {
 
 /* ── Utilitário ──────────────────────────────────────────────────────── */
 .min-w-0 { min-width: 0; }
+
+/* ── FX — feedback de combate (dano/cura) ────────────────────────────── */
+
+/* Piscada de tela inteira */
+.bel-fx-flash {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  opacity: 0;
+  pointer-events: none;
+}
+.bel-fx-flash.is-dano {
+  background: radial-gradient(ellipse at center, rgba(208,70,58,0) 45%, rgba(208,70,58,.45) 100%);
+}
+.bel-fx-flash.is-cura {
+  background: radial-gradient(ellipse at center, rgba(79,165,116,0) 45%, rgba(79,165,116,.4) 100%);
+}
+.bel-fx-flash-anim {
+  animation: bel-flash .55s ease-out;
+}
+@keyframes bel-flash {
+  0%   { opacity: 0; }
+  12%  { opacity: .85; }
+  100% { opacity: 0; }
+}
+
+/* Número flutuante sobre a faixa de PV */
+.bel-hp-strip {
+  position: relative;
+}
+.bel-pv-float-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.bel-pv-float {
+  position: absolute;
+  top: .4rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 2rem;
+  font-weight: 900;
+  line-height: 1;
+  animation: bel-float-up .9s ease-out forwards;
+}
+.bel-pv-float-dano { color: var(--status-error); }
+.bel-pv-float-cura { color: var(--status-success); }
+@keyframes bel-float-up {
+  0%   { opacity: 0; transform: translate(-50%, 6px); }
+  15%  { opacity: 1; transform: translate(-50%, 0); }
+  100% { opacity: 0; transform: translate(-50%, -44px); }
+}
+
+/* Tremida do card de PV — só no dano */
+#pv-card.bel-shake {
+  animation: bel-shake .32s ease-in-out;
+}
+@keyframes bel-shake {
+  0%, 100% { transform: translateX(0); }
+  25%      { transform: translateX(-4px); }
+  50%      { transform: translateX(4px); }
+  75%      { transform: translateX(-4px); }
+}
+
+/* Barra de PV desliza até a nova largura em vez de saltar */
+.bel-pv-bar .progress-bar {
+  transition: width .45s cubic-bezier(.4, 0, .2, 1), background-color .3s;
+}
+
+/* ── FX — modo Fúria (ambiente contínuo + burst de ativação) ─────────── */
+
+/* Camada ambiente — vinheta + chamas, só aparece sob body.em-furia */
+.bel-fx-furia {
+  position: fixed;
+  inset: 0;
+  z-index: 1500;
+  pointer-events: none;
+}
+
+body.em-furia .bel-fx-furia-vinheta {
+  position: fixed;
+  inset: 0;
+  opacity: var(--furia-opacidade);
+  background: radial-gradient(ellipse at center, rgba(196,71,44,0) 55%, rgba(122,35,24,.9) 100%);
+  animation: bel-furia-pulso var(--furia-ciclo) ease-in-out infinite alternate;
+  will-change: opacity;
+}
+@keyframes bel-furia-pulso {
+  0%   { opacity: calc(var(--furia-opacidade) * .55); }
+  100% { opacity: var(--furia-opacidade); }
+}
+
+body.em-furia .bel-fx-furia-chamas {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 180px;
+  opacity: var(--furia-opacidade);
+  overflow: hidden;
+}
+body.em-furia .bel-fx-furia-chamas::before,
+body.em-furia .bel-fx-furia-chamas::after {
+  content: '';
+  position: absolute;
+  left: -10%;
+  right: -10%;
+  bottom: -40%;
+  height: 140%;
+  filter: blur(14px);
+  mask-image: linear-gradient(to top, black, transparent 85%);
+  -webkit-mask-image: linear-gradient(to top, black, transparent 85%);
+  will-change: transform;
+}
+body.em-furia .bel-fx-furia-chamas::before {
+  background-image:
+    radial-gradient(circle at 15% 70%, var(--ember-light) 0%, transparent 55%),
+    radial-gradient(circle at 45% 60%, var(--ember) 0%, transparent 50%),
+    radial-gradient(circle at 75% 65%, var(--ember-light) 0%, transparent 55%);
+  animation: bel-furia-chama-a 4.5s ease-in-out infinite alternate;
+}
+body.em-furia .bel-fx-furia-chamas::after {
+  background-image:
+    radial-gradient(circle at 30% 75%, var(--ember-deep) 0%, transparent 50%),
+    radial-gradient(circle at 60% 70%, var(--ember) 0%, transparent 55%),
+    radial-gradient(circle at 90% 72%, var(--ember-deep) 0%, transparent 50%);
+  animation: bel-furia-chama-b 3.2s ease-in-out infinite alternate-reverse;
+}
+@keyframes bel-furia-chama-a {
+  0%   { transform: translateX(0) scaleY(1); }
+  100% { transform: translateX(-4%) scaleY(1.12); }
+}
+@keyframes bel-furia-chama-b {
+  0%   { transform: translateX(0) scaleY(1); }
+  100% { transform: translateX(5%) scaleY(1.08); }
+}
+
+/* Card de PV também pulsa em brasa durante a fúria */
+body.em-furia #pv-card {
+  border-color: var(--ember);
+  animation: bel-furia-card-pulso var(--furia-ciclo) ease-in-out infinite alternate;
+}
+
+/* Burst de ativação — dispara uma vez, no reload após "Usar" Fúria */
+.bel-furia-burst {
+  position: fixed;
+  inset: 0;
+  z-index: 2100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, rgba(196,71,44,.85) 0%, rgba(122,35,24,.5) 55%, rgba(122,35,24,0) 100%);
+}
+.bel-furia-burst span {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(4rem, 19vw, 15rem);
+  white-space: nowrap;
+  letter-spacing: .02em;
+  color: var(--ember-light);
+  text-shadow: 0 0 24px var(--ember), 0 0 48px var(--ember-deep), 0 0 90px var(--ember-deep);
+}
+.bel-furia-burst-anim {
+  animation: bel-furia-burst-bg 2s ease-out;
+}
+.bel-furia-burst-anim span {
+  animation: bel-furia-burst-texto 2s ease-out;
+}
+@keyframes bel-furia-burst-bg {
+  0%   { opacity: 0; }
+  15%  { opacity: 1; }
+  80%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+@keyframes bel-furia-burst-texto {
+  0%   { opacity: 0; transform: scale(.6); letter-spacing: 0; }
+  15%  { opacity: 1; transform: scale(1.1); letter-spacing: .08em; }
+  80%  { opacity: 1; transform: scale(1.05); letter-spacing: .1em; }
+  100% { opacity: 0; transform: scale(1.3); letter-spacing: .25em; }
+}
+
+/* Tremor da ativação — amplitude maior que o bel-shake do card de PV */
+#app-main.bel-furia-tremor {
+  animation: bel-furia-tremor .4s ease-in-out;
+}
+@keyframes bel-furia-tremor {
+  0%, 100% { transform: translateX(0); }
+  20%      { transform: translateX(-8px); }
+  40%      { transform: translateX(8px); }
+  60%      { transform: translateX(-6px); }
+  80%      { transform: translateX(6px); }
+}
+
+/* Burst de descanso — dispara ao aplicar Curto/Longo, aura verde com o ícone do botão */
+.bel-descanso-burst {
+  position: fixed;
+  inset: 0;
+  z-index: 2100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, rgba(79,165,116,.85) 0%, rgba(79,165,116,.35) 55%, rgba(79,165,116,0) 100%);
+}
+.bel-descanso-burst i {
+  font-size: clamp(4rem, 19vw, 15rem);
+  color: var(--status-success);
+  text-shadow: 0 0 24px var(--status-success), 0 0 48px rgba(79,165,116,.7), 0 0 90px rgba(79,165,116,.5);
+}
+.bel-descanso-burst-anim {
+  animation: bel-descanso-burst-bg 2s ease-out;
+}
+.bel-descanso-burst-anim i {
+  animation: bel-descanso-burst-icone 2s ease-out;
+}
+@keyframes bel-descanso-burst-bg {
+  0%   { opacity: 0; }
+  15%  { opacity: 1; }
+  80%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+@keyframes bel-descanso-burst-icone {
+  0%   { opacity: 0; transform: scale(.6); }
+  15%  { opacity: 1; transform: scale(1.1); }
+  80%  { opacity: 1; transform: scale(1.05); }
+  100% { opacity: 0; transform: scale(1.3); }
+}

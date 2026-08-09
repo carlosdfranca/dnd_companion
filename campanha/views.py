@@ -3,6 +3,7 @@ import json
 from django.db.models import F
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
+from django.template.loader import render_to_string
 from django.views import View
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.views.decorators.http import require_POST
@@ -146,6 +147,22 @@ class FichaEditView(View):
 
 # ── Central de Combate ────────────────────────────────────────────────────────
 
+def _pv_pct(personagem):
+    """Percentual de PV atual sobre o máximo, limitado a [0, 100]."""
+    if not personagem or not personagem.pv_maximo:
+        return 0
+    return max(0, min(100, round(personagem.pv_atual * 100 / personagem.pv_maximo)))
+
+
+def _recursos_com_pips(personagem):
+    """Lista de recursos de combate com os pips (usado/disponível) já montados."""
+    recursos_com_pips = []
+    for r in personagem.recursos.all():
+        pips = [i < r.usos_restantes for i in range(r.usos_totais)]
+        recursos_com_pips.append({"recurso": r, "pips": pips})
+    return recursos_com_pips
+
+
 def central_combate(request):
     personagem = get_current_character(request)
     pv_pct = 0
@@ -154,12 +171,10 @@ def central_combate(request):
     magicos_equipados = 0
     dado_range = range(0)
     ataques = []
+    furia_fx = request.session.pop("furia_fx", None)
     if personagem:
-        if personagem.pv_maximo:
-            pv_pct = max(0, min(100, round(personagem.pv_atual * 100 / personagem.pv_maximo)))
-        for r in personagem.recursos.all():
-            pips = [i < r.usos_restantes for i in range(r.usos_totais)]
-            recursos_com_pips.append({"recurso": r, "pips": pips})
+        pv_pct = _pv_pct(personagem)
+        recursos_com_pips = _recursos_com_pips(personagem)
         itens_equipados = personagem.itens.filter(tipo="equipado")
         magicos_equipados = sum(1 for i in itens_equipados if i.magico)
         dado_range = range(personagem.nivel)
@@ -176,15 +191,17 @@ def central_combate(request):
         "dado_range": dado_range,
         "notas_combate": notas_combate,
         "ataques": ataques,
+        "furia_fx": furia_fx,
     })
 
 
 @require_POST
 def atualizar_pv(request):
     p = get_current_character(request)
-    if p:
-        acao = request.POST.get("acao", "set")
+    acao = request.POST.get("acao", "set")
+    aplicado = 0
 
+    if p:
         if acao == "dano":
             # Temp HP absorve primeiro; dano negativo ignorado
             dano = max(0, int(request.POST.get("valor", 0)))
@@ -195,12 +212,16 @@ def atualizar_pv(request):
                 absorvido = min(dano, p.pv_temporario)
                 p.pv_temporario -= absorvido
                 dano -= absorvido
+            pv_antes = p.pv_atual
             p.pv_atual = max(-p.pv_maximo, p.pv_atual - dano)
+            aplicado = pv_antes - p.pv_atual
             p.save(update_fields=["pv_atual", "pv_temporario"])
 
         elif acao == "cura":
             cura = max(0, int(request.POST.get("valor", 0)))
+            pv_antes = p.pv_atual
             p.pv_atual = min(p.pv_maximo, p.pv_atual + cura)
+            aplicado = p.pv_atual - pv_antes
             p.save(update_fields=["pv_atual"])
 
         elif acao == "delta":
@@ -217,7 +238,46 @@ def atualizar_pv(request):
                 p.pv_temporario = max(0, int(tmp))
             p.save(update_fields=["pv_atual", "pv_temporario"])
 
+    if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+        if not p:
+            return JsonResponse({"ok": False}, status=404)
+        return JsonResponse({
+            "ok": True,
+            "tipo": acao,
+            "aplicado": aplicado,
+            "pv_atual": p.pv_atual,
+            "pv_maximo": p.pv_maximo,
+            "pv_temporario": p.pv_temporario,
+            "pv_pct": _pv_pct(p),
+        })
+
     return redirect("combate")
+
+
+def _descanso_ajax_response(request, p, tipo, aplicado=0, ataques_html=True):
+    """Payload comum devolvido pelas views de descanso quando a requisição é AJAX."""
+    payload = {
+        "ok": True,
+        "tipo": tipo,
+        "aplicado": aplicado,
+        "pv_atual": p.pv_atual,
+        "pv_maximo": p.pv_maximo,
+        "pv_temporario": p.pv_temporario,
+        "pv_pct": _pv_pct(p),
+        "furia_ativa": p.furia_ativa,
+        "recursos_html": render_to_string(
+            "campanha/partials/_recursos_body.html",
+            {"recursos_com_pips": _recursos_com_pips(p), "personagem": p},
+            request=request,
+        ),
+    }
+    if ataques_html:
+        payload["ataques_html"] = render_to_string(
+            "campanha/partials/_ataques_body.html",
+            {"ataques": p.ataques.all(), "personagem": p},
+            request=request,
+        )
+    return JsonResponse(payload)
 
 
 @require_POST
@@ -230,6 +290,12 @@ def aplicar_descanso(request, tipo):
             p.furia_ativa = False
             p.save(update_fields=["pv_atual", "pv_temporario", "furia_ativa"])
             p.recursos.all().update(usos_restantes=F("usos_totais"))
+
+    if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+        if not p:
+            return JsonResponse({"ok": False}, status=404)
+        return _descanso_ajax_response(request, p, "longo")
+
     return redirect("combate")
 
 
@@ -237,10 +303,10 @@ def aplicar_descanso(request, tipo):
 def descanso_curto_dados(request):
     """Processa os dados de cura do descanso curto e restaura +1 Fúria."""
     p = get_current_character(request)
+    total_cura = 0
     if p:
         dados_raw = request.POST.getlist("dado")
         con_mod = p.mod_constituicao
-        total_cura = 0
         for d in dados_raw:
             try:
                 val = int(d)
@@ -258,6 +324,11 @@ def descanso_curto_dados(request):
             furia.usos_restantes += 1
             furia.save(update_fields=["usos_restantes"])
 
+    if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+        if not p:
+            return JsonResponse({"ok": False}, status=404)
+        return _descanso_ajax_response(request, p, "curto", aplicado=total_cura, ataques_html=False)
+
     return redirect("combate")
 
 
@@ -272,6 +343,7 @@ def usar_recurso(request, pk):
             p.furia_ativa = True
             p.pv_temporario = max(p.pv_temporario, p.nivel)
             p.save(update_fields=["furia_ativa", "pv_temporario"])
+            request.session["furia_fx"] = 1
     return redirect("combate")
 
 

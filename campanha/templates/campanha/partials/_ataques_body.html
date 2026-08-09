@@ -1,0 +1,21 @@
+{% if ataques %}
+  <div class="row g-2 p-2">
+    {% for a in ataques %}
+      <div class="col-12 col-sm-6">
+        <div class="bel-ataque-card {% if personagem.furia_ativa %}bel-ataque-card-furia{% endif %}">
+          <div class="bel-ataque-nome">{{ a.nome }}</div>
+          <div class="bel-ataque-formula">
+            {% if personagem.furia_ativa %}{{ a.formula_furia }}{% else %}{{ a.formula }}{% endif %}
+          </div>
+          {% if personagem.furia_ativa %}
+            <span class="badge bg-danger mt-2"><i class="bi bi-lightning-fill me-1"></i>FÚRIA</span>
+          {% endif %}
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="p-3 text-muted">
+    Nenhum ataque cadastrado. <a href="{% url 'ataque_create' %}">Adicionar</a>
+  </div>
+{% endif %}

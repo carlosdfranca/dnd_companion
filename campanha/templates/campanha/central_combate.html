@@ -1,5 +1,6 @@
 {% extends "campanha/base.html" %}
 {% block title %}Combate{% endblock %}
+{% block body_class %}{% if personagem.furia_ativa %}em-furia{% endif %}{% endblock %}
 
 {% block content %}
 {% if not personagem %}
@@ -21,51 +22,50 @@
   <div class="col-12 col-lg-4">
 
     {# Card de PV #}
-    <div class="bel-card mb-3">
+    <div class="bel-card mb-3" id="pv-card">
       <div class="bel-card-header"><i class="bi bi-heart-fill me-2 text-danger"></i>Pontos de Vida</div>
 
       {# Número grande + barra #}
-      <div class="bel-hp-strip">
+      <div class="bel-hp-strip" id="pv-strip">
+        <div id="pv-float" class="bel-pv-float-layer" aria-hidden="true"></div>
         <div class="d-flex align-items-baseline justify-content-between px-3 mb-2">
-          <span class="bel-hp-main {% if personagem.pv_atual <= 0 %}text-danger{% elif pv_pct < 40 %}text-warning{% endif %}">
-            {{ personagem.pv_atual }}
+          <span class="bel-hp-main {% if personagem.pv_atual <= 0 %}text-danger{% elif pv_pct < 40 %}text-warning{% endif %}" id="pv-main">
+            <span id="pv-valor">{{ personagem.pv_atual }}</span>
             <span class="bel-hp-sep">/</span>
             <span class="bel-hp-max-inline">{{ personagem.pv_maximo }}</span>
           </span>
           <span class="d-flex align-items-center gap-1">
             <span class="small text-muted fw-semibold">PV</span>
-            {% if personagem.pv_temporario %}
-              <span class="badge bg-info ms-1">+{{ personagem.pv_temporario }} temp</span>
-            {% endif %}
+            <span class="badge bg-info ms-1 {% if not personagem.pv_temporario %}d-none{% endif %}" id="pv-temp">+{{ personagem.pv_temporario }} temp</span>
           </span>
         </div>
         <div class="progress bel-pv-bar">
           <div class="progress-bar {% if pv_pct > 60 %}bg-success{% elif pv_pct > 30 %}bg-warning{% else %}bg-danger{% endif %}"
-               style="width:{{ pv_pct }}%"></div>
+               style="width:{{ pv_pct }}%" id="pv-bar"></div>
         </div>
       </div>
 
       {# Dano e Cura — ações principais #}
       <div class="row g-0 bel-pv-actions">
         <div class="col-6">
-          <form method="post" action="{% url 'pv_atualizar' %}">
+          <form method="post" action="{% url 'pv_atualizar' %}" data-pv-form>
             {% csrf_token %}
             <input type="hidden" name="acao" value="dano">
             <div class="bel-pv-action-box bel-pv-dano">
               <div class="bel-pv-action-label"><i class="bi bi-arrow-down-circle me-1"></i>Dano</div>
               <input type="number" name="valor" class="bel-pv-input" placeholder="0" min="0" max="999" autocomplete="off">
-              {% if personagem.furia_ativa %}
+              <div id="dano-fisico-wrap" class="{% if not personagem.furia_ativa %}d-none{% endif %}">
                 <label class="d-flex align-items-center gap-1 small mt-1 mb-1">
                   <input type="checkbox" name="fisico" value="1" class="form-check-input mt-0">
                   Dano físico (C/P/Conc.)
                 </label>
-              {% endif %}
+              </div>
               <button type="submit" class="bel-pv-btn bel-pv-btn-dano">Aplicar</button>
             </div>
           </form>
         </div>
         <div class="col-6">
-          <form method="post" action="{% url 'pv_atualizar' %}">
+          <form method="post" action="{% url 'pv_atualizar' %}" data-pv-form>
             {% csrf_token %}
             <input type="hidden" name="acao" value="cura">
             <div class="bel-pv-action-box bel-pv-cura">
@@ -138,7 +138,7 @@
         </button>
 
         {# Longo — restaura tudo #}
-        <form method="post" action="{% url 'descanso' 'longo' %}" class="flex-fill">
+        <form method="post" action="{% url 'descanso' 'longo' %}" class="flex-fill" data-descanso-form data-icone="bi-moon-fill">
           {% csrf_token %}
           <button class="btn btn-outline-secondary w-100"><i class="bi bi-moon-fill me-1"></i>Longo</button>
         </form>
@@ -154,66 +154,7 @@
         <span><i class="bi bi-lightning-fill me-2"></i>Recursos de Combate</span>
         <a href="{% url 'recurso_list' %}" class="btn btn-outline-secondary btn-sm py-0">Gerenciar</a>
       </div>
-      {% if recursos_com_pips %}
-        <div class="row g-2 p-2">
-          {% for item in recursos_com_pips %}
-          <div class="col-12 col-sm-6">
-            <div class="bel-recurso-card">
-              <div class="d-flex align-items-start justify-content-between mb-1">
-                <div>
-                  <strong>{{ item.recurso.nome }}</strong>
-                  <span class="badge bg-secondary ms-1 small">{{ item.recurso.get_recuperacao_display }}</span>
-                  {% if item.recurso.nome == "Fúria" and personagem.furia_ativa %}
-                    <span class="badge bg-danger ms-1 small">ATIVA</span>
-                  {% endif %}
-                </div>
-                <span class="bel-usos-count">{{ item.recurso.usos_restantes }}/{{ item.recurso.usos_totais }}</span>
-              </div>
-
-              <div class="bel-pips mb-2">
-                {% for filled in item.pips %}
-                  <span class="bel-pip {% if filled %}bel-pip-on{% endif %}">●</span>
-                {% endfor %}
-              </div>
-
-              {% if item.recurso.descricao %}
-                <p class="text-muted small mb-2" style="line-height:1.3">{{ item.recurso.descricao|truncatechars:80 }}</p>
-              {% endif %}
-
-              <div class="d-flex gap-1">
-                <form method="post" action="{% url 'recurso_usar' item.recurso.pk %}">
-                  {% csrf_token %}
-                  <button class="btn btn-danger btn-sm" {% if item.recurso.usos_restantes == 0 %}disabled{% endif %}>
-                    <i class="bi bi-dash-circle me-1"></i>Usar
-                  </button>
-                </form>
-                <form method="post" action="{% url 'recurso_restaurar' item.recurso.pk %}">
-                  {% csrf_token %}
-                  <button class="btn btn-outline-success btn-sm" {% if item.recurso.usos_restantes == item.recurso.usos_totais %}disabled{% endif %}>
-                    <i class="bi bi-arrow-counterclockwise me-1"></i>Restaurar
-                  </button>
-                </form>
-                {% if item.recurso.nome == "Fúria" and personagem.furia_ativa %}
-                  <form method="post" action="{% url 'furia_encerrar' %}">
-                    {% csrf_token %}
-                    <button class="btn btn-outline-warning btn-sm">
-                      <i class="bi bi-x-circle me-1"></i>Encerrar Fúria
-                    </button>
-                  </form>
-                {% endif %}
-                <a href="{% url 'recurso_update' item.recurso.pk %}" class="btn btn-outline-secondary btn-sm ms-auto">
-                  <i class="bi bi-pencil"></i>
-                </a>
-              </div>
-            </div>
-          </div>
-          {% endfor %}
-        </div>
-      {% else %}
-        <div class="p-3 text-muted">
-          Nenhum recurso cadastrado. <a href="{% url 'recurso_create' %}">Adicionar</a>
-        </div>
-      {% endif %}
+      <div id="recursos-body">{% include "campanha/partials/_recursos_body.html" %}</div>
     </div>
 
     {# ── Ataques / Dano ── #}
@@ -222,27 +163,7 @@
         <span><i class="bi bi-crosshair2 me-2"></i>Ataques / Dano</span>
         <a href="{% url 'ataque_list' %}" class="btn btn-outline-secondary btn-sm py-0">Gerenciar</a>
       </div>
-      {% if ataques %}
-        <div class="row g-2 p-2">
-          {% for a in ataques %}
-            <div class="col-12 col-sm-6">
-              <div class="bel-ataque-card {% if personagem.furia_ativa %}bel-ataque-card-furia{% endif %}">
-                <div class="bel-ataque-nome">{{ a.nome }}</div>
-                <div class="bel-ataque-formula">
-                  {% if personagem.furia_ativa %}{{ a.formula_furia }}{% else %}{{ a.formula }}{% endif %}
-                </div>
-                {% if personagem.furia_ativa %}
-                  <span class="badge bg-danger mt-2"><i class="bi bi-lightning-fill me-1"></i>FÚRIA</span>
-                {% endif %}
-              </div>
-            </div>
-          {% endfor %}
-        </div>
-      {% else %}
-        <div class="p-3 text-muted">
-          Nenhum ataque cadastrado. <a href="{% url 'ataque_create' %}">Adicionar</a>
-        </div>
-      {% endif %}
+      <div id="ataques-body">{% include "campanha/partials/_ataques_body.html" %}</div>
     </div>
 
     {# ── Notas de Combate ── #}
@@ -344,7 +265,7 @@
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content" style="background:var(--bel-surface-2);border-color:var(--bel-border)">
 
-      <form method="post" action="{% url 'descanso_curto_dados' %}">
+      <form method="post" action="{% url 'descanso_curto_dados' %}" data-descanso-form data-icone="bi-cup-hot">
         {% csrf_token %}
 
         <div class="modal-header" style="border-color:var(--bel-border)">
@@ -436,6 +357,180 @@
   });
 })();
 </script>
+
+<script>
+(function () {
+  var flashEl = document.getElementById('fx-flash');
+  var floatLayer = document.getElementById('pv-float');
+  var pvCard = document.getElementById('pv-card');
+  var pvMain = document.getElementById('pv-main');
+  var pvValor = document.getElementById('pv-valor');
+  var pvBar = document.getElementById('pv-bar');
+  var pvTemp = document.getElementById('pv-temp');
+
+  function aplicaPV(d) {
+    pvValor.textContent = d.pv_atual;
+
+    pvMain.classList.remove('text-danger', 'text-warning');
+    if (d.pv_atual <= 0) {
+      pvMain.classList.add('text-danger');
+    } else if (d.pv_pct < 40) {
+      pvMain.classList.add('text-warning');
+    }
+
+    pvBar.style.width = d.pv_pct + '%';
+    pvBar.classList.remove('bg-success', 'bg-warning', 'bg-danger');
+    if (d.pv_pct > 60) {
+      pvBar.classList.add('bg-success');
+    } else if (d.pv_pct > 30) {
+      pvBar.classList.add('bg-warning');
+    } else {
+      pvBar.classList.add('bg-danger');
+    }
+
+    if (d.pv_temporario > 0) {
+      pvTemp.textContent = '+' + d.pv_temporario + ' temp';
+      pvTemp.classList.remove('d-none');
+    } else {
+      pvTemp.classList.add('d-none');
+    }
+  }
+
+  function dispararFX(tipo, valor) {
+    if (!flashEl) return;
+
+    // Piscada de tela
+    flashEl.classList.remove('is-dano', 'is-cura', 'bel-fx-flash-anim');
+    void flashEl.offsetWidth; // reinicia a animação em cliques seguidos
+    flashEl.classList.add(tipo === 'dano' ? 'is-dano' : 'is-cura', 'bel-fx-flash-anim');
+    flashEl.addEventListener('animationend', function handler() {
+      flashEl.classList.remove('bel-fx-flash-anim');
+      flashEl.removeEventListener('animationend', handler);
+    });
+
+    // Número flutuante
+    if (floatLayer) {
+      var span = document.createElement('span');
+      span.className = 'bel-pv-float ' + (tipo === 'dano' ? 'bel-pv-float-dano' : 'bel-pv-float-cura');
+      span.textContent = (tipo === 'dano' ? '-' : '+') + valor;
+      floatLayer.appendChild(span);
+      span.addEventListener('animationend', function () { span.remove(); });
+    }
+
+    // Tremida — só no dano
+    if (tipo === 'dano' && pvCard) {
+      pvCard.classList.remove('bel-shake');
+      void pvCard.offsetWidth;
+      pvCard.classList.add('bel-shake');
+      pvCard.addEventListener('animationend', function handler() {
+        pvCard.classList.remove('bel-shake');
+        pvCard.removeEventListener('animationend', handler);
+      });
+    }
+  }
+
+  document.querySelectorAll('[data-pv-form]').forEach(function (form) {
+    form.addEventListener('submit', function (ev) {
+      var input = form.querySelector('input[name="valor"]');
+      if (!input || !input.value || parseInt(input.value, 10) <= 0) {
+        ev.preventDefault();
+        return;
+      }
+      ev.preventDefault();
+
+      fetch(form.action, {
+        method: 'POST',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        body: new FormData(form),
+      })
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          if (!d.ok) { form.submit(); return; }
+          input.value = '';
+          aplicaPV(d);
+          if (d.aplicado > 0) dispararFX(d.tipo, d.aplicado);
+        })
+        .catch(function () { form.submit(); });
+    });
+  });
+
+  var descansoBurst = document.getElementById('fx-descanso-burst');
+  var descansoIcone = descansoBurst ? descansoBurst.querySelector('i') : null;
+
+  function dispararDescansoFX(icone) {
+    if (!descansoBurst || !descansoIcone) return;
+    descansoIcone.className = 'bi ' + icone;
+    descansoBurst.classList.remove('bel-descanso-burst-anim');
+    void descansoBurst.offsetWidth;
+    descansoBurst.classList.add('bel-descanso-burst-anim');
+    descansoBurst.addEventListener('animationend', function handler() {
+      descansoBurst.classList.remove('bel-descanso-burst-anim');
+      descansoBurst.removeEventListener('animationend', handler);
+    });
+  }
+
+  document.querySelectorAll('[data-descanso-form]').forEach(function (form) {
+    form.addEventListener('submit', function (ev) {
+      ev.preventDefault();
+
+      fetch(form.action, {
+        method: 'POST',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        body: new FormData(form),
+      })
+        .then(function (r) { return r.json(); })
+        .then(function (d) {
+          if (!d.ok) { form.submit(); return; }
+
+          aplicaPV(d);
+          document.body.classList.toggle('em-furia', d.furia_ativa);
+          var fisicoWrap = document.getElementById('dano-fisico-wrap');
+          if (fisicoWrap) fisicoWrap.classList.toggle('d-none', !d.furia_ativa);
+
+          var recursosBody = document.getElementById('recursos-body');
+          if (recursosBody && d.recursos_html !== undefined) recursosBody.innerHTML = d.recursos_html;
+          var ataquesBody = document.getElementById('ataques-body');
+          if (ataquesBody && d.ataques_html !== undefined) ataquesBody.innerHTML = d.ataques_html;
+
+          var modalEl = document.getElementById('modalDescanso');
+          if (modalEl && modalEl.contains(form) && window.bootstrap) {
+            var modalInstancia = bootstrap.Modal.getInstance(modalEl);
+            if (modalInstancia) modalInstancia.hide();
+          }
+
+          dispararDescansoFX(form.dataset.icone);
+        })
+        .catch(function () { form.submit(); });
+    });
+  });
+})();
+</script>
+
+{% if furia_fx %}
+<script>
+(function () {
+  var burst = document.getElementById('fx-furia-burst');
+  var main = document.getElementById('app-main');
+  if (!burst || !main) return;
+
+  burst.classList.remove('bel-furia-burst-anim');
+  void burst.offsetWidth;
+  burst.classList.add('bel-furia-burst-anim');
+  burst.addEventListener('animationend', function handler() {
+    burst.classList.remove('bel-furia-burst-anim');
+    burst.removeEventListener('animationend', handler);
+  });
+
+  main.classList.remove('bel-furia-tremor');
+  void main.offsetWidth;
+  main.classList.add('bel-furia-tremor');
+  main.addEventListener('animationend', function handler() {
+    main.classList.remove('bel-furia-tremor');
+    main.removeEventListener('animationend', handler);
+  });
+})();
+</script>
+{% endif %}
 
 {% endif %}
 {% endblock %}
