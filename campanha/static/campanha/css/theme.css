@@ -376,6 +376,11 @@ body {
   line-height: 1;
   color: var(--ember);
 }
+.bel-ataque-meta {
+  font-size: .74rem;
+  color: var(--bel-text-muted);
+  margin-top: .3rem;
+}
 .bel-ataque-card-furia {
   border-color: var(--ember);
   animation: bel-furia-card-pulso var(--furia-ciclo) ease-in-out infinite alternate;
@@ -1624,6 +1629,213 @@ body {
   background: rgba(208,70,58,.1);
   border-bottom: 1px solid rgba(208,70,58,.3);
   padding: .55rem .85rem;
+}
+
+/* ── Tags de efeito estruturado (EfeitoItem) ─────────────────────────── */
+.bel-inv-efeitos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .3rem;
+  margin-top: .3rem;
+}
+.bel-tag-efeito {
+  display: inline-flex;
+  align-items: center;
+  gap: .25rem;
+  font-size: .72rem;
+  padding: .08rem .5rem;
+  border-radius: 20px;
+  border: 1px solid var(--bel-border);
+  background: var(--bel-surface-3);
+  color: var(--bel-text-primary);
+  white-space: nowrap;
+}
+.bel-tag-efeito i { font-size: .75rem; }
+.bel-tag-efeito-numerico {
+  border-color: rgba(109,74,199,.4);
+  color: var(--bel-accent);
+  background: var(--bel-accent-dim);
+}
+.bel-tag-efeito-palavra_chave {
+  border-color: rgba(201,162,75,.45);
+  color: var(--gold-soft);
+  background: rgba(201,162,75,.12);
+}
+.bel-tag-efeito-informativo {
+  border-color: var(--bel-border);
+  color: var(--bel-text-muted);
+  font-style: italic;
+}
+.bel-tag-efeito-situacional { opacity: .75; }
+
+/* ── Select de slot embutido na linha de mochila ─────────────────────── */
+.bel-inv-slot-select {
+  width: auto;
+  font-size: .78rem;
+  padding: .1rem .4rem;
+}
+
+/* ── Grid de equipamento em formato de corpo ──────────────────────────── */
+/* 3 colunas × 5 linhas com vãos deliberados — é o vazio que faz o olho ler
+   "isso é um corpo": pescoço/peito livre na 2ª linha, pernas livres na
+   última. A silhueta SVG só decora por trás; nunca intercepta o drop. */
+.bel-body-grid {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr minmax(92px, .8fr) 1fr;
+  grid-template-areas:
+    "capa     cabeca    colar"
+    "mao_p    .         mao_s"
+    "luvas    armadura  anel_1"
+    "municao  cinto     anel_2"
+    ".        botas     .";
+  gap: .5rem;
+  padding: 1rem .85rem;
+}
+.bel-slot-tile[data-slot="cabeca"]            { grid-area: cabeca; }
+.bel-slot-tile[data-slot="capa"]              { grid-area: capa; }
+.bel-slot-tile[data-slot="colar"]             { grid-area: colar; }
+.bel-slot-tile[data-slot="mao_principal"]     { grid-area: mao_p; }
+.bel-slot-tile[data-slot="mao_secundaria"]    { grid-area: mao_s; }
+.bel-slot-tile[data-slot="armadura_corporal"] { grid-area: armadura; }
+.bel-slot-tile[data-slot="luvas"]             { grid-area: luvas; }
+.bel-slot-tile[data-slot="anel_1"]            { grid-area: anel_1; }
+.bel-slot-tile[data-slot="anel_2"]            { grid-area: anel_2; }
+.bel-slot-tile[data-slot="municao"]           { grid-area: municao; }
+.bel-slot-tile[data-slot="cinto"]             { grid-area: cinto; }
+.bel-slot-tile[data-slot="botas"]             { grid-area: botas; }
+
+.bel-body-silhueta {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;   /* nunca rouba o drop dos tiles */
+  z-index: 0;
+  fill: var(--bel-surface-raised);
+  stroke: var(--bel-border);
+  stroke-width: 1.5;
+  opacity: .38;
+}
+
+.bel-slot-tile {
+  position: relative;
+  z-index: 1;
+  border: 1px solid var(--bel-border);
+  border-radius: 10px;
+  background: var(--bel-surface-3);
+  padding: .5rem .55rem;
+  min-height: 84px;
+  display: flex;
+  flex-direction: column;
+  gap: .3rem;
+  transition: border-color .15s, background .15s;
+}
+.bel-slot-tile-ocupado {
+  border-color: rgba(109,74,199,.4);
+  background: var(--bel-accent-dim);
+}
+/* Realce de alvo de drop válido — SortableJS marca o container ativo */
+.bel-slot-tile.sortable-ghost,
+.bel-slot-tile:has(> .sortable-ghost) {
+  border-color: var(--bel-accent);
+  box-shadow: var(--glow-arcane);
+}
+.bel-slot-label {
+  font-size: .64rem;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  font-weight: 600;
+  color: var(--bel-text-muted);
+}
+.bel-slot-item { display: flex; flex-direction: column; gap: .3rem; cursor: grab; }
+.bel-slot-item:active { cursor: grabbing; }
+.bel-slot-item-linha { display: flex; align-items: center; gap: .35rem; }
+.bel-slot-item-nome {
+  font-weight: 600;
+  font-size: .85rem;
+  color: var(--bel-text-primary);
+  overflow-wrap: anywhere;
+}
+.bel-slot-item-nota { font-size: .68rem; color: var(--bel-text-muted); }
+.bel-slot-actions { display: flex; gap: .25rem; margin-top: auto; }
+.bel-slot-fantasma { pointer-events: none; opacity: .75; }
+
+.bel-slot-vazio {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+.bel-slot-icon-empty {
+  width: 2.2rem;
+  height: 2.2rem;
+  color: var(--bel-text-muted);
+  opacity: .5;
+}
+.bel-slot-icon-empty svg { width: 100%; height: 100%; display: block; }
+.bel-slot-icon-item {
+  width: 1.15rem;
+  height: 1.15rem;
+  color: var(--bel-accent);
+  flex-shrink: 0;
+}
+.bel-slot-icon-item svg { width: 100%; height: 100%; display: block; }
+
+/* Pulso de "acabei de receber um item" — mesma lógica de restart de
+   animação já usada em central_combate.html (remove → reflow → add). */
+@keyframes bel-slot-pulso {
+  0%   { box-shadow: 0 0 0 0 rgba(109,74,199,.55); }
+  100% { box-shadow: 0 0 0 14px rgba(109,74,199,0); }
+}
+.bel-slot-pulso { animation: bel-slot-pulso .6s ease-out; }
+
+/* ── Faixa de carga (dentro do painel de Equipamento) ─────────────────── */
+.bel-carga-strip {
+  padding: .1rem 1rem 1rem;
+}
+.bel-carga-label {
+  font-size: .78rem;
+  color: var(--bel-text-muted);
+}
+
+/* ── Estado de mochila vazia (alvo de drop) ───────────────────────────── */
+.bel-mochila-vazia { pointer-events: none; }
+.js-mochila-drop { min-height: 90px; }
+
+/* ── Arrasto (SortableJS) ──────────────────────────────────────────────
+   .bel-inv-row já existe (linha da mochila); aqui só o que é específico
+   do drag: alça, item "fantasma" durante o arrasto, item "escolhido". */
+.bel-inv-handle {
+  cursor: grab;
+  color: var(--bel-text-muted);
+  padding: 0 .2rem;
+  transition: color .15s;
+}
+.bel-inv-handle:hover { color: var(--bel-text-primary); }
+.bel-inv-handle:active { cursor: grabbing; }
+.bel-inv-ghost {
+  opacity: .5;
+  border: 1px dashed var(--bel-accent) !important;
+}
+.bel-inv-chosen { box-shadow: var(--glow-arcane); }
+
+/* Trava a tela discretamente enquanto uma ação de arrasto está em voo */
+.bel-inv-busy { pointer-events: none; opacity: .7; transition: opacity .1s; }
+
+/* ── Responsivo: abaixo de 767px o corpo vira um grid simples de 2       */
+/*    colunas — sem a silhueta (decorativa, sem espaço útil no celular). */
+@media (max-width: 767px) {
+  .bel-body-grid {
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-areas: none;
+  }
+  .bel-body-grid > .bel-slot-tile { grid-area: auto; }
+  .bel-body-silhueta { display: none; }
+}
+@media (max-width: 479px) {
+  .bel-body-grid { grid-template-columns: 1fr; }
 }
 
 /* ── Utilitário ──────────────────────────────────────────────────────── */

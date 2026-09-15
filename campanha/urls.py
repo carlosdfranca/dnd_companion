@@ -29,6 +29,28 @@ urlpatterns = [
     path("itens/novo/", views.ItemCreateView.as_view(), name="item_create"),
     path("itens/<int:pk>/editar/", views.ItemUpdateView.as_view(), name="item_update"),
     path("itens/<int:pk>/excluir/", views.ItemDeleteView.as_view(), name="item_delete"),
+    path("itens/<int:pk>/equipar/", views.item_equipar, name="item_equipar"),
+    path("itens/<int:pk>/desequipar/", views.item_desequipar, name="item_desequipar"),
+    path("itens/<int:pk>/sintonizar/", views.item_sintonizar, name="item_sintonizar"),
+    path("itens/<int:pk>/dessintonizar/", views.item_dessintonizar, name="item_dessintonizar"),
+    path("itens/<int:pk>/empunhadura/", views.item_empunhadura, name="item_empunhadura"),
+
+    # Poções
+    path("itens/pocoes/<int:pk>/usar/", views.pocao_usar, name="pocao_usar"),
+
+    # Alquimia
+    path("itens/alquimia/componentes/novo/", views.ComponenteAlquimicoCreateView.as_view(), name="alquimia_componente_create"),
+    path("itens/alquimia/componentes/<int:pk>/editar/", views.ComponenteAlquimicoUpdateView.as_view(), name="alquimia_componente_update"),
+    path("itens/alquimia/componentes/<int:pk>/excluir/", views.ComponenteAlquimicoDeleteView.as_view(), name="alquimia_componente_delete"),
+    path("itens/alquimia/bases/novo/", views.BaseAlquimicaCreateView.as_view(), name="alquimia_base_create"),
+    path("itens/alquimia/bases/<int:pk>/editar/", views.BaseAlquimicaUpdateView.as_view(), name="alquimia_base_update"),
+    path("itens/alquimia/bases/<int:pk>/excluir/", views.BaseAlquimicaDeleteView.as_view(), name="alquimia_base_delete"),
+
+    # Harvesting
+    path("itens/harvesting/essencias/", views.essencia_atualizar, name="essencia_atualizar"),
+    path("itens/harvesting/componentes/novo/", views.ComponenteCriaturaCreateView.as_view(), name="criatura_componente_create"),
+    path("itens/harvesting/componentes/<int:pk>/editar/", views.ComponenteCriaturaUpdateView.as_view(), name="criatura_componente_update"),
+    path("itens/harvesting/componentes/<int:pk>/excluir/", views.ComponenteCriaturaDeleteView.as_view(), name="criatura_componente_delete"),
 
     # Recursos
     path("recursos/", views.RecursoListView.as_view(), name="recurso_list"),
@@ -36,12 +58,8 @@ urlpatterns = [
     path("recursos/<int:pk>/editar/", views.RecursoUpdateView.as_view(), name="recurso_update"),
     path("recursos/<int:pk>/excluir/", views.RecursoDeleteView.as_view(), name="recurso_delete"),
 
-    # Ataques / Dano
-    path("ataques/", views.AtaqueListView.as_view(), name="ataque_list"),
-    path("ataques/furia-bonus/", views.atualizar_bonus_furia, name="bonus_furia_atualizar"),
-    path("ataques/novo/", views.AtaqueCreateView.as_view(), name="ataque_create"),
-    path("ataques/<int:pk>/editar/", views.AtaqueUpdateView.as_view(), name="ataque_update"),
-    path("ataques/<int:pk>/excluir/", views.AtaqueDeleteView.as_view(), name="ataque_delete"),
+    # Ataques / Dano: rotas removidas junto com o model Ataque. Voltam como
+    # página somativa das armas equipadas quando a fase de UI for autorizada.
 
     # Locais
     path("locais/", views.LocalListView.as_view(), name="local_list"),

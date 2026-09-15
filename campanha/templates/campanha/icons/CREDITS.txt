@@ -1,0 +1,19 @@
+Ícones de equipamento (slots vazios e categorias) — game-icons.net
+Licença: CC BY 3.0 (https://creativecommons.org/licenses/by/3.0/)
+
+  broadsword.svg      — Lorc         https://game-icons.net/1x1/lorc/broadsword.html
+  boots.svg           — Lorc         https://game-icons.net/1x1/lorc/boots.html
+  chest-armor.svg     — Delapouite   https://game-icons.net/1x1/delapouite/chest-armor.html
+  cape.svg            — Delapouite   https://game-icons.net/1x1/delapouite/cape.html
+  ring.svg            — Delapouite   https://game-icons.net/1x1/delapouite/ring.html
+  gloves.svg          — Delapouite   https://game-icons.net/1x1/delapouite/gloves.html
+  quiver.svg          — Delapouite   https://game-icons.net/1x1/delapouite/quiver.html
+  backpack.svg        — Delapouite   https://game-icons.net/1x1/delapouite/backpack.html
+  helmet.svg          — sbed         https://game-icons.net/1x1/sbed/helmet.html
+  shield.svg          — sbed         https://game-icons.net/1x1/sbed/shield.html
+  belt.svg            — Lucas Martins (lucasms) https://game-icons.net/1x1/lucasms/belt.html
+  necklace.svg        — Lucas Martins (lucasms) https://game-icons.net/1x1/lucasms/necklace.html
+
+Baixados com fundo transparente e `fill` trocado para `currentColor` (só essa
+alteração — permite colorir via CSS igual aos outros ícones do tema). Nenhuma
+outra modificação. Uso interno, app pessoal de uma mesa — não publicado.

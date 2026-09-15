@@ -5,7 +5,12 @@
         <div class="bel-ataque-card {% if personagem.furia_ativa %}bel-ataque-card-furia{% endif %}">
           <div class="bel-ataque-nome">{{ a.nome }}</div>
           <div class="bel-ataque-formula">
-            {% if personagem.furia_ativa %}{{ a.formula_furia }}{% else %}{{ a.formula }}{% endif %}
+            {% if personagem.furia_ativa %}{{ a.formula_dano_furia }}{% else %}{{ a.formula_dano }}{% endif %}
+          </div>
+          <div class="bel-ataque-meta">
+            {% if a.bonus_ataque >= 0 %}+{% endif %}{{ a.bonus_ataque }} pra acertar
+            {% if a.tipo_dano %} · {{ a.tipo_dano }}{% endif %}
+            {% if a.versatil %} · {{ a.empunhadura_label }}{% endif %}
           </div>
           {% if personagem.furia_ativa %}
             <span class="badge bg-danger mt-2"><i class="bi bi-lightning-fill me-1"></i>FÚRIA</span>
@@ -16,6 +21,6 @@
   </div>
 {% else %}
   <div class="p-3 text-muted">
-    Nenhum ataque cadastrado. <a href="{% url 'ataque_create' %}">Adicionar</a>
+    Nenhuma arma equipada.
   </div>
 {% endif %}

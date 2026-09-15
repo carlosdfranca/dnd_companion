@@ -1,0 +1,11 @@
+{# Fila de avisos do inventário — GET completo (via sessão) e respostas AJAX (via corpo) renderizam este mesmo partial. #}
+{% if avisos %}
+  <div class="mb-3">
+    {% for aviso in avisos %}
+      <div class="alert {% if aviso.tipo == 'erro' %}alert-danger{% else %}alert-info{% endif %} py-2 mb-2 d-flex align-items-center">
+        <i class="bi {% if aviso.tipo == 'erro' %}bi-exclamation-triangle-fill{% else %}bi-info-circle-fill{% endif %} me-2"></i>
+        {{ aviso.texto }}
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}

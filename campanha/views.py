@@ -1,5 +1,6 @@
 import json
 
+from django.core.exceptions import ValidationError
 from django.db.models import F
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
@@ -9,20 +10,134 @@ from django.views.generic import ListView, DetailView, CreateView, UpdateView, D
 from django.views.decorators.http import require_POST
 from django.urls import reverse_lazy
 
+from . import constants, regras
 from .models import (
-    Personagem, RecursoDeCombate, Ataque, ItemInventario,
+    Personagem, RecursoDeCombate, Equipamento, Pocao,
+    ComponenteAlquimico, BaseAlquimica, ComponenteCriatura,
     Local, NPC, Missao, ResumoSessao, InformacaoImportante, NotaCombate,
 )
 from .forms import (
-    PersonagemForm, PericiaFormSet, SalvaguardaFormSet,
-    RecursoDeCombateForm, AtaqueForm, BonusFuriaForm, ItemInventarioForm, MoedasForm,
+    PersonagemForm, PericiaFormSet, SalvaguardaFormSet, EssenciaFormSet,
+    RecursoDeCombateForm, ItemInventarioForm, EfeitoItemFormSet, MoedasForm,
+    ComponenteAlquimicoForm, BaseAlquimicaForm, ComponenteCriaturaForm,
     LocalForm, NPCForm, MissaoForm, ResumoSessaoForm, InformacaoImportanteForm,
     NotaCombateForm,
 )
 from .utils import get_current_character
 
-# Máximo de itens mágicos que podem estar equipados ao mesmo tempo.
-LIMITE_ITENS_MAGICOS = 3
+
+def _flash_avisos(request, avisos, tipo="info"):
+    """Fila de avisos na sessão, mostrada uma vez na próxima renderização
+    COMPLETA de /itens/ — mesmo padrão de flash usado para `furia_fx` em
+    central_combate. Usada pela resposta não-AJAX das actions de item e por
+    `pocao_usar` (que não tem contraparte AJAX)."""
+    if not avisos:
+        return
+    fila = request.session.get("item_avisos", [])
+    fila.extend({"texto": a, "tipo": tipo} for a in avisos)
+    request.session["item_avisos"] = fila
+
+
+def _flash_avisos_dicts(request, avisos_dicts):
+    """Como `_flash_avisos`, mas recebe uma lista já no formato
+    `{"texto":, "tipo":}` — usada quando um lote pode ter tipos mistos
+    (não é o caso hoje, mas mantém a sessão e a resposta AJAX no mesmo formato)."""
+    if not avisos_dicts:
+        return
+    fila = request.session.get("item_avisos", [])
+    fila.extend(avisos_dicts)
+    request.session["item_avisos"] = fila
+
+
+def _avisos_dicts(textos, tipo="info"):
+    return [{"texto": t, "tipo": tipo} for t in (textos or [])]
+
+
+def _texto_validation_error(exc):
+    return "; ".join(getattr(exc, "messages", None) or [str(exc)])
+
+
+def _contexto_inventario(personagem):
+    """Contexto dos blocos de Equipamento/Mochila do inventário — usado
+    tanto pelo GET completo de `ItemListView` quanto pelas respostas AJAX
+    das 5 actions de item (`_item_acao_resposta`), pra garantir que os dois
+    produzam exatamente o mesmo HTML a partir do mesmo dicionário."""
+    if personagem is None:
+        return {
+            "grid_slots": [
+                {"slot": ident, "label": label,
+                 "icone": constants.SLOT_ICONES.get(ident, ""), "ocupacao": None}
+                for ident, label, _ordem in constants.SLOTS_EQUIPAMENTO
+            ],
+            "mochila": [],
+            "slot_choices": constants.SLOT_CHOICES,
+            "sintonizados": 0,
+            "limite_sintonizacao": constants.LIMITE_SINTONIZACAO,
+            "excedeu_sintonizacao": False,
+            "carga_atual": 0, "capacidade_carga": 0,
+            "percentual_carga": 0, "sobrecarregado": False,
+        }
+
+    itens = list(
+        Equipamento.objects.filter(personagem=personagem).prefetch_related("efeitos")
+    )
+
+    # Mapa slot -> {"item":, "primario": bool}. Arma de duas mãos ocupa 2
+    # slots (ver Equipamento.slots_ocupados) mesmo só gravando um `slot`;
+    # o secundário aparece marcado como não-primário no grid.
+    ocupacao = {}
+    for item in itens:
+        if not item.slot:
+            continue
+        for indice, ident in enumerate(item.slots_ocupados):
+            ocupacao[ident] = {"item": item, "primario": indice == 0}
+
+    grid_slots = [
+        {"slot": ident, "label": label,
+         "icone": constants.SLOT_ICONES.get(ident, ""), "ocupacao": ocupacao.get(ident)}
+        for ident, label, _ordem in constants.SLOTS_EQUIPAMENTO
+    ]
+
+    return {
+        "grid_slots": grid_slots,
+        "mochila": [i for i in itens if not i.slot],
+        "slot_choices": constants.SLOT_CHOICES,
+        "sintonizados": personagem.sintonizados_count,
+        "limite_sintonizacao": constants.LIMITE_SINTONIZACAO,
+        "excedeu_sintonizacao": personagem.excedeu_sintonizacao,
+        "carga_atual": personagem.carga_atual,
+        "capacidade_carga": personagem.capacidade_carga,
+        "percentual_carga": personagem.percentual_carga,
+        "sobrecarregado": personagem.sobrecarregado,
+    }
+
+
+def _item_acao_resposta(request, personagem, avisos_dicts):
+    """Resposta comum das 5 actions de item (equipar/desequipar/sintonizar/
+    dessintonizar/empunhadura).
+
+    Fora de AJAX: flasheia os avisos na sessão e redireciona — exatamente
+    como sempre foi.
+
+    Em AJAX (`X-Requested-With`): devolve os blocos de Equipamento/Mochila
+    já renderizados a partir de `_contexto_inventario`, com os avisos NO
+    CORPO da resposta — nunca gravados na sessão nesse branch, senão
+    reapareceriam velhos da próxima vez que a página carregasse de verdade
+    (a sessão só é esvaziada por `ItemListView.get_context_data`).
+    """
+    if request.headers.get("X-Requested-With") != "XMLHttpRequest":
+        _flash_avisos_dicts(request, avisos_dicts)
+        return redirect("item_list")
+
+    ctx = _contexto_inventario(personagem)
+    return JsonResponse({
+        "ok": True,
+        "equip_html": render_to_string("campanha/partials/_equip_body.html", ctx, request=request),
+        "mochila_html": render_to_string("campanha/partials/_mochila_body.html", ctx, request=request),
+        "avisos_html": render_to_string(
+            "campanha/partials/_inv_avisos.html", {"avisos": avisos_dicts}, request=request
+        ),
+    })
 
 
 # ── Dashboard ─────────────────────────────────────────────────────────────────
@@ -171,23 +286,26 @@ def central_combate(request):
     magicos_equipados = 0
     dado_range = range(0)
     ataques = []
+    notas_combate = []
     furia_fx = request.session.pop("furia_fx", None)
     if personagem:
         pv_pct = _pv_pct(personagem)
         recursos_com_pips = _recursos_com_pips(personagem)
         itens_equipados = personagem.itens.filter(tipo="equipado")
-        magicos_equipados = sum(1 for i in itens_equipados if i.magico)
+        # Conta sintonização de verdade (Equipamento.sintonizado), não mais o
+        # proxy antigo `magico` — mesma regra usada em ItemListView agora.
+        magicos_equipados = personagem.sintonizados_count
         dado_range = range(personagem.nivel)
         notas_combate = personagem.notas_combate.all()
-        ataques = personagem.ataques.all()
+        ataques = regras.ataques_do_personagem(personagem)
     return render(request, "campanha/central_combate.html", {
         "personagem": personagem,
         "pv_pct": pv_pct,
         "recursos_com_pips": recursos_com_pips,
         "itens_equipados": itens_equipados,
         "magicos_equipados": magicos_equipados,
-        "limite_magicos": LIMITE_ITENS_MAGICOS,
-        "excedeu_magicos": magicos_equipados > LIMITE_ITENS_MAGICOS,
+        "limite_magicos": constants.LIMITE_SINTONIZACAO,
+        "excedeu_magicos": magicos_equipados > constants.LIMITE_SINTONIZACAO,
         "dado_range": dado_range,
         "notas_combate": notas_combate,
         "ataques": ataques,
@@ -274,7 +392,7 @@ def _descanso_ajax_response(request, p, tipo, aplicado=0, ataques_html=True):
     if ataques_html:
         payload["ataques_html"] = render_to_string(
             "campanha/partials/_ataques_body.html",
-            {"ataques": p.ataques.all(), "personagem": p},
+            {"ataques": regras.ataques_do_personagem(p), "personagem": p},
             request=request,
         )
     return JsonResponse(payload)
@@ -411,27 +529,35 @@ class NotaCombateDeleteView(DeleteView):
 # ── Itens de Inventário ───────────────────────────────────────────────────────
 
 class ItemListView(ListView):
-    model = ItemInventario
+    model = Equipamento
     template_name = "campanha/item_list.html"
 
     def get_queryset(self):
-        return ItemInventario.objects.filter(personagem=get_current_character(self.request))
+        return (
+            Equipamento.objects
+            .filter(personagem=get_current_character(self.request))
+            .prefetch_related("efeitos")
+        )
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         p = get_current_character(self.request)
-        itens = list(ctx["object_list"])
-        equipados = [i for i in itens if i.tipo == "equipado"]
-        mochila = [i for i in itens if i.tipo == "mochila"]
-        magicos_equipados = sum(1 for i in equipados if i.magico)
+
+        essencia_fs = EssenciaFormSet(instance=p, prefix="essencias") if p else None
+        essencia_forms = sorted(essencia_fs.forms, key=lambda f: f.instance.ordem) if essencia_fs else []
+
+        ctx.update(_contexto_inventario(p))
         ctx.update({
             "personagem": p,
             "moedas_form": MoedasForm(instance=p),
-            "equipados": equipados,
-            "mochila": mochila,
-            "magicos_equipados": magicos_equipados,
-            "limite_magicos": LIMITE_ITENS_MAGICOS,
-            "excedeu_magicos": magicos_equipados > LIMITE_ITENS_MAGICOS,
+            "pocoes": p.pocoes.all() if p else [],
+            "componentes_alquimicos": p.componentes_alquimicos.all() if p else [],
+            "bases_alquimicas": p.bases_alquimicas.all() if p else [],
+            "componentes_criatura": p.componentes_criatura.all() if p else [],
+            "essencia_fs": essencia_fs,
+            "essencia_forms": essencia_forms,
+            "empunhadura_choices": constants.EMPUNHADURA_CHOICES,
+            "avisos": self.request.session.pop("item_avisos", []),
         })
         return ctx
 
@@ -446,8 +572,63 @@ def atualizar_moedas(request):
     return redirect("item_list")
 
 
+@require_POST
+def item_equipar(request, pk):
+    equipamento = get_object_or_404(Equipamento, pk=pk)
+    slot = request.POST.get("slot") or None
+    try:
+        avisos = _avisos_dicts(regras.equipar(equipamento, slot_alvo=slot))
+    except ValidationError as exc:
+        avisos = _avisos_dicts([_texto_validation_error(exc)], tipo="erro")
+    return _item_acao_resposta(request, equipamento.personagem, avisos)
+
+
+@require_POST
+def item_desequipar(request, pk):
+    equipamento = get_object_or_404(Equipamento, pk=pk)
+    regras.desequipar(equipamento)
+    return _item_acao_resposta(request, equipamento.personagem, [])
+
+
+@require_POST
+def item_sintonizar(request, pk):
+    equipamento = get_object_or_404(Equipamento, pk=pk)
+    try:
+        regras.sintonizar(equipamento)
+        avisos = []
+    except ValidationError as exc:
+        avisos = _avisos_dicts([_texto_validation_error(exc)], tipo="erro")
+    return _item_acao_resposta(request, equipamento.personagem, avisos)
+
+
+@require_POST
+def item_dessintonizar(request, pk):
+    equipamento = get_object_or_404(Equipamento, pk=pk)
+    regras.dessintonizar(equipamento)
+    return _item_acao_resposta(request, equipamento.personagem, [])
+
+
+@require_POST
+def item_empunhadura(request, pk):
+    equipamento = get_object_or_404(Equipamento, pk=pk)
+    nova = request.POST.get("empunhadura")
+    try:
+        avisos = _avisos_dicts(regras.trocar_empunhadura(equipamento, nova))
+    except ValidationError as exc:
+        avisos = _avisos_dicts([_texto_validation_error(exc)], tipo="erro")
+    return _item_acao_resposta(request, equipamento.personagem, avisos)
+
+
+@require_POST
+def pocao_usar(request, pk):
+    pocao = get_object_or_404(Pocao, pk=pk)
+    avisos = regras.aplicar_pocao(pocao)
+    _flash_avisos(request, avisos)
+    return redirect("item_list")
+
+
 class ItemCreateView(CreateView):
-    model = ItemInventario
+    model = Equipamento
     form_class = ItemInventarioForm
     template_name = "campanha/generic_form.html"
     success_url = reverse_lazy("item_list")
@@ -456,6 +637,78 @@ class ItemCreateView(CreateView):
         ctx = super().get_context_data(**kwargs)
         ctx["titulo"] = "Novo Item"
         ctx["cancel_url"] = reverse_lazy("item_list")
+        ctx["formset_titulo"] = "Efeitos do item"
+        if "formset" not in ctx:
+            if self.request.method == "POST":
+                ctx["formset"] = EfeitoItemFormSet(self.request.POST, instance=self.object)
+            else:
+                ctx["formset"] = EfeitoItemFormSet(instance=self.object)
+        return ctx
+
+    def form_valid(self, form):
+        form.instance.personagem = get_current_character(self.request)
+        formset = self.get_context_data()["formset"]
+        if not formset.is_valid():
+            return self.render_to_response(self.get_context_data(form=form))
+        response = super().form_valid(form)  # grava form, define self.object
+        formset.instance = self.object
+        formset.save()
+        return response
+
+
+class ItemUpdateView(UpdateView):
+    model = Equipamento
+    form_class = ItemInventarioForm
+    template_name = "campanha/generic_form.html"
+    success_url = reverse_lazy("item_list")
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["titulo"] = f"Editar: {self.object.nome}"
+        ctx["cancel_url"] = reverse_lazy("item_list")
+        ctx["formset_titulo"] = "Efeitos do item"
+        if "formset" not in ctx:
+            if self.request.method == "POST":
+                ctx["formset"] = EfeitoItemFormSet(self.request.POST, instance=self.object)
+            else:
+                ctx["formset"] = EfeitoItemFormSet(instance=self.object)
+        return ctx
+
+    def form_valid(self, form):
+        formset = self.get_context_data()["formset"]
+        if not formset.is_valid():
+            return self.render_to_response(self.get_context_data(form=form))
+        response = super().form_valid(form)
+        formset.instance = self.object
+        formset.save()
+        return response
+
+
+class ItemDeleteView(DeleteView):
+    model = Equipamento
+    template_name = "campanha/generic_confirm_delete.html"
+    success_url = reverse_lazy("item_list")
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["cancel_url"] = reverse_lazy("item_list")
+        return ctx
+
+
+# ── Alquimia ──────────────────────────────────────────────────────────────────
+# CRUD simples — armazenamento puro, sem slot, sem efeito mecânico, sem
+# formset de efeitos (ao contrário de Equipamento/EfeitoItem).
+
+class ComponenteAlquimicoCreateView(CreateView):
+    model = ComponenteAlquimico
+    form_class = ComponenteAlquimicoForm
+    template_name = "campanha/generic_form.html"
+    success_url = reverse_lazy("item_list")
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["titulo"] = "Novo Componente Alquímico"
+        ctx["cancel_url"] = reverse_lazy("item_list")
         return ctx
 
     def form_valid(self, form):
@@ -463,9 +716,9 @@ class ItemCreateView(CreateView):
         return super().form_valid(form)
 
 
-class ItemUpdateView(UpdateView):
-    model = ItemInventario
-    form_class = ItemInventarioForm
+class ComponenteAlquimicoUpdateView(UpdateView):
+    model = ComponenteAlquimico
+    form_class = ComponenteAlquimicoForm
     template_name = "campanha/generic_form.html"
     success_url = reverse_lazy("item_list")
 
@@ -476,8 +729,105 @@ class ItemUpdateView(UpdateView):
         return ctx
 
 
-class ItemDeleteView(DeleteView):
-    model = ItemInventario
+class ComponenteAlquimicoDeleteView(DeleteView):
+    model = ComponenteAlquimico
+    template_name = "campanha/generic_confirm_delete.html"
+    success_url = reverse_lazy("item_list")
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["cancel_url"] = reverse_lazy("item_list")
+        return ctx
+
+
+class BaseAlquimicaCreateView(CreateView):
+    model = BaseAlquimica
+    form_class = BaseAlquimicaForm
+    template_name = "campanha/generic_form.html"
+    success_url = reverse_lazy("item_list")
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["titulo"] = "Nova Base Alquímica"
+        ctx["cancel_url"] = reverse_lazy("item_list")
+        return ctx
+
+    def form_valid(self, form):
+        form.instance.personagem = get_current_character(self.request)
+        return super().form_valid(form)
+
+
+class BaseAlquimicaUpdateView(UpdateView):
+    model = BaseAlquimica
+    form_class = BaseAlquimicaForm
+    template_name = "campanha/generic_form.html"
+    success_url = reverse_lazy("item_list")
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["titulo"] = f"Editar: {self.object.nome}"
+        ctx["cancel_url"] = reverse_lazy("item_list")
+        return ctx
+
+
+class BaseAlquimicaDeleteView(DeleteView):
+    model = BaseAlquimica
+    template_name = "campanha/generic_confirm_delete.html"
+    success_url = reverse_lazy("item_list")
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["cancel_url"] = reverse_lazy("item_list")
+        return ctx
+
+
+# ── Harvesting ────────────────────────────────────────────────────────────────
+# Essência é editada como formset (mesmo padrão de PericiaFormSet/
+# SalvaguardaFormSet), com endpoint POST próprio — mesmo estilo de
+# MoedasForm/atualizar_moedas, um widget pequeno embutido em /itens/.
+
+@require_POST
+def essencia_atualizar(request):
+    p = get_current_character(request)
+    if p:
+        formset = EssenciaFormSet(request.POST, instance=p, prefix="essencias")
+        if formset.is_valid():
+            formset.save()
+    return redirect("item_list")
+
+
+class ComponenteCriaturaCreateView(CreateView):
+    model = ComponenteCriatura
+    form_class = ComponenteCriaturaForm
+    template_name = "campanha/generic_form.html"
+    success_url = reverse_lazy("item_list")
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["titulo"] = "Novo Componente de Criatura"
+        ctx["cancel_url"] = reverse_lazy("item_list")
+        return ctx
+
+    def form_valid(self, form):
+        form.instance.personagem = get_current_character(self.request)
+        return super().form_valid(form)
+
+
+class ComponenteCriaturaUpdateView(UpdateView):
+    model = ComponenteCriatura
+    form_class = ComponenteCriaturaForm
+    template_name = "campanha/generic_form.html"
+    success_url = reverse_lazy("item_list")
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx["titulo"] = f"Editar: {self.object.nome}"
+        ctx["cancel_url"] = reverse_lazy("item_list")
+        return ctx
+
+
+class ComponenteCriaturaDeleteView(DeleteView):
+    model = ComponenteCriatura
     template_name = "campanha/generic_confirm_delete.html"
     success_url = reverse_lazy("item_list")
 
@@ -539,71 +889,10 @@ class RecursoDeleteView(DeleteView):
 
 
 # ── Ataques / Dano ────────────────────────────────────────────────────────────
-
-class AtaqueListView(ListView):
-    model = Ataque
-    template_name = "campanha/ataque_list.html"
-
-    def get_queryset(self):
-        return Ataque.objects.filter(personagem=get_current_character(self.request))
-
-    def get_context_data(self, **kwargs):
-        ctx = super().get_context_data(**kwargs)
-        p = get_current_character(self.request)
-        ctx["personagem"] = p
-        ctx["bonus_furia_form"] = BonusFuriaForm(instance=p)
-        return ctx
-
-
-@require_POST
-def atualizar_bonus_furia(request):
-    p = get_current_character(request)
-    if p:
-        form = BonusFuriaForm(request.POST, instance=p)
-        if form.is_valid():
-            form.save()
-    return redirect("ataque_list")
-
-
-class AtaqueCreateView(CreateView):
-    model = Ataque
-    form_class = AtaqueForm
-    template_name = "campanha/generic_form.html"
-    success_url = reverse_lazy("ataque_list")
-
-    def get_context_data(self, **kwargs):
-        ctx = super().get_context_data(**kwargs)
-        ctx["titulo"] = "Novo Ataque"
-        ctx["cancel_url"] = reverse_lazy("ataque_list")
-        return ctx
-
-    def form_valid(self, form):
-        form.instance.personagem = get_current_character(self.request)
-        return super().form_valid(form)
-
-
-class AtaqueUpdateView(UpdateView):
-    model = Ataque
-    form_class = AtaqueForm
-    template_name = "campanha/generic_form.html"
-    success_url = reverse_lazy("ataque_list")
-
-    def get_context_data(self, **kwargs):
-        ctx = super().get_context_data(**kwargs)
-        ctx["titulo"] = f"Editar: {self.object.nome}"
-        ctx["cancel_url"] = reverse_lazy("ataque_list")
-        return ctx
-
-
-class AtaqueDeleteView(DeleteView):
-    model = Ataque
-    template_name = "campanha/generic_confirm_delete.html"
-    success_url = reverse_lazy("ataque_list")
-
-    def get_context_data(self, **kwargs):
-        ctx = super().get_context_data(**kwargs)
-        ctx["cancel_url"] = reverse_lazy("ataque_list")
-        return ctx
+# CRUD de Ataque removido junto com o model (ver models.py). A tela de gestão
+# de ataques (listar/criar/editar/excluir armas cadastradas à mão) volta como
+# TemplateView somativa das armas equipadas quando a fase de UI do sistema de
+# itens estruturado for autorizada — ver campanha/regras.py.
 
 
 # ── Locais ────────────────────────────────────────────────────────────────────

@@ -2,8 +2,10 @@ from django import forms
 from django.forms import inlineformset_factory
 
 from .models import (
-    Personagem, Pericia, Salvaguarda, RecursoDeCombate, Ataque,
-    ItemInventario, Local, NPC, Missao, ResumoSessao, InformacaoImportante,
+    Personagem, Pericia, Salvaguarda, RecursoDeCombate,
+    Equipamento, EfeitoItem,
+    ComponenteAlquimico, BaseAlquimica, Essencia, ComponenteCriatura,
+    Local, NPC, Missao, ResumoSessao, InformacaoImportante,
     NotaCombate,
 )
 
@@ -50,7 +52,7 @@ class PersonagemForm(BootstrapFormMixin, forms.ModelForm):
             "carisma": forms.NumberInput(attrs={"min": 1, "max": 30}),
             "nivel": forms.NumberInput(attrs={"min": 1, "max": 20}),
             "bonus_proficiencia": forms.NumberInput(attrs={"min": 2, "max": 6}),
-            "ca": forms.NumberInput(attrs={"min": 0}),
+            "ca_override": forms.NumberInput(attrs={"min": 0}),
             "pv_maximo": forms.NumberInput(attrs={"min": 0}),
             "pv_temporario": forms.NumberInput(attrs={"min": 0}),
             "deslocamento": forms.NumberInput(attrs={"min": 0}),
@@ -90,6 +92,25 @@ SalvaguardaFormSet = inlineformset_factory(
 )
 
 
+class EssenciaForm(forms.ModelForm):
+    class Meta:
+        model = Essencia
+        fields = ["quantidade"]
+        widgets = {
+            "quantidade": forms.NumberInput(
+                attrs={"min": 0, "class": "form-control form-control-sm text-center"}
+            ),
+        }
+
+
+EssenciaFormSet = inlineformset_factory(
+    Personagem, Essencia,
+    form=EssenciaForm,
+    extra=0,
+    can_delete=False,
+)
+
+
 class MoedasForm(BootstrapFormMixin, forms.ModelForm):
     """Edição rápida das moedas do personagem (usada na tela de Inventário)."""
 
@@ -115,16 +136,6 @@ class RecursoDeCombateForm(BootstrapFormMixin, forms.ModelForm):
         }
 
 
-class AtaqueForm(BootstrapFormMixin, forms.ModelForm):
-    class Meta:
-        model = Ataque
-        exclude = ["personagem"]
-        widgets = {
-            "quantidade_dados": forms.NumberInput(attrs={"min": 1, "max": 20}),
-            "ordem": forms.NumberInput(attrs={"min": 0}),
-        }
-
-
 class BonusFuriaForm(BootstrapFormMixin, forms.ModelForm):
     """Edição rápida do bônus de dano da Fúria (usada na tela de Ataques)."""
 
@@ -137,12 +148,65 @@ class BonusFuriaForm(BootstrapFormMixin, forms.ModelForm):
 
 
 class ItemInventarioForm(BootstrapFormMixin, forms.ModelForm):
+    """CRUD genérico de Equipamento via generic_form.html.
+
+    `exclude = ["personagem"]` inclui automaticamente todos os campos novos
+    (slot, categoria, dano, sintonizado...) — o form fica extenso e sem
+    agrupamento até a fase de UI reformular a tela; por ora só garante que
+    nada quebra. `atributos_efeito_legado` fica de fora sozinho por ser
+    `editable=False` no model.
+    """
+
     class Meta:
-        model = ItemInventario
+        model = Equipamento
         exclude = ["personagem"]
         widgets = {
-            "atributos_efeito": forms.Textarea(attrs={"rows": 3}),
+            "propriedades_texto": forms.Textarea(attrs={"rows": 3}),
             "lore": forms.Textarea(attrs={"rows": 5}),
+        }
+
+
+class EfeitoItemForm(BootstrapFormMixin, forms.ModelForm):
+    class Meta:
+        model = EfeitoItem
+        fields = [
+            "categoria", "alvo", "valor", "tipo_bonus",
+            "palavra_chave", "tipo_dano", "condicao", "descricao", "ordem",
+        ]
+
+
+EfeitoItemFormSet = inlineformset_factory(
+    Equipamento, EfeitoItem,
+    form=EfeitoItemForm,
+    extra=2,
+    can_delete=True,
+)
+
+
+class ComponenteAlquimicoForm(BootstrapFormMixin, forms.ModelForm):
+    class Meta:
+        model = ComponenteAlquimico
+        exclude = ["personagem"]
+        widgets = {
+            "lore": forms.Textarea(attrs={"rows": 3}),
+        }
+
+
+class BaseAlquimicaForm(BootstrapFormMixin, forms.ModelForm):
+    class Meta:
+        model = BaseAlquimica
+        exclude = ["personagem"]
+        widgets = {
+            "lore": forms.Textarea(attrs={"rows": 3}),
+        }
+
+
+class ComponenteCriaturaForm(BootstrapFormMixin, forms.ModelForm):
+    class Meta:
+        model = ComponenteCriatura
+        exclude = ["personagem"]
+        widgets = {
+            "lore": forms.Textarea(attrs={"rows": 3}),
         }
 
 

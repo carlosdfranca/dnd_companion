@@ -1,0 +1,11 @@
+{# Lista de itens não equipados. `.js-mochila-drop` é SEMPRE renderizado, mesmo vazio — é o alvo de soltar um item arrastado de volta pra desequipar. #}
+<div class="bel-inv-list js-mochila-drop">
+  {% for item in mochila %}
+    {% include "campanha/_inv_item_row.html" %}
+  {% endfor %}
+  {% if not mochila %}
+    <div class="p-3 text-muted small bel-mochila-vazia">
+      <i class="bi bi-bag me-1"></i>Mochila vazia — arraste um item aqui pra desequipar.
+    </div>
+  {% endif %}
+</div>

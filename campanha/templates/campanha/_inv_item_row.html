@@ -1,5 +1,6 @@
-{# Linha de um item de inventário. Espera a variável `item`. #}
-<div class="bel-inv-row {% if item.magico %}bel-inv-row-magico{% endif %}">
+{# Linha de um item de inventário (mochila). Espera a variável `item`. #}
+<div class="bel-inv-row js-inv-item {% if item.magico %}bel-inv-row-magico{% endif %}" data-pk="{{ item.pk }}">
+  <i class="bi bi-grip-vertical bel-inv-handle" title="Arrastar"></i>
   <div class="bel-inv-main">
     <div class="bel-inv-name-line">
       <span class="bel-inv-name">{{ item.nome }}</span>
@@ -8,15 +9,44 @@
         <span class="bel-tag-item bel-tag-magico" title="Item mágico"><i class="bi bi-stars"></i>Mágico</span>
       {% endif %}
       {% if item.requer_sintonizacao %}
-        <span class="bel-tag-item bel-tag-sintonia" title="Requer sintonização — não pode ser trocado livremente (exige descanso)"><i class="bi bi-gem"></i>Sintonização</span>
+        <span class="bel-tag-item bel-tag-sintonia" title="Requer sintonização — não conta enquanto na mochila">
+          <i class="bi bi-gem"></i>Sintonização
+        </span>
       {% endif %}
       {% if item.lore %}<i class="bi bi-book-half bel-inv-lore-icon" title="Tem lore"></i>{% endif %}
     </div>
-    {% if item.atributos_efeito %}
-      <div class="bel-inv-effect">{{ item.atributos_efeito|truncatechars:130 }}</div>
-    {% endif %}
+
+    {% with efeitos=item.efeitos.all %}
+      {% if efeitos %}
+        <div class="bel-inv-efeitos">
+          {% for ef in efeitos %}
+            <span class="bel-tag-efeito bel-tag-efeito-{{ ef.categoria }}{% if ef.condicao %} bel-tag-efeito-situacional{% endif %}"
+                  title="{% if ef.categoria == 'informativo' %}Regra não automatizada{% elif ef.condicao %}Situacional: {{ ef.condicao }}{% endif %}">
+              {% if ef.categoria == "informativo" %}<i class="bi bi-info-circle"></i>
+              {% elif ef.condicao %}<i class="bi bi-asterisk"></i>{% endif %}
+              {{ ef.rotulo }}
+            </span>
+          {% endfor %}
+        </div>
+      {% elif item.propriedades_texto %}
+        <div class="bel-inv-effect">{{ item.propriedades_texto|truncatechars:130 }}</div>
+      {% elif item.atributos_efeito_legado %}
+        <div class="bel-inv-effect text-muted">
+          <i class="bi bi-archive me-1" title="Texto legado, não estruturado"></i>{{ item.atributos_efeito_legado|truncatechars:130 }}
+        </div>
+      {% endif %}
+    {% endwith %}
   </div>
   <div class="bel-inv-actions">
+    <form method="post" action="{% url 'item_equipar' item.pk %}" class="d-inline-flex align-items-center gap-1" data-inv-acao>
+      {% csrf_token %}
+      <select name="slot" class="form-select form-select-sm bel-inv-slot-select" title="Equipar em">
+        {% for ident, label in slot_choices %}
+          <option value="{{ ident }}" {% if ident == item.slot_padrao %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+      <button type="submit" class="btn btn-outline-success btn-sm py-0" title="Equipar"><i class="bi bi-box-arrow-up"></i></button>
+    </form>
     <a href="{% url 'item_update' item.pk %}" class="btn btn-outline-secondary btn-sm py-0" title="Editar"><i class="bi bi-pencil"></i></a>
     <a href="{% url 'item_delete' item.pk %}" class="btn btn-outline-danger btn-sm py-0" title="Excluir"><i class="bi bi-trash3"></i></a>
   </div>

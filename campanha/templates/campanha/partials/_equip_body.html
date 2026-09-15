@@ -1,0 +1,114 @@
+{# Corpo do painel de Equipamento: grid em formato de corpo + silhueta + faixa de sintonização/carga. #}
+
+<div class="p-3 pb-2">
+  <span class="bel-magico-counter {% if excedeu_sintonizacao %}bel-magico-counter-over{% elif sintonizados == limite_sintonizacao %}bel-magico-counter-full{% endif %}"
+        title="Itens sintonizados">
+    <i class="bi bi-gem me-1"></i>Sintonizados {{ sintonizados }}/{{ limite_sintonizacao }}
+  </span>
+</div>
+
+{% if excedeu_sintonizacao %}
+  <div class="bel-inv-warning">
+    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+    Você está com <strong>{{ sintonizados }}</strong> itens sintonizados — o limite é <strong>{{ limite_sintonizacao }}</strong>. Quebre a sintonização de algum.
+  </div>
+{% endif %}
+
+<div class="bel-body-grid">
+  <svg class="bel-body-silhueta" viewBox="0 0 120 260" preserveAspectRatio="xMidYMid meet" aria-hidden="true" focusable="false">
+    <circle cx="60" cy="26" r="17"/>
+    <path d="M44 48 H76 L86 86 L78 142 H42 L34 86 Z"/>
+    <path d="M34 58 L22 66 L12 136 L24 140 L34 90 Z"/>
+    <path d="M86 58 L98 66 L108 136 L96 140 L86 90 Z"/>
+    <path d="M44 144 H58 L56 236 H42 Z"/>
+    <path d="M62 144 H76 L78 236 H64 Z"/>
+  </svg>
+
+  {% for slot in grid_slots %}
+    <div class="bel-slot-tile js-slot-drop {% if slot.ocupacao %}bel-slot-tile-ocupado{% endif %}"
+         data-slot="{{ slot.slot }}">
+      <div class="bel-slot-label">{{ slot.label }}</div>
+
+      {% if slot.ocupacao %}
+        {% with item=slot.ocupacao.item primario=slot.ocupacao.primario %}
+          {% if primario %}
+            <div class="bel-slot-item js-inv-item" data-pk="{{ item.pk }}">
+              <div class="bel-slot-item-linha">
+                {% if item.icone_categoria %}
+                  <span class="bel-slot-icon-item">{% include item.icone_categoria %}</span>
+                {% endif %}
+                <span class="bel-slot-item-nome">{{ item.nome }}</span>
+                {% if item.magico %}<i class="bi bi-stars text-warning ms-1" title="Mágico"></i>{% endif %}
+              </div>
+              <div class="bel-slot-actions">
+                <form method="post" action="{% url 'item_desequipar' item.pk %}" class="d-inline" data-inv-acao>
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-outline-warning btn-sm py-0" title="Desequipar">
+                    <i class="bi bi-box-arrow-down"></i>
+                  </button>
+                </form>
+                {% if item.requer_sintonizacao %}
+                  {% if item.sintonizado %}
+                    <form method="post" action="{% url 'item_dessintonizar' item.pk %}" class="d-inline" data-inv-acao>
+                      {% csrf_token %}
+                      <button type="submit" class="btn btn-outline-secondary btn-sm py-0" title="Quebrar sintonização">
+                        <i class="bi bi-gem"></i>
+                      </button>
+                    </form>
+                  {% else %}
+                    <form method="post" action="{% url 'item_sintonizar' item.pk %}" class="d-inline" data-inv-acao>
+                      {% csrf_token %}
+                      <button type="submit" class="btn btn-outline-primary btn-sm py-0" title="Sintonizar">
+                        <i class="bi bi-gem"></i>
+                      </button>
+                    </form>
+                  {% endif %}
+                {% endif %}
+                {% if item.versatil %}
+                  <form method="post" action="{% url 'item_empunhadura' item.pk %}" class="d-inline" data-inv-acao>
+                    {% csrf_token %}
+                    <input type="hidden" name="empunhadura" value="{% if item.empunhadura == 'duas' %}uma{% else %}duas{% endif %}">
+                    <button type="submit" class="btn btn-outline-info btn-sm py-0"
+                            title="Alternar empunhadura (atual: {{ item.get_empunhadura_display }})">
+                      <i class="bi bi-arrow-left-right"></i>
+                    </button>
+                  </form>
+                {% endif %}
+              </div>
+            </div>
+          {% else %}
+            <div class="bel-slot-item bel-slot-fantasma">
+              {% if item.icone_categoria %}
+                <span class="bel-slot-icon-item">{% include item.icone_categoria %}</span>
+              {% endif %}
+              <span class="bel-slot-item-nome">{{ item.nome }}</span>
+              <div class="bel-slot-item-nota text-muted small">via {{ item.get_slot_display }}</div>
+            </div>
+          {% endif %}
+        {% endwith %}
+      {% else %}
+        <div class="bel-slot-vazio">
+          {% if slot.icone %}
+            <span class="bel-slot-icon-empty">{% include slot.icone %}</span>
+          {% endif %}
+          <span class="visually-hidden">Vazio</span>
+        </div>
+      {% endif %}
+    </div>
+  {% endfor %}
+</div>
+
+<div class="bel-carga-strip">
+  <div class="d-flex align-items-center justify-content-between mb-1">
+    <span class="bel-carga-label"><i class="bi bi-basket2-fill me-1"></i>Carga</span>
+    <span class="{% if sobrecarregado %}text-danger fw-bold{% endif %}">{{ carga_atual }} / {{ capacidade_carga }} kg</span>
+  </div>
+  <div class="progress" style="height: 8px;" role="progressbar"
+       aria-valuenow="{{ percentual_carga }}" aria-valuemin="0" aria-valuemax="100">
+    <div class="progress-bar {% if sobrecarregado %}bg-danger{% elif percentual_carga >= 80 %}bg-warning{% else %}bg-success{% endif %}"
+         style="width: {{ percentual_carga }}%;"></div>
+  </div>
+  {% if sobrecarregado %}
+    <div class="text-danger small mt-1"><i class="bi bi-exclamation-triangle-fill me-1"></i>Sobrecarregado.</div>
+  {% endif %}
+</div>

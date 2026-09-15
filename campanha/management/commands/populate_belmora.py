@@ -10,9 +10,9 @@ from django.core.management.base import BaseCommand
 from django.db.models import F
 
 from campanha.models import (
-    Ataque,
     InformacaoImportante,
-    ItemInventario,
+    Equipamento,
+    EfeitoItem,
     Local,
     Missao,
     NPC,
@@ -239,7 +239,6 @@ class Command(BaseCommand):
         personagem = self._criar_personagem()
         self._configurar_proficiencias(personagem)
         self._criar_recursos(personagem)
-        self._criar_ataques(personagem)
         self._criar_inventario(personagem)
         locais = self._criar_locais()
         npcs = self._criar_npcs(locais)
@@ -267,7 +266,7 @@ class Command(BaseCommand):
                 "sabedoria": 13,
                 "carisma": 12,
                 "bonus_proficiencia": 3,
-                "ca": 16,
+                "estilo_ca": "barbaro",  # Defesa sem Armadura; CA vira calculada (ver campanha/regras.py)
                 "pv_maximo": 55,
                 "pv_atual": 55,
                 "pv_temporario": 0,
@@ -352,89 +351,147 @@ class Command(BaseCommand):
             self.stdout.write(f"  Recurso '{nome}' — {label}")
 
     # ------------------------------------------------------------------ #
-    #  Ataques / Dano                                                      #
+    #  Ataques / Dano — removido: o dano do Machado de Batalha (1d8 +5)
+    #  agora vem do próprio Equipamento (ver _criar_inventario / migração
+    #  0012), lido por campanha.regras.ataques_do_personagem().
     # ------------------------------------------------------------------ #
-    def _criar_ataques(self, personagem):
-        ataques = [
-            {
-                "nome": "Machado de Batalha",
-                "quantidade_dados": 1,
-                "faces_dado": 8,
-                "bonus_atributo": 5,
-                "ordem": 0,
-            },
-        ]
-
-        for a in ataques:
-            nome = a.pop("nome")
-            obj, created = Ataque.objects.get_or_create(
-                personagem=personagem,
-                nome=nome,
-                defaults=a,
-            )
-            label = "criado" if created else "já existia"
-            self.stdout.write(f"  Ataque '{nome}' — {label}")
 
     # ------------------------------------------------------------------ #
     #  Inventário                                                          #
     # ------------------------------------------------------------------ #
     def _criar_inventario(self, personagem):
+        """Espelha o MAPA_EQUIPAMENTO da migração 0012_dados_equipamento.py —
+        mesmos 8 itens, mesmos efeitos estruturados. Rodar este comando num
+        banco vazio e rodar 0011–0013 num banco real devem produzir tabelas
+        Equipamento/EfeitoItem idênticas; é o teste de regressão da migração.
+        Duplicado à mão (migrações não podem importar código da app) — ao
+        mudar um dos dois, atualize o outro.
+        """
         itens = [
             # Equipados
             {
                 "nome": "Machado de Batalha",
                 "tipo": "equipado",
+                "slot": "mao_principal",
+                "slot_padrao": "mao_principal",
                 "quantidade": 1,
-                "atributos_efeito": "1d8 + FOR (Versátil 1d10). Propriedade Derrubar: se acertar, criatura faz save CON CD=8+prof+FOR ou cai Caído.",
-                "lore": "",
+                "categoria": "arma",
+                "empunhadura": "uma",
+                "versatil": True,
+                "dano_qtd_dados": 1,
+                "dano_faces": 8,
+                "dano_faces_versatil": 10,
+                "tipo_dano": "cortante",
+                "atributo_ataque": "forca",
+                "proficiente": True,
+                "peso": "1.80",
+                "propriedades_texto": (
+                    "Propriedade Derrubar: se acertar, criatura faz save CON "
+                    "CD=8+prof+FOR ou cai Caído."
+                ),
+                "atributos_efeito_legado": (
+                    "1d8 + FOR (Versátil 1d10). Propriedade Derrubar: se acertar, "
+                    "criatura faz save CON CD=8+prof+FOR ou cai Caído."
+                ),
+                "efeitos": [],
             },
             {
                 "nome": "Escudo",
                 "tipo": "equipado",
+                "slot": "mao_secundaria",
+                "slot_padrao": "mao_secundaria",
                 "quantidade": 1,
-                "atributos_efeito": "+2 AC",
-                "lore": "",
+                "categoria": "escudo",
+                "peso": "2.70",
+                "atributos_efeito_legado": "+2 AC",
+                "efeitos": [
+                    {"categoria": "numerico", "alvo": "ca", "valor": 2, "tipo_bonus": "escudo"},
+                ],
+            },
+            {
+                "nome": "Cloack of Protection",
+                "tipo": "equipado",
+                "slot": "capa",
+                "slot_padrao": "capa",
+                "quantidade": 1,
+                "categoria": "acessorio",
+                "magico": True,
+                "requer_sintonizacao": True,
+                "sintonizado": True,
+                "raridade": "incomum",
+                "peso": "0.20",
+                "atributos_efeito_legado": "+1 de CA e +1 para testes de salvaguardas de DEX",
+                "efeitos": [
+                    {"categoria": "numerico", "alvo": "ca", "valor": 1, "tipo_bonus": "deflexao"},
+                    {"categoria": "numerico", "alvo": "salvaguardas_todas", "valor": 1, "tipo_bonus": ""},
+                ],
             },
             # Mochila
             {
                 "nome": "Ração",
                 "tipo": "mochila",
                 "quantidade": 5,
-                "atributos_efeito": "",
-                "lore": "",
+                "peso": "0.30",
+                "efeitos": [],
             },
             {
                 "nome": "Kit de Jogos (Dados)",
                 "tipo": "mochila",
                 "quantidade": 1,
-                "atributos_efeito": "Proficiência em ferramentas. Útil para ganhar dinheiro, interações sociais, contatos, distrair NPCs.",
-                "lore": "",
+                "peso": "0.20",
+                "propriedades_texto": (
+                    "Proficiência em ferramentas. Útil para ganhar dinheiro, "
+                    "interações sociais, contatos, distrair NPCs."
+                ),
+                "atributos_efeito_legado": (
+                    "Proficiência em ferramentas. Útil para ganhar dinheiro, "
+                    "interações sociais, contatos, distrair NPCs."
+                ),
+                "efeitos": [],
             },
             {
                 "nome": "Corda",
                 "tipo": "mochila",
                 "quantidade": 1,
-                "atributos_efeito": "",
-                "lore": "",
+                "peso": "4.50",
+                "efeitos": [],
             },
             {
                 "nome": "Cantil",
                 "tipo": "mochila",
                 "quantidade": 1,
-                "atributos_efeito": "Cheio",
-                "lore": "",
+                "peso": "1.00",
+                "lore": "Cheio",
+                "atributos_efeito_legado": "Cheio",
+                "efeitos": [],
+            },
+            {
+                "nome": "Poção de Cura Menor",
+                "tipo": "mochila",
+                "quantidade": 1,
+                "peso": "0.25",
+                "atributos_efeito_legado": "1d4 + 2 de vida ao tomar",
+                "efeitos": [],
+                # Fica como Equipamento de mochila até a fase 2 (model Pocao)
+                # estruturar cura/efeito de poção de verdade.
             },
         ]
 
         for item_data in itens:
             nome = item_data["nome"]
-            obj, created = ItemInventario.objects.get_or_create(
+            efeitos = item_data.pop("efeitos")
+            obj, created = Equipamento.objects.get_or_create(
                 personagem=personagem,
                 nome=nome,
                 defaults=item_data,
             )
             label = "criado" if created else "já existia"
             self.stdout.write(f"  Item '{nome}' — {label}")
+            for ef in efeitos:
+                EfeitoItem.objects.get_or_create(
+                    equipamento=obj, alvo=ef["alvo"], categoria=ef["categoria"],
+                    defaults=ef,
+                )
 
     # ------------------------------------------------------------------ #
     #  Locais                                                              #

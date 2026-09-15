@@ -2,12 +2,17 @@
 {% block title %}Inventário{% endblock %}
 
 {% block content %}
+<div id="inv-root">
+<div hidden>{% csrf_token %}</div>
 
 {# ── Header ── #}
 <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
   <h3 class="mb-0"><i class="bi bi-bag-fill me-2"></i>Inventário</h3>
   <a href="{% url 'item_create' %}" class="btn btn-outline-success btn-sm"><i class="bi bi-plus-lg me-1"></i>Novo Item</a>
 </div>
+
+{# ── Avisos (equip desloca outro item, limite de sintonização, etc.) ── #}
+<div id="inv-avisos">{% include "campanha/partials/_inv_avisos.html" %}</div>
 
 {# ── Moedas ── #}
 <div class="bel-card mb-3">
@@ -47,53 +52,313 @@
   </form>
 </div>
 
-{# ── Equipados ── #}
-<div class="bel-card mb-3">
-  <div class="bel-card-header d-flex align-items-center justify-content-between">
-    <span><i class="bi bi-shield-fill-check me-2"></i>Equipado</span>
-    <span class="bel-magico-counter {% if excedeu_magicos %}bel-magico-counter-over{% elif magicos_equipados == limite_magicos %}bel-magico-counter-full{% endif %}"
-          title="Itens mágicos equipados">
-      <i class="bi bi-stars me-1"></i>Mágicos {{ magicos_equipados }}/{{ limite_magicos }}
-    </span>
+{# ── Corpo: Equipamento à esquerda, Mochila + Poções à direita ── #}
+<div class="row g-3 mb-3">
+  <div class="col-12 col-xl-5">
+    <div class="bel-card h-100">
+      <div class="bel-card-header"><i class="bi bi-shield-fill-check me-2"></i>Equipamento</div>
+      <div id="equip-body">{% include "campanha/partials/_equip_body.html" %}</div>
+    </div>
   </div>
 
-  {% if excedeu_magicos %}
-    <div class="bel-inv-warning">
-      <i class="bi bi-exclamation-triangle-fill me-2"></i>
-      Você está com <strong>{{ magicos_equipados }}</strong> itens mágicos equipados — o limite é <strong>{{ limite_magicos }}</strong>. Desequipe algum.
+  <div class="col-12 col-xl-7">
+    <div class="bel-card mb-3">
+      <div class="bel-card-header"><i class="bi bi-backpack2-fill me-2"></i>Mochila</div>
+      <div id="mochila-body">{% include "campanha/partials/_mochila_body.html" %}</div>
     </div>
-  {% endif %}
 
-  {% if equipados %}
-    <div class="bel-inv-list">
-      {% for item in equipados %}
-        {% include "campanha/_inv_item_row.html" %}
-      {% endfor %}
+    {# ── Poções ── #}
+    <div class="bel-card">
+      <div class="bel-card-header"><i class="bi bi-cup-straw me-2"></i>Poções</div>
+      {% if pocoes %}
+        <div class="bel-inv-list">
+          {% for pocao in pocoes %}
+            <div class="bel-inv-row">
+              <div class="bel-inv-main">
+                <div class="bel-inv-name-line">
+                  <span class="bel-inv-name">{{ pocao.nome }}</span>
+                  {% if pocao.quantidade > 1 %}<span class="bel-inv-qty">×{{ pocao.quantidade }}</span>{% endif %}
+                  <span class="bel-tag-efeito bel-tag-efeito-numerico" title="Fórmula de cura">
+                    <i class="bi bi-heart-fill"></i>{{ pocao.formula_cura }}
+                  </span>
+                  {% if pocao.tem_efeito_adicional %}
+                    <span class="bel-tag-efeito {% if pocao.efeito_automatizado %}bel-tag-efeito-numerico{% else %}bel-tag-efeito-informativo{% endif %}"
+                          title="{% if not pocao.efeito_automatizado %}Não automatizado — aplicar manualmente{% endif %}">
+                      {% if not pocao.efeito_automatizado %}<i class="bi bi-info-circle"></i>{% endif %}
+                      {{ pocao.efeito_rotulo }}
+                    </span>
+                  {% endif %}
+                </div>
+                {% if pocao.lore %}<div class="bel-inv-effect text-muted">{{ pocao.lore|truncatechars:130 }}</div>{% endif %}
+              </div>
+              <div class="bel-inv-actions">
+                <form method="post" action="{% url 'pocao_usar' pocao.pk %}" class="d-inline">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-outline-success btn-sm py-0" title="Usar">
+                    <i class="bi bi-cup-straw me-1"></i>Usar
+                  </button>
+                </form>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="p-3 text-muted small"><i class="bi bi-cup me-1"></i>Nenhuma poção.</div>
+      {% endif %}
     </div>
-  {% else %}
-    <div class="p-3 text-muted small"><i class="bi bi-shield-slash me-1"></i>Nenhum item equipado.</div>
-  {% endif %}
-</div>
-
-{# ── Mochila ── #}
-<div class="bel-card mb-3">
-  <div class="bel-card-header"><i class="bi bi-backpack2-fill me-2"></i>Mochila</div>
-  {% if mochila %}
-    <div class="bel-inv-list">
-      {% for item in mochila %}
-        {% include "campanha/_inv_item_row.html" %}
-      {% endfor %}
-    </div>
-  {% else %}
-    <div class="p-3 text-muted small"><i class="bi bi-bag me-1"></i>Mochila vazia.</div>
-  {% endif %}
-</div>
-
-{% if not equipados and not mochila %}
-  <div class="text-center text-muted py-4">
-    <i class="bi bi-bag fs-1"></i>
-    <p class="mt-2">Inventário vazio. <a href="{% url 'item_create' %}">Adicionar item</a></p>
   </div>
-{% endif %}
+</div>
 
+{# ── Alquimia | Harvesting, lado a lado ── #}
+<div class="row g-3">
+  <div class="col-12 col-lg-6">
+    <div class="bel-card h-100">
+      <div class="bel-card-header"><i class="bi bi-flask-fill me-2"></i>Alquimia</div>
+      <div class="p-3">
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <h6 class="mb-0 text-muted">Componentes</h6>
+          <a href="{% url 'alquimia_componente_create' %}" class="btn btn-outline-success btn-sm py-0">
+            <i class="bi bi-plus-lg me-1"></i>Novo
+          </a>
+        </div>
+        {% if componentes_alquimicos %}
+          <div class="bel-inv-list mb-3">
+            {% for c in componentes_alquimicos %}
+              <div class="bel-inv-row">
+                <div class="bel-inv-main">
+                  <div class="bel-inv-name-line">
+                    <span class="bel-inv-name">{{ c.nome }}</span>
+                    {% if c.quantidade > 1 %}<span class="bel-inv-qty">×{{ c.quantidade }}</span>{% endif %}
+                    <span class="bel-tag-efeito bel-tag-efeito-palavra_chave">{{ c.get_reagente_display }}</span>
+                  </div>
+                  {% if c.lore %}<div class="bel-inv-effect text-muted">{{ c.lore|truncatechars:130 }}</div>{% endif %}
+                </div>
+                <div class="bel-inv-actions">
+                  <a href="{% url 'alquimia_componente_update' c.pk %}" class="btn btn-outline-secondary btn-sm py-0" title="Editar"><i class="bi bi-pencil"></i></a>
+                  <a href="{% url 'alquimia_componente_delete' c.pk %}" class="btn btn-outline-danger btn-sm py-0" title="Excluir"><i class="bi bi-trash3"></i></a>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="p-2 text-muted small mb-3">Nenhum componente.</div>
+        {% endif %}
+
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <h6 class="mb-0 text-muted">Bases</h6>
+          <a href="{% url 'alquimia_base_create' %}" class="btn btn-outline-success btn-sm py-0">
+            <i class="bi bi-plus-lg me-1"></i>Nova
+          </a>
+        </div>
+        {% if bases_alquimicas %}
+          <div class="bel-inv-list">
+            {% for b in bases_alquimicas %}
+              <div class="bel-inv-row">
+                <div class="bel-inv-main">
+                  <div class="bel-inv-name-line">
+                    <span class="bel-inv-name">{{ b.nome }}</span>
+                    {% if b.quantidade > 1 %}<span class="bel-inv-qty">×{{ b.quantidade }}</span>{% endif %}
+                  </div>
+                  {% if b.lore %}<div class="bel-inv-effect text-muted">{{ b.lore|truncatechars:130 }}</div>{% endif %}
+                </div>
+                <div class="bel-inv-actions">
+                  <a href="{% url 'alquimia_base_update' b.pk %}" class="btn btn-outline-secondary btn-sm py-0" title="Editar"><i class="bi bi-pencil"></i></a>
+                  <a href="{% url 'alquimia_base_delete' b.pk %}" class="btn btn-outline-danger btn-sm py-0" title="Excluir"><i class="bi bi-trash3"></i></a>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="p-2 text-muted small">Nenhuma base.</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-lg-6">
+    <div class="bel-card h-100">
+      <div class="bel-card-header"><i class="bi bi-gem me-2"></i>Harvesting</div>
+      <div class="p-3">
+        <h6 class="mb-2 text-muted">Essências</h6>
+        <form method="post" action="{% url 'essencia_atualizar' %}" class="mb-4">
+          {% csrf_token %}
+          {{ essencia_fs.management_form }}
+          <div class="row g-2">
+            {% for f in essencia_forms %}
+              <div class="col-6 col-md-2">
+                {{ f.id }}
+                <label for="{{ f.quantidade.id_for_label }}" class="form-label small d-block text-center">
+                  {{ f.instance.rotulo }}
+                </label>
+                {{ f.quantidade }}
+              </div>
+            {% endfor %}
+          </div>
+          <button type="submit" class="btn btn-primary btn-sm mt-3">
+            <i class="bi bi-check2 me-1"></i>Salvar essências
+          </button>
+        </form>
+
+        <div class="d-flex align-items-center justify-content-between mb-2">
+          <h6 class="mb-0 text-muted">Componentes de Criatura</h6>
+          <a href="{% url 'criatura_componente_create' %}" class="btn btn-outline-success btn-sm py-0">
+            <i class="bi bi-plus-lg me-1"></i>Novo
+          </a>
+        </div>
+        {% if componentes_criatura %}
+          <div class="bel-inv-list">
+            {% for c in componentes_criatura %}
+              <div class="bel-inv-row">
+                <div class="bel-inv-main">
+                  <div class="bel-inv-name-line">
+                    <span class="bel-inv-name">{{ c.nome }}</span>
+                    {% if c.quantidade > 1 %}<span class="bel-inv-qty">×{{ c.quantidade }}</span>{% endif %}
+                    <span class="bel-tag-efeito bel-tag-efeito-palavra_chave">{{ c.get_tipo_origem_display }}</span>
+                  </div>
+                  {% if c.lore %}<div class="bel-inv-effect text-muted">{{ c.lore|truncatechars:130 }}</div>{% endif %}
+                </div>
+                <div class="bel-inv-actions">
+                  <a href="{% url 'criatura_componente_update' c.pk %}" class="btn btn-outline-secondary btn-sm py-0" title="Editar"><i class="bi bi-pencil"></i></a>
+                  <a href="{% url 'criatura_componente_delete' c.pk %}" class="btn btn-outline-danger btn-sm py-0" title="Excluir"><i class="bi bi-trash3"></i></a>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="p-2 text-muted small">Nenhum componente de criatura.</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
+<script>
+(function () {
+  var root = document.getElementById('inv-root');
+  if (!root || !window.Sortable) return;
+
+  var csrfInput = root.querySelector('[name=csrfmiddlewaretoken]');
+  if (!csrfInput) return;
+  var csrf = csrfInput.value;
+
+  var equipBody = document.getElementById('equip-body');
+  var mochilaBody = document.getElementById('mochila-body');
+  var avisosEl = document.getElementById('inv-avisos');
+
+  var instancias = [];
+  var ocupado = false;
+
+  var GRUPO = { name: 'inventario', pull: true, put: true };
+  var BASE_OPCOES = {
+    group: GRUPO,
+    draggable: '.js-inv-item',
+    handle: '.bel-inv-handle, .bel-slot-item-nome',
+    sort: false,
+    animation: 150,
+    ghostClass: 'bel-inv-ghost',
+    chosenClass: 'bel-inv-chosen',
+    fallbackOnBody: true,
+    forceFallback: true,
+  };
+
+  function urlAcao(nome, pk) {
+    // Troca o placeholder "0" da URL nomeada pelo pk real do item arrastado.
+    var mapa = {
+      equipar: "{% url 'item_equipar' 0 %}",
+      desequipar: "{% url 'item_desequipar' 0 %}",
+    };
+    return mapa[nome].replace(/0\/?$/, pk + '/');
+  }
+
+  function novoFormData(extras) {
+    var fd = new FormData();
+    fd.append('csrfmiddlewaretoken', csrf);
+    Object.keys(extras || {}).forEach(function (chave) { fd.append(chave, extras[chave]); });
+    return fd;
+  }
+
+  function enviar(url, fd, aoFalhar) {
+    if (ocupado) return;
+    ocupado = true;
+    root.classList.add('bel-inv-busy');
+
+    fetch(url, {
+      method: 'POST',
+      headers: { 'X-Requested-With': 'XMLHttpRequest' },
+      body: fd,
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (!d.ok) { aoFalhar(); return; }
+        equipBody.innerHTML = d.equip_html;
+        mochilaBody.innerHTML = d.mochila_html;
+        avisosEl.innerHTML = d.avisos_html;
+        initSortables();
+        pulsarSlotsOcupados();
+      })
+      .catch(aoFalhar)
+      .finally(function () {
+        ocupado = false;
+        root.classList.remove('bel-inv-busy');
+      });
+  }
+
+  function pulsarSlotsOcupados() {
+    // Pequeno brilho nos tiles ocupados, reaproveitando o timing do resto
+    // do app (mesma ideia do FX de dano/cura em central_combate.html).
+    equipBody.querySelectorAll('.bel-slot-tile-ocupado').forEach(function (tile) {
+      tile.classList.remove('bel-slot-pulso');
+      void tile.offsetWidth;
+      tile.classList.add('bel-slot-pulso');
+      tile.addEventListener('animationend', function limpa() {
+        tile.classList.remove('bel-slot-pulso');
+        tile.removeEventListener('animationend', limpa);
+      });
+    });
+  }
+
+  function initSortables() {
+    instancias.forEach(function (s) { s.destroy(); });
+    instancias = [];
+
+    var mochilaDrop = mochilaBody.querySelector('.js-mochila-drop');
+    if (mochilaDrop) {
+      instancias.push(new Sortable(mochilaDrop, Object.assign({}, BASE_OPCOES, {
+        onAdd: function (evt) {
+          var pk = evt.item.dataset.pk;
+          enviar(urlAcao('desequipar', pk), novoFormData(), function () { window.location.reload(); });
+        },
+      })));
+    }
+
+    equipBody.querySelectorAll('.js-slot-drop').forEach(function (tile) {
+      instancias.push(new Sortable(tile, Object.assign({}, BASE_OPCOES, {
+        onAdd: function (evt) {
+          var pk = evt.item.dataset.pk;
+          enviar(urlAcao('equipar', pk), novoFormData({ slot: tile.dataset.slot }), function () { window.location.reload(); });
+        },
+      })));
+    });
+  }
+
+  // Um único listener delegado em #inv-root: cobre os 5 formulários de
+  // ação de item (desequipar/sintonizar/dessintonizar/empunhadura, e o
+  // select+botão de equipar na mochila) mesmo depois que o AJAX troca o
+  // HTML por baixo — addEventListener por formulário morreria na primeira
+  // troca, porque os nós antigos são destruídos.
+  root.addEventListener('submit', function (ev) {
+    var form = ev.target.closest('form[data-inv-acao]');
+    if (!form) return;
+    ev.preventDefault();
+    enviar(form.getAttribute('action'), new FormData(form), function () { form.submit(); });
+  });
+
+  initSortables();
+})();
+</script>
 {% endblock %}

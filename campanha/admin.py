@@ -5,7 +5,8 @@ from .models import (
     Pericia,
     Salvaguarda,
     RecursoDeCombate,
-    ItemInventario,
+    Equipamento,
+    EfeitoItem,
     Local,
     NPC,
     Missao,
@@ -30,7 +31,7 @@ class RecursoInline(admin.TabularInline):
 
 
 class ItemInline(admin.TabularInline):
-    model = ItemInventario
+    model = Equipamento
     extra = 0
 
 
@@ -46,11 +47,17 @@ class RecursoDeCombateAdmin(admin.ModelAdmin):
     list_filter = ("recuperacao", "personagem")
 
 
-@admin.register(ItemInventario)
-class ItemInventarioAdmin(admin.ModelAdmin):
-    list_display = ("nome", "personagem", "tipo", "quantidade")
-    list_filter = ("tipo", "personagem")
+class EfeitoItemInline(admin.TabularInline):
+    model = EfeitoItem
+    extra = 1
+
+
+@admin.register(Equipamento)
+class EquipamentoAdmin(admin.ModelAdmin):
+    list_display = ("nome", "personagem", "slot", "categoria", "sintonizado", "quantidade")
+    list_filter = ("categoria", "slot", "personagem")
     search_fields = ("nome",)
+    inlines = [EfeitoItemInline]
 
 
 @admin.register(Local)
